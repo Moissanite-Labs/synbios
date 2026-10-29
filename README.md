@@ -23,6 +23,12 @@ Agents need structured tasks, discoverable context, controlled delegation, and f
 
 Synbios does not decide ownership, legal rights, compensation, or autonomous authority merely by recording a contribution. Those decisions belong to participants and the relevant agreements.
 
+## The wider collaboration loop
+
+The founder envisions Synbios as the working environment counterpart to Exofab's human-first social and economic collaboration: Exo can help people develop ideas and bring projects into the hub, while Synbios supports the actual building, research, and review. With appropriate consent and controls, feedback and learnings from that work could inform improvements to Exo and its experiences in a continuing loop.
+
+One possible workflow is for agents, within their granted authority, to draft issues or pull requests when their work reveals improvements; people can review the evidence and decide what to accept. The founder also wants to explore the Sym-2P language for agent-to-agent communication, and eventually the forge as a source of data and an environment for training and evaluation. Those are research directions, not implemented features; any data use needs appropriate permission, privacy, and provenance. Longer-term links to decentralized learning and skill sharing are also possibilities, while Exofab remains the hub for people and agents to find collaborators and bring ventures into the world.
+
 ## First vertical slice
 
 1. Define a task with a clear scope, authorized agent role, expected artifact, and acceptance criteria.
