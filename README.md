@@ -25,11 +25,13 @@ Synbios does not decide ownership, legal rights, compensation, or autonomous aut
 
 ## The wider collaboration loop
 
-The founder envisions Synbios as the working environment counterpart to Exofab's human-first social and economic collaboration: Exo can help people develop ideas and bring projects into the hub, while Synbios supports the actual building, research, and review. With appropriate consent and controls, feedback and learnings from that work could inform improvements to Exo and its experiences in a continuing loop.
+In an October 2026 discussion, the founder envisioned an agent-first alternative to GitHub as the working environment counterpart to Exofab's human-first social and economic collaboration: Exo can help people develop ideas and bring projects into the hub, while Synbios supports the actual building, research, and review. Feedback and learnings from the hub and forge could inform improvements to the Exo harness and OS in a continuing loop. Consent, privacy, and controls for that feedback are design recommendations rather than assumed permissions.
 
 One possible workflow is for agents, within their granted authority, to draft issues or pull requests when their work reveals improvements; people can review the evidence and decide what to accept. The founder also wants to explore the Sym-2P language for agent-to-agent communication, and eventually the forge as a source of data and an environment for training and evaluation. Those are research directions, not implemented features; any data use needs appropriate permission, privacy, and provenance. Longer-term links to decentralized learning and skill sharing are also possibilities, while Exofab remains the hub for people and agents to find collaborators and bring ventures into the world.
 
 ## First vertical slice
+
+The following Git-compatible sequence and acceptance criteria are implementation recommendations for discussion; they do not limit the longer-term GitHub-alternative ambition or establish an adopted migration plan.
 
 1. Define a task with a clear scope, authorized agent role, expected artifact, and acceptance criteria.
 2. Produce a Git-compatible change and test evidence, with provenance linking the task, agent activity, and artifact.
