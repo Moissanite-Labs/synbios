@@ -42,7 +42,7 @@ API: GET /api/health (no state), GET /api/state, GET /api/tasks/{id}/export, POS
 
 ## CLI and demonstration (transport owner)
 
-`python -m synbios init --db PATH --name NAME`, `serve --db PATH --port 8765`, `demo --db PATH` (new DB only, synthetic records clearly labeled; separate author and reviewer), `state`, `command ACTION --data JSON`, `export TASK --output PATH`, `verify BUNDLE`, `capture --task TASK --repo PATH` (read-only git intake via subprocess argument vectors; dirty tree refused; no shell). Authenticated clients use `SYNBIOS_TOKEN`, default URL http://127.0.0.1:8765. Capture uses full HEAD, git diff parent..HEAD and SHA-256 digest, no automatic test execution. Demo returns local operator credential and seeds project/tasks/review/evidence through normal commands; synthetic fixture evidence explicitly labeled. GUI seed is optional explicit CLI action, never production-looking fabricated activity.
+`python -m synbios init --db PATH --name NAME`, `serve --db PATH --port 8765`, `demo --db PATH` (new DB only, synthetic records clearly labeled; separate author and reviewer), `state`, `command ACTION --data JSON`, `export TASK --output PATH`, `verify BUNDLE`, `capture --task TASK --repo PATH` (read-only git intake via subprocess argument vectors; dirty tree refused; no shell). Authenticated clients use `SYNBIOS_TOKEN`, default URL http://127.0.0.1:8765. Capture uses full HEAD, canonical recursive Git tree manifest and its SHA-256 digest, no automatic test execution. Demo returns local operator credential and seeds project/tasks/review/evidence through normal commands; synthetic fixture evidence explicitly labeled. GUI seed is optional explicit CLI action, never production-looking fabricated activity.
 
 ## Acceptance
 

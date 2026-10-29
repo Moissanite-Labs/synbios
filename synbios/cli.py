@@ -53,33 +53,35 @@ def capture(repo, task, title=None):
     """Read a clean revision; neither execute tests nor modify Git state."""
     repo = str(Path(repo).resolve())
     def git(*args):
-        result = subprocess.run(['git', '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '-C', repo, *args], capture_output=True, check=True)
+        result = subprocess.run(['git', '--no-replace-objects', '--no-optional-locks', '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '-C', repo, *args], capture_output=True, check=True)
         return result.stdout
     # Git status can execute configured clean/process filters while refreshing.
     # Refuse them before any tree scan; vector arguments alone do not stop hooks.
-    configured = subprocess.run(['git', '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '-C', repo, 'config', '--get-regexp', r'^filter\..*\.(clean|process)$'], capture_output=True)
+    configured = subprocess.run(['git', '--no-replace-objects', '--no-optional-locks', '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '-C', repo, 'config', '--get-regexp', r'^filter\..*\.(clean|process)$'], capture_output=True)
     if configured.returncode not in (0, 1):
         raise ValueError('Unable to inspect Git filter configuration')
     if configured.returncode == 0:
         raise ValueError('Capture refuses configured Git clean/process filters because Git may execute them')
     if any(line.startswith(b'160000 ') for line in git('ls-files', '--stage', '-z').split(b'\0')):
         raise ValueError('Capture refuses submodules because their Git configuration may execute filters')
+    flags = git('ls-files', '-v', '-z').split(b'\0')
+    if any(entry and (entry[:1].islower() or entry[:1].upper() == b'S') for entry in flags):
+        raise ValueError('Capture refuses assume-unchanged or skip-worktree index entries')
     if git('status', '--porcelain', '--untracked-files=all').strip():
         raise ValueError('Capture requires a clean Git working tree, including untracked files')
     revision = git('rev-parse', '--verify', 'HEAD^{commit}').decode().strip()
-    # Select the first parent explicitly, including merge commits.
-    parents = git('rev-list', '--parents', '-n', '1', revision).decode().split()[1:]
-    if parents:
-        diff = git('diff', '--binary', '--no-ext-diff', '--no-textconv', parents[0], revision, '--')
-    else:
-        diff = git('diff-tree', '--root', '--no-commit-id', '-p', '--binary', '--no-ext-diff', '--no-textconv', revision, '--')
+    # Canonical NUL-delimited manifest: full modes, types, object IDs and paths.
+    manifest = git('ls-tree', '-r', '-z', '--full-tree', revision)
     # Recheck both tree and HEAD to catch ordinary concurrent edits during intake.
-    if git('status', '--porcelain', '--untracked-files=all').strip() or git('rev-parse', 'HEAD').decode().strip() != revision:
+    flags_after = git('ls-files', '-v', '-z').split(b'\0')
+    if (any(entry and (entry[:1].islower() or entry[:1].upper() == b'S') for entry in flags_after)
+            or git('status', '--porcelain', '--untracked-files=all').strip()
+            or git('rev-parse', 'HEAD').decode().strip() != revision):
         raise ValueError('Repository changed during capture; retry from a stable clean tree')
     return {'task_id': task, 'title': title or 'Git revision ' + revision[:12], 'kind': 'git_commit',
-            'revision': revision, 'digest': hashlib.sha256(diff).hexdigest(),
+            'revision': revision, 'digest': hashlib.sha256(manifest).hexdigest(),
             'uri': Path(repo).as_uri() + '#' + revision,
-            'summary': 'Read-only Git capture. SHA-256 of exact binary Git patch against first parent (including merges), or root diff for initial commit; no tests executed.'}
+            'summary': 'Read-only Git capture. SHA-256 of raw git ls-tree -r -z --full-tree REVISION manifest (mode/type/object ID/path); no tests executed.'}
 
 
 def main(argv=None):

@@ -14,6 +14,8 @@ Task scope is a statement of permitted work. Synbios does not inspect filesystem
 
 ## Acceptance
 
+Starting work requires an explicit claim. A work-only grant cannot take an open task out of the claim queue.
+
 Submission and approval check the latest artifact. Its test evidence must include a passing record and no failed record. A later passing record does not erase a failure. Attach a new candidate and fresh evidence for a rerun. Prior evidence stays visible as stale.
 
 All task dependencies must be accepted. Dependencies are selected from existing tasks at creation and cannot be edited, so the dependency graph cannot acquire a cycle. Accepted tasks cannot be reopened or changed. Create a successor task to revise accepted work.
@@ -44,6 +46,10 @@ The browser stores the credential in session storage. Signing out removes it. A 
 
 ## Git intake
 
-Git capture is an explicit CLI action against a local repository. It reads the full commit ID and hashes a binary patch. Merge commits use the first parent. No test command, URL, hook, external diff, or text conversion is intentionally executed.
+Git capture is an explicit CLI action against a local repository. It reads the full commit ID and hashes the raw bytes of `git ls-tree -r -z --full-tree REVISION`. This canonical manifest contains tracked paths, modes, types, and full object IDs. Diff display settings and local object replacements cannot change the digest. Optional index writes are disabled.
 
-Capture refuses dirty or untracked content, configured clean/process filters, and submodules. This includes environments with globally configured Git LFS filters. These restrictions prevent ordinary Git inspection from invoking repository-controlled programs. Capture checks the working tree and HEAD again before returning. It is a best-effort local consistency check, not a filesystem lock or sandbox.
+No test command, URL, hook, external diff, or text conversion is intentionally executed.
+
+Capture refuses dirty or untracked content, assume-unchanged or skip-worktree index entries, configured clean/process filters, and submodules. This includes environments with globally configured Git LFS filters. These restrictions prevent ordinary Git inspection from invoking repository-controlled programs.
+
+Capture checks the working tree and HEAD again before returning. It is a best-effort local consistency check, not a filesystem lock or sandbox.

@@ -67,7 +67,7 @@ def _chain(events):
 def verify_bundle(bundle):
     errors = []
     try:
-        if not isinstance(bundle, dict) or bundle.get('version') != 1:
+        if not isinstance(bundle, dict) or type(bundle.get('version')) is not int or bundle.get('version') != 1 or bundle.get('format') != 'synbios-task':
             raise ValueError('Unsupported bundle')
         events = bundle['events']
         if not isinstance(events, list) or not events:
@@ -91,6 +91,8 @@ def verify_bundle(bundle):
             if any(event[key] != link[key] for key in ('seq', 'hash', 'previous_hash')):
                 raise ValueError('Event commitment mismatch')
         task = bundle['task']
+        if task['status'] not in ('open', 'claimed', 'in_progress', 'in_review', 'changes_requested', 'accepted', 'cancelled'):
+            raise ValueError('Invalid task status')
         if any(event['task_id'] != task['id'] for event in events):
             raise ValueError('Unrelated task event')
         records = [e['payload'].get('task') for e in events if e.get('task_id') == task['id']]
@@ -106,10 +108,14 @@ def verify_bundle(bundle):
             if artifact['kind'] not in {'git_commit', 'document'} or not re.fullmatch(pattern, artifact['revision']):
                 raise ValueError('Invalid artifact revision')
         for evidence in task['evidence']:
+            if evidence['kind'] not in ('test', 'proof', 'analysis') or evidence['status'] not in ('passed', 'failed', 'unavailable'):
+                raise ValueError('Invalid evidence kind or status')
             artifact = artifacts[evidence['artifact_id']]
             if evidence['task_id'] != task['id'] or evidence['revision'] != artifact['revision'] or evidence['artifact_digest'] != artifact['digest']:
                 raise ValueError('Invalid evidence binding')
         for review in task['reviews']:
+            if review['decision'] not in ('approved', 'changes_requested'):
+                raise ValueError('Invalid review decision')
             artifact = artifacts[review['artifact_id']]
             if review['task_id'] != task['id'] or review['revision'] != artifact['revision'] or review['created_by'] == artifact['created_by']:
                 raise ValueError('Invalid independent review binding')
@@ -375,7 +381,7 @@ class Store:
                 result = task
             elif action == 'task.transition':
                 status = choice('status', {'in_progress', 'in_review', 'cancelled', 'open'})
-                allowed = {'open': {'in_progress', 'cancelled'}, 'claimed': {'in_progress', 'cancelled', 'open'}, 'in_progress': {'in_review', 'cancelled', 'open'}, 'in_review': {'cancelled', 'open'}, 'changes_requested': {'in_progress', 'in_review', 'cancelled', 'open'}, 'cancelled': {'open'}}
+                allowed = {'open': {'cancelled'}, 'claimed': {'in_progress', 'cancelled', 'open'}, 'in_progress': {'in_review', 'cancelled', 'open'}, 'in_review': {'cancelled', 'open'}, 'changes_requested': {'in_progress', 'in_review', 'cancelled', 'open'}, 'cancelled': {'open'}}
                 if status not in allowed.get(task['status'], set()):
                     raise DomainError('Invalid task transition', 409)
                 if status in {'cancelled', 'open'}:

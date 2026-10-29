@@ -28,7 +28,7 @@ class CLITests(unittest.TestCase):
             git('commit', '-qm', 'fixture')
             first = capture(repo, 'task')
             self.assertEqual(len(first['revision']), 40)
-            self.assertEqual(first['digest'], hashlib.sha256(git('diff-tree', '--root', '--no-commit-id', '-p', '--binary', '--no-ext-diff', '--no-textconv', first['revision'], '--')).hexdigest())
+            self.assertEqual(first['digest'], hashlib.sha256(git('ls-tree', '-r', '-z', '--full-tree', first['revision'])).hexdigest())
             (repo / 'untracked').write_text('dirty')
             with self.assertRaisesRegex(ValueError, 'clean'):
                 capture(repo, 'task')
@@ -38,7 +38,7 @@ class CLITests(unittest.TestCase):
             second = capture(repo, 'task')
             self.assertNotEqual(first['revision'], second['revision'])
             self.assertNotEqual(first['digest'], second['digest'])
-            self.assertEqual(second['digest'], hashlib.sha256(git('diff', '--binary', '--no-ext-diff', '--no-textconv', first['revision'], second['revision'], '--')).hexdigest())
+            self.assertEqual(second['digest'], hashlib.sha256(git('ls-tree', '-r', '-z', '--full-tree', second['revision'])).hexdigest())
             main_branch = git('branch', '--show-current').decode().strip()
             git('checkout', '-qb', 'side', first['revision'])
             (repo / 'side.txt').write_text('side\n')
@@ -47,7 +47,37 @@ class CLITests(unittest.TestCase):
             git('checkout', '-q', main_branch)
             git('merge', '--no-ff', '-qm', 'merge fixture', 'side')
             merged = capture(repo, 'task')
-            self.assertEqual(merged['digest'], hashlib.sha256(git('diff', '--binary', '--no-ext-diff', '--no-textconv', second['revision'], merged['revision'], '--')).hexdigest())
+            self.assertEqual(merged['digest'], hashlib.sha256(git('ls-tree', '-r', '-z', '--full-tree', merged['revision'])).hexdigest())
+            for key, value in [('diff.noprefix', 'true'), ('color.diff', 'always'),
+                               ('core.abbrev', '5'), ('diff.renames', 'false'),
+                               ('diff.algorithm', 'histogram'), ('diff.context', '100')]:
+                git('config', key, value)
+            hostile = capture(repo, 'task')
+            self.assertEqual(merged['revision'], hostile['revision'])
+            self.assertEqual(merged['digest'], hostile['digest'])
+            for bit in ('assume-unchanged', 'skip-worktree'):
+                git('update-index', '--' + bit, 'document.txt')
+                (repo / 'document.txt').write_text('hidden dirty\n')
+                self.assertEqual(git('status', '--porcelain'), b'')
+                with self.assertRaisesRegex(ValueError, 'assume-unchanged or skip-worktree'):
+                    capture(repo, 'task')
+                git('update-index', '--no-' + bit, 'document.txt')
+                git('checkout', '--', 'document.txt')
+            original_manifest = git('ls-tree', '-r', '-z', '--full-tree', merged['revision'])
+            replacement_tree = git('rev-parse', first['revision'] + '^{tree}').decode().strip()
+            replacement = subprocess.run(
+                ['git', '-C', directory, 'commit-tree', replacement_tree, '-m', 'Replacement fixture'],
+                check=True, capture_output=True).stdout.decode().strip()
+            git('replace', merged['revision'], replacement)
+            self.assertNotEqual(git('ls-tree', '-r', '-z', '--full-tree', merged['revision']), original_manifest)
+            (repo / 'document.txt').touch()
+            index = repo / '.git' / 'index'
+            index_before = (index.read_bytes(), index.stat().st_mtime_ns)
+            protected = capture(repo, 'task')
+            self.assertEqual((index.read_bytes(), index.stat().st_mtime_ns), index_before)
+            self.assertEqual(protected['revision'], merged['revision'])
+            self.assertEqual(protected['digest'], merged['digest'])
+            git('replace', '-d', merged['revision'])
             marker = repo / 'unexpected-execution'
             git('config', 'filter.evil.clean', 'touch ' + str(marker) + '; cat')
             with self.assertRaisesRegex(ValueError, 'filters'):

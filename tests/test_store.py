@@ -93,6 +93,7 @@ class StoreTests(unittest.TestCase):
         self.assert_error(409, self.s.bootstrap)
 
     def test_revision_evidence_and_independent_acceptance(self):
+        self.cmd('task.claim', task_id=self.task['id'])
         self.transition('in_progress')
         a = self.artifact()
         self.assert_error(409, self.transition, 'in_review')
@@ -112,6 +113,7 @@ class StoreTests(unittest.TestCase):
         self.assert_error(409, self.transition, 'in_review')
 
     def test_failed_evidence_after_submission_blocks_review(self):
+        self.cmd('task.claim', task_id=self.task['id'])
         self.transition('in_progress')
         a = self.artifact()
         self.evidence(a)
@@ -128,6 +130,7 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(before, self.s.verify_integrity()['event_count'])
         self.assert_error(409, self.transition, 'in_review')
         self.task = dependent
+        self.cmd('task.claim', task_id=self.task['id'])
         self.transition('in_progress')
         a = self.artifact()
         self.evidence(a)
@@ -285,6 +288,54 @@ class StoreTests(unittest.TestCase):
             malformed['events'] = events
             malformed['bundle_digest'] = digest({k: v for k, v in malformed.items() if k != 'bundle_digest'})
             self.assertFalse(verify_bundle(malformed)['valid'])
+
+    def test_bundle_envelope_and_record_enums(self):
+        self.cmd('task.claim', task_id=self.task['id'])
+        self.transition('in_progress')
+        artifact = self.artifact()
+        self.evidence(artifact)
+        self.transition('in_review')
+        self.review(artifact, decision='changes_requested')
+        original = self.s.export(self.owner, self.task['id'])
+        self.assertTrue(verify_bundle(original)['valid'])
+        for key, value in (('version', True), ('version', 1.0), ('format', 'other-format'), ('format', None)):
+            bundle = copy.deepcopy(original)
+            bundle[key] = value
+            bundle['bundle_digest'] = digest({k: v for k, v in bundle.items() if k != 'bundle_digest'})
+            self.assertFalse(verify_bundle(bundle)['valid'], (key, value))
+        # Rewrite the unsigned supplied event and its commitment consistently.
+        # Structural validation must still reject unsupported enum values.
+        for field, value in (('status', 'unknown'), ('evidence.kind', 'unknown'), ('evidence.status', 'unknown'), ('review.decision', 'unknown')):
+            bundle = copy.deepcopy(original)
+            task = bundle['task']
+            if field == 'status':
+                task['status'] = value
+            elif field.startswith('evidence.'):
+                task['evidence'][0][field.split('.')[1]] = value
+            else:
+                task['reviews'][0]['decision'] = value
+            event = bundle['events'][-1]
+            event['payload']['task'] = copy.deepcopy(task)
+            event['hash'] = digest({k: v for k, v in event.items() if k != 'hash'})
+            bundle['audit_chain'][-1]['hash'] = event['hash']
+            bundle['bundle_digest'] = digest({k: v for k, v in bundle.items() if k != 'bundle_digest'})
+            self.assertFalse(verify_bundle(bundle)['valid'], field)
+
+    def test_claim_required_before_starting_work(self):
+        self.grant(caps=['work'])
+        before = self.s.snapshot(self.owner)
+        self.assert_error(409, self.transition, 'in_progress', self.agent['token'])
+        self.assert_error(409, self.transition, 'in_progress', self.owner)
+        self.assertEqual(before, self.s.snapshot(self.owner))
+        self.assert_error(403, self.cmd, 'task.claim', self.agent['token'], task_id=self.task['id'])
+        self.grant(caps=['claim'])
+        claimed = self.cmd('task.claim', self.agent['token'], task_id=self.task['id'])
+        self.assertEqual(claimed['assignee_id'], self.agent['principal']['id'])
+        started = self.transition('in_progress', self.agent['token'])
+        self.assertEqual(started['status'], 'in_progress')
+        self.assertEqual(started['assignee_id'], self.agent['principal']['id'])
+        self.assertEqual(started['scope'], self.task['scope'])
+        self.assertEqual(started['criteria'], self.task['criteria'])
 
     def test_bad_fields_roll_back(self):
         for payload in ({'kind': 'document', 'revision': 'short', 'digest': 'b' * 64}, {'kind': 'git_commit', 'revision': 'a' * 40, 'digest': 'bad'}):
