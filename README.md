@@ -43,6 +43,10 @@ The slice is ready for review when a maintainer can inspect the task and change,
 
 Propose changes through issues or pull requests with a concrete example, test evidence, and an explanation of compatibility and authority boundaries. Make human review and agent-facing behavior understandable. Contribution conventions and maintainership are still being established.
 
+## Design explorations
+
+- [Proof evidence and the Bend pilot](docs/proof-evidence-rfc.md) — a proposed, shadow-mode experiment for formal verification; no toolchain or merge policy has been adopted.
+
 ## Open decisions
 
 Task and artifact models, identity and delegation, review and trust signals, Git interoperability, execution isolation, storage and transport, privacy, harness adapters, licensing, and governance require design. Koinos integration and the division of responsibility with Exofab should be validated against a real end-to-end workflow.
