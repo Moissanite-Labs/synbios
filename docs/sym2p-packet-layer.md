@@ -21,7 +21,7 @@ Forge events record `sym2p_packet_hash` and `sym2p_audit` when commands arrive t
 Forge payloads are **not** duplicated under `ext.synbios`. The codec writes:
 
 - **Header** (`v`, `id`, `tk`, `prj`, `f`, `t`, `a`, `s`, `st`, `rq`, `exp`) — routing, speech act, epistemic status.
-- **`cond`** — string fields and JSON-valued lists (prefix `synbios/…`); used for project/principal/grant/evidence/review text.
+- **`cond`** — `synbios/<field>=<value>` lines for project/principal/grant/evidence/review text. Values are verbatim strings, even when they look like JSON; only `capabilities` is JSON-encoded. Repeated `assumptions` lines form that list.
 - **`ops`** — `update` deltas (`set` / `add`) for task criteria, artifact fields, task status transitions, etc., with `base:"forge:v1"`.
 - **`ext.sym2p.rev`** — profile tag (sanctioned).
 - **`ext.synbios` residue only:**
