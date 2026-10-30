@@ -15,7 +15,7 @@ The founding goal is an agent-first development forge that works with people, pr
 
 ## Decisions to make through working examples
 
-Identity and governance need participants who can test recovery and resolve disputes. Licensing and compensation require explicit agreements. Sym-2P needs a defined interoperable format and a measured benefit over the existing JSON API. None should be implied by a project name or a stored contribution.
+Identity and governance need participants who can test recovery and resolve disputes. Licensing and compensation require explicit agreements. Sym-2P v1 is pinned (`vendor/protean-sym2p-v1.0.0`) with a Synbios codec, audit renderer, and measured JSON/v1/v2 bench (`python3 -m synbios.sym2p.bench`); latent profiles and v2 adoption remain future work. None should be implied by a project name or a stored contribution.
 
 The next engineering milestone is a shared-team pilot with project read isolation and authenticated identities. It should use the current task-to-review loop as its acceptance test before adding remote execution or a Git merge service.
 

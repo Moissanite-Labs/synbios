@@ -217,8 +217,12 @@ class Store:
         state['credentials'][hashlib.sha256(token.encode()).hexdigest()] = principal['id']
         return {'principal': principal, 'token': token}
 
-    def _save(self, state, events, actor, action, entity, task=None):
+    def _save(self, state, events, actor, action, entity, task=None, *, sym2p_packet_hash=None, sym2p_audit=None):
         payload = {'state_digest': digest(state), 'entity': entity}
+        if sym2p_packet_hash:
+            payload['sym2p_packet_hash'] = sym2p_packet_hash
+        if sym2p_audit:
+            payload['sym2p_audit'] = sym2p_audit
         if task:
             payload['task'] = task
         event = {'seq': len(events) + 1, 'id': uid(), 'type': action, 'actor_id': actor['id'], 'task_id': task['id'] if task else None, 'created_at': now(), 'payload': payload, 'previous_hash': events[-1]['hash'] if events else '0' * 64}
@@ -293,11 +297,17 @@ class Store:
             raise DomainError('Dependencies must be accepted', 409)
         return current
 
-    def command(self, token, action, payload):
+    def command(self, token, action, payload, *, sym2p_packet_hash=None, sym2p_audit=None):
         if not isinstance(action, str):
             raise DomainError('Invalid command')
         if not isinstance(payload, dict):
             raise DomainError('Payload must be an object')
+        if sym2p_packet_hash is not None and (
+                not isinstance(sym2p_packet_hash, str)
+                or not re.fullmatch(r'[0-9a-f]{64}', sym2p_packet_hash)):
+            raise DomainError('Invalid sym2p packet hash')
+        if sym2p_audit is not None and (not isinstance(sym2p_audit, str) or not sym2p_audit.strip()):
+            raise DomainError('Invalid sym2p audit line')
         with self._lock:
             self.db.execute('BEGIN IMMEDIATE')
             try:
@@ -305,7 +315,11 @@ class Store:
                 actor = self._auth(state, token)
                 result, task = self._command(state, actor, action, payload)
                 entity = result.get('principal', result) if isinstance(result, dict) else result
-                self._save(state, events, actor, action, entity, task)
+                self._save(
+                    state, events, actor, action, entity, task,
+                    sym2p_packet_hash=sym2p_packet_hash,
+                    sym2p_audit=sym2p_audit,
+                )
                 self.db.commit()
                 return copy.deepcopy(result)
             except Exception:

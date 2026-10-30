@@ -1,0 +1,8 @@
+{
+  "name": "protean-sym2p",
+  "profile": "SYM-2P/1.0",
+  "tag": "v1.0.0",
+  "commit": "43334b2fa756b11481a7c021931870864f95ea71",
+  "url": "https://github.com/aska-digital/protean-sym2p",
+  "note": "Referenced by Moissanite-Labs ecosystem; Moissanite-Labs/protean-sym2p was not published at pin time."
+}
