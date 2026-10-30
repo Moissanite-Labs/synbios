@@ -155,7 +155,7 @@
           }
         },
         {
-          "label": "English terse (lossless, CoD-style)",
+          "label": "key=value text (lossless)",
           "messages": {
             "cl100k_base": 693,
             "o200k_base": 691
@@ -595,7 +595,7 @@
           }
         },
         {
-          "label": "English terse (lossless, CoD-style)",
+          "label": "key=value text (lossless)",
           "messages": {
             "cl100k_base": 5395,
             "o200k_base": 5328
@@ -1010,7 +1010,7 @@
           }
         },
         {
-          "label": "English terse (lossless, CoD-style)",
+          "label": "key=value text (lossless)",
           "messages": {
             "cl100k_base": 27515,
             "o200k_base": 27180
