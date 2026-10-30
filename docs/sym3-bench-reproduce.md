@@ -39,6 +39,10 @@ git diff docs/sym3-bench.md
 
 Versions are pinned in [requirements-bench.txt](../requirements-bench.txt) (`tiktoken`, `toon-format`). CI installs the same file before running verification.
 
+The bench counts with exactly the `o200k_base` (primary) and `cl100k_base` encodings. tiktoken downloads them on first use; without network access, set `TIKTOKEN_CACHE_DIR` to a cache that already holds them. If either encoding cannot load, `make bench` stops and reports the cause instead of comparing tables.
+
+Other tokenizers change adaptive choices, ref labels, and lexicon generation, so they are opt-in: `SYM3_EXTRA_TOKENIZERS=1` adds a Hugging Face tokenizer (requires the `tokenizers` package) for lexicon exploration. Bench verification refuses to run with it set.
+
 ## Optional checks
 
 - Regenerate committed markdown after review: `python -m synbios.sym3.bench --write-md` or `python -m synbios.sym3.reproduce --write-md`.
@@ -50,4 +54,4 @@ Versions are pinned in [requirements-bench.txt](../requirements-bench.txt) (`tik
 python -m unittest discover -s tests -v
 ```
 
-Tests cover SYM-3 round-trip encoding and bench invariants without network access.
+Round-trip, minimal-context, and tokenizer-loading tests need no network access. Lexicon and bench verification tests need the pinned encodings and skip when they are unavailable; CI still enforces the bench through `make bench`. Tests compare against committed files without writing to them.

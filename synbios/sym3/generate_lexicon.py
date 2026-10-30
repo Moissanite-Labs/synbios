@@ -162,11 +162,8 @@ def _format_tag_candidates() -> dict[str, list[str]]:
     return tags
 
 
-def main() -> int:
-    specs = load_tokenizers()
-    if not specs:
-        print("No tokenizers available; install tiktoken", file=sys.stderr)
-        return 1
+def render_lexicon(specs) -> str:
+    """Lexicon JSON text for these tokenizers, exactly as written to lexicon.json."""
     concepts_in = _build_concepts()
     chosen: dict[str, dict[str, str]] = {}
     for category, mapping in concepts_in.items():
@@ -208,7 +205,15 @@ def main() -> int:
         "concepts": chosen,
         "format_tags": format_tags,
     }
-    OUT.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return json.dumps(payload, indent=2, sort_keys=True) + "\n"
+
+
+def main() -> int:
+    specs = load_tokenizers()
+    if not specs:
+        print("No tokenizers available; install tiktoken", file=sys.stderr)
+        return 1
+    OUT.write_text(render_lexicon(specs), encoding="utf-8")
     print(f"Wrote {OUT} ({len(specs)} tokenizers)")
     return 0
 
