@@ -1,0 +1,1291 @@
+{
+  "benchmark_source": "docs/sym3-bench.md",
+  "generated_at": "2026-10-30T18:53:01.678040+00:00",
+  "git_sha": "3422091d3b1a9a02139f60847f5e89ae02283e2d",
+  "git_sha_short": "3422091",
+  "primary_tokenizer": "o200k_base",
+  "tokenizers": {
+    "dependency_pins": {
+      "tiktoken": "0.14.0",
+      "toon-format": "1.2.0"
+    },
+    "encodings": [
+      "o200k_base",
+      "cl100k_base"
+    ],
+    "primary": "o200k_base",
+    "tiktoken_version": "0.14.0"
+  },
+  "transcripts": [
+    {
+      "break_even": {
+        "adaptive": {
+          "vs_compact_json": 7,
+          "vs_english_lossless": 7
+        },
+        "combined": {
+          "vs_compact_json": 8,
+          "vs_english_lossless": 8
+        },
+        "delta": {
+          "vs_compact_json": 9,
+          "vs_english_lossless": 9
+        },
+        "omit": {
+          "vs_compact_json": 9,
+          "vs_english_lossless": 9
+        },
+        "positional": {
+          "vs_compact_json": 7,
+          "vs_english_lossless": 7
+        },
+        "refs": {
+          "vs_compact_json": 7,
+          "vs_english_lossless": 7
+        }
+      },
+      "count": 11,
+      "rows": [
+        {
+          "label": "compact JSON",
+          "messages": {
+            "cl100k_base": 680,
+            "o200k_base": 682
+          },
+          "msg_rate": 62.0,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 682.0
+          },
+          "total_full": {
+            "o200k_base": 682
+          },
+          "total_primary": {
+            "o200k_base": 682
+          }
+        },
+        {
+          "label": "pretty JSON",
+          "messages": {
+            "cl100k_base": 850,
+            "o200k_base": 849
+          },
+          "msg_rate": 77.18181818181819,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 849.0
+          },
+          "total_full": {
+            "o200k_base": 849
+          },
+          "total_primary": {
+            "o200k_base": 849
+          }
+        },
+        {
+          "label": "English (lossy summary)",
+          "messages": {
+            "cl100k_base": 479,
+            "o200k_base": 478
+          },
+          "msg_rate": 43.45454545454545,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 478.0
+          },
+          "total_full": {
+            "o200k_base": 478
+          },
+          "total_primary": {
+            "o200k_base": 478
+          }
+        },
+        {
+          "label": "English (lossless)",
+          "messages": {
+            "cl100k_base": 688,
+            "o200k_base": 686
+          },
+          "msg_rate": 62.36363636363637,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 686.0
+          },
+          "total_full": {
+            "o200k_base": 686
+          },
+          "total_primary": {
+            "o200k_base": 686
+          }
+        },
+        {
+          "label": "English terse (lossless, CoD-style)",
+          "messages": {
+            "cl100k_base": 693,
+            "o200k_base": 691
+          },
+          "msg_rate": 62.81818181818182,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 691.0
+          },
+          "total_full": {
+            "o200k_base": 691
+          },
+          "total_primary": {
+            "o200k_base": 691
+          }
+        },
+        {
+          "label": "TOON (toon-format)",
+          "messages": {
+            "cl100k_base": 805,
+            "o200k_base": 805
+          },
+          "msg_rate": 73.18181818181819,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 805.0
+          },
+          "total_full": {
+            "o200k_base": 805
+          },
+          "total_primary": {
+            "o200k_base": 805
+          }
+        },
+        {
+          "label": "Agora envelope (arXiv:2410.11905)",
+          "messages": {
+            "cl100k_base": 968,
+            "o200k_base": 979
+          },
+          "msg_rate": 89.0,
+          "setup_cached": {
+            "o200k_base": 4.800000000000001
+          },
+          "setup_full": {
+            "o200k_base": 48
+          },
+          "setup_min": {
+            "o200k_base": 48
+          },
+          "setup_min_n": 48,
+          "total_cached": {
+            "o200k_base": 983.8
+          },
+          "total_full": {
+            "o200k_base": 1027
+          },
+          "total_primary": {
+            "o200k_base": 1027
+          }
+        },
+        {
+          "label": "SYM-2P v1",
+          "messages": {
+            "cl100k_base": 2689,
+            "o200k_base": 2719
+          },
+          "msg_rate": 247.1818181818182,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 2719.0
+          },
+          "total_full": {
+            "o200k_base": 2719
+          },
+          "total_primary": {
+            "o200k_base": 2719
+          }
+        },
+        {
+          "label": "SYM-2P v2 session + handshake (PR #6)",
+          "messages": {
+            "o200k_base": 1202
+          },
+          "note": "PR #6 dense pilot numbers",
+          "setup_cached": {
+            "o200k_base": 21.3
+          },
+          "setup_full": {
+            "o200k_base": 213
+          },
+          "setup_min": {
+            "o200k_base": 213
+          },
+          "total_cached": {
+            "o200k_base": 1223.3
+          },
+          "total_full": {
+            "o200k_base": 1415
+          },
+          "total_primary": {
+            "o200k_base": 1415
+          }
+        },
+        {
+          "label": "SYM-3 delta",
+          "messages": {
+            "cl100k_base": 351,
+            "o200k_base": 349
+          },
+          "msg_rate": 31.727272727272727,
+          "setup_cached": {
+            "o200k_base": 25.0
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 250
+          },
+          "setup_min_n": 250,
+          "total_cached": {
+            "o200k_base": 374.0
+          },
+          "total_full": {
+            "o200k_base": 873
+          },
+          "total_primary": {
+            "o200k_base": 599
+          }
+        },
+        {
+          "label": "SYM-3 refs",
+          "messages": {
+            "cl100k_base": 243,
+            "o200k_base": 241
+          },
+          "msg_rate": 21.90909090909091,
+          "note": "closest prior art: Agora (arXiv:2410.11905)",
+          "setup_cached": {
+            "o200k_base": 25.0
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 250
+          },
+          "setup_min_n": 250,
+          "total_cached": {
+            "o200k_base": 266.0
+          },
+          "total_full": {
+            "o200k_base": 765
+          },
+          "total_primary": {
+            "o200k_base": 491
+          }
+        },
+        {
+          "label": "SYM-3 positional",
+          "messages": {
+            "cl100k_base": 258,
+            "o200k_base": 256
+          },
+          "msg_rate": 23.272727272727273,
+          "setup_cached": {
+            "o200k_base": 25.1
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 251
+          },
+          "setup_min_n": 251,
+          "total_cached": {
+            "o200k_base": 281.1
+          },
+          "total_full": {
+            "o200k_base": 780
+          },
+          "total_primary": {
+            "o200k_base": 507
+          }
+        },
+        {
+          "label": "SYM-3 omit",
+          "messages": {
+            "cl100k_base": 359,
+            "o200k_base": 357
+          },
+          "msg_rate": 32.45454545454545,
+          "setup_cached": {
+            "o200k_base": 25.0
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 250
+          },
+          "setup_min_n": 250,
+          "total_cached": {
+            "o200k_base": 382.0
+          },
+          "total_full": {
+            "o200k_base": 881
+          },
+          "total_primary": {
+            "o200k_base": 607
+          }
+        },
+        {
+          "label": "SYM-3 combined",
+          "messages": {
+            "cl100k_base": 336,
+            "o200k_base": 334
+          },
+          "msg_rate": 30.363636363636363,
+          "setup_cached": {
+            "o200k_base": 25.0
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 250
+          },
+          "setup_min_n": 250,
+          "total_cached": {
+            "o200k_base": 359.0
+          },
+          "total_full": {
+            "o200k_base": 858
+          },
+          "total_primary": {
+            "o200k_base": 584
+          }
+        },
+        {
+          "label": "SYM-3 adaptive",
+          "messages": {
+            "cl100k_base": 243,
+            "o200k_base": 241
+          },
+          "msg_rate": 21.90909090909091,
+          "setup_cached": {
+            "o200k_base": 27.1
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 271
+          },
+          "setup_min_n": 271,
+          "total_cached": {
+            "o200k_base": 268.1
+          },
+          "total_full": {
+            "o200k_base": 765
+          },
+          "total_primary": {
+            "o200k_base": 512
+          }
+        }
+      ],
+      "tokenizers": [
+        "o200k_base",
+        "cl100k_base"
+      ],
+      "transcript": "lifecycle_11"
+    },
+    {
+      "break_even": {
+        "adaptive": {
+          "vs_compact_json": 3,
+          "vs_english_lossless": 3
+        },
+        "combined": {
+          "vs_compact_json": 4,
+          "vs_english_lossless": 4
+        },
+        "delta": {
+          "vs_compact_json": 6,
+          "vs_english_lossless": 6
+        },
+        "omit": {
+          "vs_compact_json": 6,
+          "vs_english_lossless": 6
+        },
+        "positional": {
+          "vs_compact_json": 4,
+          "vs_english_lossless": 4
+        },
+        "refs": {
+          "vs_compact_json": 3,
+          "vs_english_lossless": 3
+        }
+      },
+      "count": 40,
+      "rows": [
+        {
+          "label": "compact JSON",
+          "messages": {
+            "cl100k_base": 5404,
+            "o200k_base": 5343
+          },
+          "msg_rate": 133.575,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 5343.0
+          },
+          "total_full": {
+            "o200k_base": 5343
+          },
+          "total_primary": {
+            "o200k_base": 5343
+          }
+        },
+        {
+          "label": "pretty JSON",
+          "messages": {
+            "cl100k_base": 6581,
+            "o200k_base": 6516
+          },
+          "msg_rate": 162.9,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 6516.0
+          },
+          "total_full": {
+            "o200k_base": 6516
+          },
+          "total_primary": {
+            "o200k_base": 6516
+          }
+        },
+        {
+          "label": "English (lossy summary)",
+          "messages": {
+            "cl100k_base": 2336,
+            "o200k_base": 2283
+          },
+          "msg_rate": 57.075,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 2283.0
+          },
+          "total_full": {
+            "o200k_base": 2283
+          },
+          "total_primary": {
+            "o200k_base": 2283
+          }
+        },
+        {
+          "label": "English (lossless)",
+          "messages": {
+            "cl100k_base": 5284,
+            "o200k_base": 5242
+          },
+          "msg_rate": 131.05,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 5242.0
+          },
+          "total_full": {
+            "o200k_base": 5242
+          },
+          "total_primary": {
+            "o200k_base": 5242
+          }
+        },
+        {
+          "label": "English terse (lossless, CoD-style)",
+          "messages": {
+            "cl100k_base": 5395,
+            "o200k_base": 5328
+          },
+          "msg_rate": 133.2,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 5328.0
+          },
+          "total_full": {
+            "o200k_base": 5328
+          },
+          "total_primary": {
+            "o200k_base": 5328
+          }
+        },
+        {
+          "label": "TOON (toon-format)",
+          "messages": {
+            "cl100k_base": 6103,
+            "o200k_base": 6049
+          },
+          "msg_rate": 151.225,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 6049.0
+          },
+          "total_full": {
+            "o200k_base": 6049
+          },
+          "total_primary": {
+            "o200k_base": 6049
+          }
+        },
+        {
+          "label": "Agora envelope (arXiv:2410.11905)",
+          "messages": {
+            "cl100k_base": 6472,
+            "o200k_base": 6449
+          },
+          "msg_rate": 161.225,
+          "setup_cached": {
+            "o200k_base": 4.800000000000001
+          },
+          "setup_full": {
+            "o200k_base": 48
+          },
+          "setup_min": {
+            "o200k_base": 48
+          },
+          "setup_min_n": 48,
+          "total_cached": {
+            "o200k_base": 6453.8
+          },
+          "total_full": {
+            "o200k_base": 6497
+          },
+          "total_primary": {
+            "o200k_base": 6497
+          }
+        },
+        {
+          "label": "SYM-2P v1",
+          "messages": {
+            "cl100k_base": 12895,
+            "o200k_base": 12925
+          },
+          "msg_rate": 323.125,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 12925.0
+          },
+          "total_full": {
+            "o200k_base": 12925
+          },
+          "total_primary": {
+            "o200k_base": 12925
+          }
+        },
+        {
+          "label": "SYM-3 delta",
+          "messages": {
+            "cl100k_base": 3423,
+            "o200k_base": 3356
+          },
+          "msg_rate": 83.9,
+          "setup_cached": {
+            "o200k_base": 25.400000000000002
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 254
+          },
+          "setup_min_n": 254,
+          "total_cached": {
+            "o200k_base": 3381.4
+          },
+          "total_full": {
+            "o200k_base": 3880
+          },
+          "total_primary": {
+            "o200k_base": 3610
+          }
+        },
+        {
+          "label": "SYM-3 refs",
+          "messages": {
+            "cl100k_base": 1478,
+            "o200k_base": 1463
+          },
+          "msg_rate": 36.575,
+          "note": "closest prior art: Agora (arXiv:2410.11905)",
+          "setup_cached": {
+            "o200k_base": 25.400000000000002
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 254
+          },
+          "setup_min_n": 254,
+          "total_cached": {
+            "o200k_base": 1488.4
+          },
+          "total_full": {
+            "o200k_base": 1987
+          },
+          "total_primary": {
+            "o200k_base": 1717
+          }
+        },
+        {
+          "label": "SYM-3 positional",
+          "messages": {
+            "cl100k_base": 2574,
+            "o200k_base": 2507
+          },
+          "msg_rate": 62.675,
+          "setup_cached": {
+            "o200k_base": 25.5
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 255
+          },
+          "setup_min_n": 255,
+          "total_cached": {
+            "o200k_base": 2532.5
+          },
+          "total_full": {
+            "o200k_base": 3031
+          },
+          "total_primary": {
+            "o200k_base": 2762
+          }
+        },
+        {
+          "label": "SYM-3 omit",
+          "messages": {
+            "cl100k_base": 3431,
+            "o200k_base": 3364
+          },
+          "msg_rate": 84.1,
+          "setup_cached": {
+            "o200k_base": 25.400000000000002
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 254
+          },
+          "setup_min_n": 254,
+          "total_cached": {
+            "o200k_base": 3389.4
+          },
+          "total_full": {
+            "o200k_base": 3888
+          },
+          "total_primary": {
+            "o200k_base": 3618
+          }
+        },
+        {
+          "label": "SYM-3 combined",
+          "messages": {
+            "cl100k_base": 2327,
+            "o200k_base": 2312
+          },
+          "msg_rate": 57.8,
+          "setup_cached": {
+            "o200k_base": 25.400000000000002
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 254
+          },
+          "setup_min_n": 254,
+          "total_cached": {
+            "o200k_base": 2337.4
+          },
+          "total_full": {
+            "o200k_base": 2836
+          },
+          "total_primary": {
+            "o200k_base": 2566
+          }
+        },
+        {
+          "label": "SYM-3 adaptive",
+          "messages": {
+            "cl100k_base": 1478,
+            "o200k_base": 1463
+          },
+          "msg_rate": 36.575,
+          "setup_cached": {
+            "o200k_base": 27.5
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 275
+          },
+          "setup_min_n": 275,
+          "total_cached": {
+            "o200k_base": 1490.5
+          },
+          "total_full": {
+            "o200k_base": 1987
+          },
+          "total_primary": {
+            "o200k_base": 1738
+          }
+        }
+      ],
+      "tokenizers": [
+        "o200k_base",
+        "cl100k_base"
+      ],
+      "transcript": "lifecycle_40"
+    },
+    {
+      "break_even": {
+        "adaptive": {
+          "vs_compact_json": 3,
+          "vs_english_lossless": 3
+        },
+        "combined": {
+          "vs_compact_json": 4,
+          "vs_english_lossless": 4
+        },
+        "delta": {
+          "vs_compact_json": 6,
+          "vs_english_lossless": 6
+        },
+        "omit": {
+          "vs_compact_json": 6,
+          "vs_english_lossless": 6
+        },
+        "positional": {
+          "vs_compact_json": 4,
+          "vs_english_lossless": 4
+        },
+        "refs": {
+          "vs_compact_json": 3,
+          "vs_english_lossless": 3
+        }
+      },
+      "count": 200,
+      "rows": [
+        {
+          "label": "compact JSON",
+          "messages": {
+            "cl100k_base": 27560,
+            "o200k_base": 27363
+          },
+          "msg_rate": 136.815,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 27363.0
+          },
+          "total_full": {
+            "o200k_base": 27363
+          },
+          "total_primary": {
+            "o200k_base": 27363
+          }
+        },
+        {
+          "label": "pretty JSON",
+          "messages": {
+            "cl100k_base": 33445,
+            "o200k_base": 33120
+          },
+          "msg_rate": 165.6,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 33120.0
+          },
+          "total_full": {
+            "o200k_base": 33120
+          },
+          "total_primary": {
+            "o200k_base": 33120
+          }
+        },
+        {
+          "label": "English (lossy summary)",
+          "messages": {
+            "cl100k_base": 11704,
+            "o200k_base": 11439
+          },
+          "msg_rate": 57.195,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 11439.0
+          },
+          "total_full": {
+            "o200k_base": 11439
+          },
+          "total_primary": {
+            "o200k_base": 11439
+          }
+        },
+        {
+          "label": "English (lossless)",
+          "messages": {
+            "cl100k_base": 26960,
+            "o200k_base": 26754
+          },
+          "msg_rate": 133.77,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 26754.0
+          },
+          "total_full": {
+            "o200k_base": 26754
+          },
+          "total_primary": {
+            "o200k_base": 26754
+          }
+        },
+        {
+          "label": "English terse (lossless, CoD-style)",
+          "messages": {
+            "cl100k_base": 27515,
+            "o200k_base": 27180
+          },
+          "msg_rate": 135.9,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 27180.0
+          },
+          "total_full": {
+            "o200k_base": 27180
+          },
+          "total_primary": {
+            "o200k_base": 27180
+          }
+        },
+        {
+          "label": "TOON (toon-format)",
+          "messages": {
+            "cl100k_base": 31055,
+            "o200k_base": 30785
+          },
+          "msg_rate": 153.925,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 30785.0
+          },
+          "total_full": {
+            "o200k_base": 30785
+          },
+          "total_primary": {
+            "o200k_base": 30785
+          }
+        },
+        {
+          "label": "Agora envelope (arXiv:2410.11905)",
+          "messages": {
+            "cl100k_base": 32900,
+            "o200k_base": 32897
+          },
+          "msg_rate": 164.485,
+          "setup_cached": {
+            "o200k_base": 4.800000000000001
+          },
+          "setup_full": {
+            "o200k_base": 48
+          },
+          "setup_min": {
+            "o200k_base": 48
+          },
+          "setup_min_n": 48,
+          "total_cached": {
+            "o200k_base": 32901.8
+          },
+          "total_full": {
+            "o200k_base": 32945
+          },
+          "total_primary": {
+            "o200k_base": 32945
+          }
+        },
+        {
+          "label": "SYM-2P v1",
+          "messages": {
+            "cl100k_base": 65015,
+            "o200k_base": 65273
+          },
+          "msg_rate": 326.365,
+          "setup_cached": {
+            "o200k_base": 0.0
+          },
+          "setup_full": {
+            "o200k_base": 0
+          },
+          "setup_min": {
+            "o200k_base": 0
+          },
+          "setup_min_n": 0,
+          "total_cached": {
+            "o200k_base": 65273.0
+          },
+          "total_full": {
+            "o200k_base": 65273
+          },
+          "total_primary": {
+            "o200k_base": 65273
+          }
+        },
+        {
+          "label": "SYM-3 delta",
+          "messages": {
+            "cl100k_base": 17659,
+            "o200k_base": 17324
+          },
+          "msg_rate": 86.62,
+          "setup_cached": {
+            "o200k_base": 25.400000000000002
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 254
+          },
+          "setup_min_n": 254,
+          "total_cached": {
+            "o200k_base": 17349.4
+          },
+          "total_full": {
+            "o200k_base": 17848
+          },
+          "total_primary": {
+            "o200k_base": 17578
+          }
+        },
+        {
+          "label": "SYM-3 refs",
+          "messages": {
+            "cl100k_base": 7449,
+            "o200k_base": 7374
+          },
+          "msg_rate": 36.87,
+          "note": "closest prior art: Agora (arXiv:2410.11905)",
+          "setup_cached": {
+            "o200k_base": 25.400000000000002
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 254
+          },
+          "setup_min_n": 254,
+          "total_cached": {
+            "o200k_base": 7399.4
+          },
+          "total_full": {
+            "o200k_base": 7898
+          },
+          "total_primary": {
+            "o200k_base": 7628
+          }
+        },
+        {
+          "label": "SYM-3 positional",
+          "messages": {
+            "cl100k_base": 13414,
+            "o200k_base": 13079
+          },
+          "msg_rate": 65.395,
+          "setup_cached": {
+            "o200k_base": 25.5
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 255
+          },
+          "setup_min_n": 255,
+          "total_cached": {
+            "o200k_base": 13104.5
+          },
+          "total_full": {
+            "o200k_base": 13603
+          },
+          "total_primary": {
+            "o200k_base": 13334
+          }
+        },
+        {
+          "label": "SYM-3 omit",
+          "messages": {
+            "cl100k_base": 17699,
+            "o200k_base": 17364
+          },
+          "msg_rate": 86.82,
+          "setup_cached": {
+            "o200k_base": 25.400000000000002
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 254
+          },
+          "setup_min_n": 254,
+          "total_cached": {
+            "o200k_base": 17389.4
+          },
+          "total_full": {
+            "o200k_base": 17888
+          },
+          "total_primary": {
+            "o200k_base": 17618
+          }
+        },
+        {
+          "label": "SYM-3 combined",
+          "messages": {
+            "cl100k_base": 11694,
+            "o200k_base": 11619
+          },
+          "msg_rate": 58.095,
+          "setup_cached": {
+            "o200k_base": 25.400000000000002
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 254
+          },
+          "setup_min_n": 254,
+          "total_cached": {
+            "o200k_base": 11644.4
+          },
+          "total_full": {
+            "o200k_base": 12143
+          },
+          "total_primary": {
+            "o200k_base": 11873
+          }
+        },
+        {
+          "label": "SYM-3 adaptive",
+          "messages": {
+            "cl100k_base": 7449,
+            "o200k_base": 7374
+          },
+          "msg_rate": 36.87,
+          "setup_cached": {
+            "o200k_base": 27.5
+          },
+          "setup_full": {
+            "o200k_base": 524
+          },
+          "setup_min": {
+            "o200k_base": 275
+          },
+          "setup_min_n": 275,
+          "total_cached": {
+            "o200k_base": 7401.5
+          },
+          "total_full": {
+            "o200k_base": 7898
+          },
+          "total_primary": {
+            "o200k_base": 7649
+          }
+        }
+      ],
+      "tokenizers": [
+        "o200k_base",
+        "cl100k_base"
+      ],
+      "transcript": "lifecycle_200"
+    }
+  ]
+}
