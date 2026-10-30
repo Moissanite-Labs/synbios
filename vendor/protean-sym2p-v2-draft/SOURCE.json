@@ -1,0 +1,8 @@
+{
+  "name": "protean-sym2p",
+  "profile": "SYM-2P/2.0-draft",
+  "branch": "v2-draft",
+  "commit": "155b6c30ce4d9d67092e97041c850fdcb7689a96",
+  "url": "https://github.com/aska-digital/protean-sym2p",
+  "note": "Dense wire draft (SPEC-V2-DRAFT.md); not normative over SYM-2P/1.0 JSON."
+}

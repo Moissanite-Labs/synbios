@@ -1,0 +1,13 @@
+{
+  "handshake": "2|hs0|.|0|100|10|0|0|0|(60 acc0388c2168508e)(61 p a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1)(61 p p a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1)(61 t t b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2)(62 10 h d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4)(62 11 a c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3)|0||0",
+  "cases": [
+    {
+      "wire": "2|x001|t|11|100|2|0|0|0|(60 acc0388c2168508e)(50 \"task.claim\")(51 34 \"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2\")|1||1",
+      "expected_meaning": "Agent fixture-actor claimed task b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2."
+    },
+    {
+      "wire": "2|x002|t|11|100|4|1|0|0|(60 acc0388c2168508e)(50 \"task.transition\")(51 42 \"in_progress\")(51 43 \"b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2\")|1|forge:v1|2",
+      "expected_meaning": "Actor fixture-actor moved task b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2 to status in_progress."
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare JSON API payloads, SYM-2P v1 packets, and v2 draft wire size."""
+"""Compare JSON, v1, raw v2, and session-aware v2 wire size."""
 from __future__ import annotations
 
 import json
@@ -13,38 +13,8 @@ from synbios.sym2p.codec import (
     v1_size_breakdown,
     COMMAND_ACT,
 )
-
-V2_ACT = {"assign": 1, "accept": 2, "assert": 3, "reject": 3, "update": 4}
-V2_ST = {
-    "proposed": 1,
-    "assumed": 1,
-    "inferred": 1,
-    "verified": 4,
-    "disputed": 3,
-    "rejected": 3,
-    "observed": 1,
-}
-
-
-def _sexpr_string(value: str) -> str:
-    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
-    return f'"{escaped}"'
-
-
-def _payload_sexpr(payload: dict) -> str:
-    items = " ".join(
-        f"{_sexpr_string(str(k))} {_sexpr_string(json.dumps(v, sort_keys=True, separators=(',', ':')))}"
-        for k, v in sorted(payload.items())
-    )
-    return f"(33 {items})" if items else "(33)"
-
-
-def encode_v2_draft(action: str, payload: dict, ctx: EncodeContext, act: str, status: str | None) -> str:
-    body = f"(50 {_sexpr_string(action)} {_payload_sexpr(payload)})"
-    st_code = V2_ST.get(status or "proposed", 1)
-    act_code = V2_ACT.get(act, 3)
-    fields = ["2", ctx.packet_id, ctx.task_sym, "6", "1", str(act_code), str(st_code), "0", "0", body, "0", "", str(ctx.step)]
-    return "|".join(fields)
+from synbios.sym2p.session import forge_session_from_lifecycle
+from synbios.sym2p.v2_codec import encode_v2_raw, encode_v2_session
 
 
 def lifecycle_transcript() -> list[tuple[str, dict]]:
@@ -125,18 +95,31 @@ def main() -> int:
     project_hex = "a1" * 16
     task_hex = "b2" * 16
     sender_hex = "d4" * 16
-    json_bytes = v1_bytes = v2_bytes = 0
+    agent_hex = "c3" * 16
+    json_bytes = v1_bytes = v2_raw_bytes = v2_sess_bytes = 0
+    hs_bytes = 0
     env_bytes = content_bytes = 0
     json_text: list[str] = []
     v1_text: list[str] = []
-    v2_text: list[str] = []
+    v2_raw_text: list[str] = []
+    v2_sess_text: list[str] = []
     step = 1
-    for index, (action, payload) in enumerate(lifecycle_transcript(), start=1):
+    hs_line, session = forge_session_from_lifecycle(
+        project_hex=project_hex,
+        task_hex=task_hex,
+        actors=[
+            (10, sender_hex, True),
+            (11, agent_hex, False),
+        ],
+    )
+    hs_bytes = len(hs_line.encode("utf-8"))
+    commands = lifecycle_transcript()
+    for index, (action, payload) in enumerate(commands, start=1):
         ctx = EncodeContext(
             packet_id=f"c{index:03d}",
             project_hex=project_hex,
             task_hex=task_hex if action not in {"project.create"} else None,
-            sender_hex=sender_hex,
+            sender_hex=sender_hex if action not in {"task.claim", "task.transition", "artifact.add", "evidence.add"} else agent_hex,
             sender_human=action
             in {
                 "project.create",
@@ -149,47 +132,61 @@ def main() -> int:
             step=step,
         )
         step += 1
-        act = COMMAND_ACT[action]
-        if action == "review.create" and payload.get("decision") == "changes_requested":
-            act = "reject"
-        status = status_field(action, payload)
         body_json = json.dumps(payload, sort_keys=True, separators=(",", ":"))
         line_v1 = encode_command(action, payload, ctx)
-        line_v2 = encode_v2_draft(action, payload, ctx, act, status)
+        line_v2_raw = encode_v2_raw(line_v1)
+        line_v2_sess = encode_v2_session(line_v1, session)
         _, env_b, content_b = v1_size_breakdown(line_v1)
         json_bytes += len(body_json.encode("utf-8"))
         v1_bytes += len(line_v1.encode("utf-8"))
-        v2_bytes += len(line_v2.encode("utf-8"))
+        v2_raw_bytes += len(line_v2_raw.encode("utf-8"))
+        v2_sess_bytes += len(line_v2_sess.encode("utf-8"))
         env_bytes += env_b
         content_bytes += content_b
         json_text.append(body_json)
         v1_text.append(line_v1)
-        v2_text.append(line_v2)
+        v2_raw_text.append(line_v2_raw)
+        v2_sess_text.append(line_v2_sess)
+
+    n = len(commands)
 
     def summarize(label: str, blob: str, size: int) -> Row:
         return Row(label, size, counter(blob) if counter else None)
 
     combined_json = "\n".join(json_text)
     combined_v1 = "\n".join(v1_text)
-    combined_v2 = "\n".join(v2_text)
+    combined_v2_raw = "\n".join(v2_raw_text)
+    combined_v2_sess = "\n".join(v2_sess_text)
+    hs_tok = counter(hs_line) if counter else None
+    sess_with_hs = combined_v2_sess + ("\n" + hs_line if combined_v2_sess else hs_line)
     rows = [
         summarize("JSON API POST bodies", combined_json, json_bytes),
         summarize("SYM-2P v1 (Synbios codec)", combined_v1, v1_bytes),
         summarize("  v1 envelope (header + ext)", "", env_bytes),
         summarize("  v1 content (cond + ops)", "", content_bytes),
-        summarize("SYM-2P v2 draft (measurement only)", combined_v2, v2_bytes),
+        summarize("SYM-2P v2 raw (no session)", combined_v2_raw, v2_raw_bytes),
+        summarize("SYM-2P v2 session (steady state)", combined_v2_sess, v2_sess_bytes),
+        summarize("  v2 session handshake (once)", hs_line, hs_bytes),
+        summarize(
+            "  v2 session + handshake (total)",
+            sess_with_hs,
+            v2_sess_bytes + hs_bytes,
+        ),
+        summarize(
+            "  v2 session amortized per msg",
+            "",
+            (v2_sess_bytes + hs_bytes) // n if n else 0,
+        ),
     ]
 
     token_note = "tiktoken o200k_base" if counter else "tiktoken not installed; token counts omitted"
-    print(f"Forge lifecycle transcript ({len(lifecycle_transcript())} commands). Tokenizer: {token_note}.")
+    print(f"Forge lifecycle transcript ({n} commands). Tokenizer: {token_note}.")
     print(f"{'Format':<40} {'Bytes':>8} {'Tokens':>8}")
     print("-" * 58)
     for row in rows:
         tok = str(row.tokens) if row.tokens is not None else "n/a"
         if row.label.startswith("  v1"):
-            env_tok = counter("\n".join(v1_text)) if counter else None
             if row.label.endswith("ext)"):
-                # approximate envelope tokens as total minus content-only reconstruction
                 content_lines = []
                 for line in v1_text:
                     p = json.loads(line)
@@ -209,10 +206,25 @@ def main() -> int:
                 tok = str(counter("\n".join(content_lines))) if content_lines and counter else "0"
             print(f"{row.label:<40} {row.bytes:>8} {tok:>8}")
             continue
+        if row.label.endswith("amortized per msg") and counter:
+            total_tok = counter(sess_with_hs) if counter else None
+            tok = str((total_tok or 0) // n) if total_tok is not None else "n/a"
+            print(f"{row.label:<40} {row.bytes:>8} {tok:>8}")
+            continue
         print(f"{row.label:<40} {row.bytes:>8} {tok:>8}")
     print()
-    print("ext.synbios residue (v2 codec): cmd discriminator plus optional id tails (one hex")
-    print("char per 32-byte forge id carried in tk/prj/s when the SYM header truncates).")
+    beats = (counter(combined_json) if counter else 0) < (counter(sess_with_hs) if counter else 1)
+    if counter:
+        delta = counter(combined_json) - counter(sess_with_hs)
+        verdict = "beats" if delta > 0 else "does not beat"
+        steady = counter(combined_v2_sess)
+        print(
+            f"Verdict: v2 with session context {verdict} plain JSON on this transcript "
+            f"({counter(combined_json)} vs {counter(sess_with_hs)} tokens incl. handshake; "
+            f"steady-state {steady})."
+        )
+    else:
+        print("Install tiktoken for token verdict.")
     return 0
 
 
