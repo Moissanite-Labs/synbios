@@ -4,15 +4,19 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from synbios.store import Store, COMMAND_FIELDS, digest
+from synbios.store import Store, COMMAND_FIELDS
 from synbios.sym2p import (
     EncodeContext,
+    PacketRejected,
     apply_packet,
     decode_command,
     encode_command,
     packet_hash,
+    parse_packet_line,
     render_audit_line,
+    validate_wire_line,
 )
+from synbios.sym2p.canonical import packet_line
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -115,9 +119,11 @@ class Sym2pCodecTests(unittest.TestCase):
                     packet_id=f"c{index:03d}",
                 ),
             )
-            decoded_action, decoded_payload = decode_command(line)
+            packet = parse_packet_line(line)
+            decoded_action, decoded_payload = decode_command(packet)
             self.assertEqual(decoded_action, action)
             self.assertEqual(decoded_payload, payload)
+            validate_wire_line(line)
             lines.append(line)
         with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as handle:
             handle.write("\n".join(lines) + "\n")
@@ -135,10 +141,11 @@ class Sym2pCodecTests(unittest.TestCase):
 
     def test_audit_renderer_deterministic(self):
         payload = self.sample_payload("task.claim")
-        line = encode_command("task.claim", payload, self.ctx(human=False, sender=self.agent))
-        first = render_audit_line(line)
-        second = render_audit_line(line)
+        actor = {"name": "Worker", "kind": "agent"}
+        first = render_audit_line("task.claim", payload, actor)
+        second = render_audit_line("task.claim", payload, actor)
         self.assertEqual(first, second)
+        self.assertIn("Worker", first)
         self.assertIn(self.task, first)
 
     def test_adapter_records_packet_hash(self):
@@ -164,33 +171,99 @@ class Sym2pCodecTests(unittest.TestCase):
                         "dependencies": [],
                     },
                 )
-                ctx = EncodeContext(
-                    packet_id="c100",
-                    project_hex=project["id"],
-                    task_hex=task["id"],
-                    sender_hex=digest({"id": store.snapshot(owner)["actor"]["id"]}),
-                    sender_human=True,
-                    step=1,
-                )
-                # Use real actor id for sender mapping
                 actor = store.snapshot(owner)["actor"]
                 ctx = EncodeContext(
                     packet_id="c100",
                     project_hex=project["id"],
                     task_hex=task["id"],
                     sender_hex=actor["id"],
-                    sender_human=actor["kind"] == "human",
+                    sender_human=True,
                     step=1,
                 )
                 line = encode_command("task.transition", {"task_id": task["id"], "status": "cancelled"}, ctx)
                 apply_packet(store, owner, line)
                 events = store.snapshot(owner)["events"]
                 last = events[-1]
-                self.assertEqual(last["payload"]["sym2p_packet_hash"], packet_hash(line))
-                self.assertTrue(last["payload"]["sym2p_audit"].startswith("Actor"))
+                packet = parse_packet_line(line)
+                self.assertEqual(last["payload"]["sym2p_packet_hash"], packet_hash(packet))
+                self.assertIn(actor["name"], last["payload"]["sym2p_audit"])
             finally:
                 store.close()
 
+    def test_rejects_ext_payload_blob(self):
+        line = encode_command("task.claim", self.sample_payload("task.claim"), self.ctx(human=False, sender=self.agent))
+        packet = parse_packet_line(line)
+        packet["ext"]["synbios"]["payload"] = {"task_id": self.task}
+        bad = packet_line(packet)
+        with tempfile.TemporaryDirectory() as directory:
+            store = Store(str(Path(directory) / "forge.sqlite"))
+            try:
+                token = store.bootstrap()["token"]
+                count = len(store.snapshot(token)["events"])
+                with self.assertRaises(PacketRejected):
+                    apply_packet(store, token, bad)
+                self.assertEqual(len(store.snapshot(token)["events"]), count)
+            finally:
+                store.close()
+
+    def test_rejects_duplicate_json_keys(self):
+        line = encode_command("task.claim", self.sample_payload("task.claim"), self.ctx(human=False, sender=self.agent))
+        broken = line.replace('"v":2', '"v":2,"v":2', 1)
+        with self.assertRaises(PacketRejected):
+            validate_wire_line(broken)
+
+    def test_rejects_validator_schema_failure(self):
+        line = encode_command("task.claim", self.sample_payload("task.claim"), self.ctx(human=False, sender=self.agent))
+        broken = line.replace('"a":"accept"', '"a":"not-an-act"', 1)
+        with self.assertRaises(PacketRejected):
+            validate_wire_line(broken)
+
+    def test_rejects_f_mismatch_with_actor(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = Store(str(Path(directory) / "forge.sqlite"))
+            try:
+                owner = store.bootstrap()["token"]
+                store.command(owner, "principal.create", {"name": "A", "kind": "agent"})
+                line = encode_command(
+                    "task.claim",
+                    {"task_id": self.task},
+                    self.ctx(human=False, sender=self.agent, packet_id="c001"),
+                )
+                count = len(store.snapshot(owner)["events"])
+                with self.assertRaises(PacketRejected):
+                    apply_packet(store, owner, line)
+                self.assertEqual(len(store.snapshot(owner)["events"]), count)
+            finally:
+                store.close()
+
+    def test_rejects_native_ext_cmd_mismatch(self):
+        line = encode_command("task.claim", self.sample_payload("task.claim"), self.ctx(human=False, sender=self.agent))
+        packet = parse_packet_line(line)
+        packet["ext"]["synbios"]["cmd"] = "task.transition"
+        bad = packet_line(packet)
+        with tempfile.TemporaryDirectory() as directory:
+            store = Store(str(Path(directory) / "forge.sqlite"))
+            try:
+                token = store.bootstrap()["token"]
+                agent = store.command(token, "principal.create", {"name": "A", "kind": "agent"})
+                count = len(store.snapshot(token)["events"])
+                with self.assertRaises(PacketRejected):
+                    apply_packet(store, agent["token"], bad)
+                self.assertEqual(len(store.snapshot(token)["events"]), count)
+            finally:
+                store.close()
+
+    def test_plain_command_has_no_sym2p_event_fields(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = Store(str(Path(directory) / "forge.sqlite"))
+            try:
+                token = store.bootstrap()["token"]
+                store.command(token, "project.create", {"name": "P", "description": "", "repository": ""})
+                event = store.snapshot(token)["events"][-1]
+                self.assertNotIn("sym2p_packet_hash", event["payload"])
+                self.assertNotIn("sym2p_audit", event["payload"])
+            finally:
+                store.close()
 
     def test_lifecycle_via_packets(self):
         with tempfile.TemporaryDirectory() as directory:

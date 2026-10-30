@@ -121,24 +121,20 @@ def encode_command(action: str, payload: dict, ctx: EncodeContext) -> str:
     return packet_line(build_packet(action, payload, ctx))
 
 
-def decode_command(line: str) -> tuple[str, dict]:
-    packet = parse_packet_line(line)
+def decode_command(packet: dict) -> tuple[str, dict]:
     ext = packet.get("ext")
     if not isinstance(ext, dict):
         raise ValueError("packet missing ext")
     syn = ext.get("synbios")
     if not isinstance(syn, dict):
         raise ValueError("packet missing ext.synbios")
-    if syn.get("v") not in (SYNBIOS_EXT_VER, 1):
+    if syn.get("v") != SYNBIOS_EXT_VER:
         raise ValueError("unsupported ext.synbios version")
+    if "payload" in syn:
+        raise ValueError("ext.synbios.payload is not permitted")
     action = syn.get("cmd")
     if not isinstance(action, str) or action not in COMMAND_FIELDS:
         raise ValueError("invalid ext.synbios.cmd")
-    if syn.get("v") == 1:
-        body = syn.get("payload")
-        if not isinstance(body, dict):
-            raise ValueError("invalid ext.synbios.payload")
-        return action, body
     body = decode_native(action, packet)
     extra = set(body) - COMMAND_FIELDS[action]
     if extra:
@@ -149,10 +145,10 @@ def decode_command(line: str) -> tuple[str, dict]:
     return action, body
 
 
-def packet_hash(line: str) -> str:
+def packet_hash(packet: dict) -> str:
     import hashlib
 
-    return hashlib.sha256(line.strip().encode("utf-8")).hexdigest()
+    return hashlib.sha256(packet_line(packet).encode("utf-8")).hexdigest()
 
 
 def v1_size_breakdown(line: str) -> tuple[int, int, int]:

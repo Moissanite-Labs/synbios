@@ -14,6 +14,8 @@ Synbios can carry forge commands as [SYM-2P/1.0](https://github.com/aska-digital
 
 Forge events record `sym2p_packet_hash` and `sym2p_audit` when commands arrive through the adapter.
 
+`apply_packet` validates each line in-process with the pinned `sym-validate.py` rules (canonical bytes, duplicate-key rejection, schema), rejects any `ext.synbios.payload`, checks `f` against the bearer actor, then decodes native fields only. Failures do not append audit events.
+
 ## Native mapping
 
 Forge payloads are **not** duplicated under `ext.synbios`. The codec writes:
@@ -26,9 +28,7 @@ Forge payloads are **not** duplicated under `ext.synbios`. The codec writes:
   - `cmd` — forge command discriminator (required).
   - `tails` — optional map of one hex character per role (`p`, `t`, `h`) when a 32-byte forge id is split to fit SYM id grammar in `tk`/`prj`/`s` (31 nybbles in the header + 1 nybble in `tails`).
 
-Authoritative forge ids appear once on the wire: either in header sym ids (plus tail) or in `cond` (e.g. `grant.create` `principal_id`), not in both header and `cond` for the same field.
-
-Decode still accepts legacy `ext.synbios.v1` `{cmd,payload}` blobs for tests of the old shape.
+Authoritative forge ids appear once on the wire: either in header sym ids (plus tail) or in `cond` (e.g. `grant.create` `principal_id`), not in both header and `cond` for the same field. `apply_packet` rejects any `ext.synbios.payload` blob; native fields are the only source of truth.
 
 ## Verdict (this workload)
 
