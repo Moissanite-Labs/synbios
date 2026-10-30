@@ -48,6 +48,6 @@ API: GET /api/health (no state), GET /api/state, GET /api/tasks/{id}/export, POS
 
 Run clean install/build; domain tests authorization, stale evidence/review, revocation, dependency/cycle and transitions, persistence and integrity tampering; HTTP tests auth/origin/path/body guards; CLI Git intake and export verification; browser test real create/claim/artifact/evidence/review cycle plus narrow/mobile states. No remote deploy or auto-merge. Document implemented features and full-vision roadmap separately.
 
-Discovery: GET /.well-known/synbios.json exposes only public protocol metadata. GET /api/schema exposes the authenticated OpenAPI contract. Commands reject unknown payload fields. Git capture refuses configured clean/process filters and submodules because inspection can execute their programs.
+Discovery: GET /.well-known/synbios.json exposes only public protocol metadata. GET /api/schema exposes the authenticated OpenAPI contract. Commands reject unknown payload fields. Git capture does not load system or global Git configuration, and it refuses clean/process filters that remain configured, plus submodules, because inspection can execute their programs.
 
 New database files are owner-readable/writable only; existing file modes are preserved and symlink DB paths refused. The CLI accepts loopback HTTP origins only and refuses redirects and proxy routing. Bundle verification checks structure and supplied bindings, not omitted dependency acceptance or externally authenticated identity.

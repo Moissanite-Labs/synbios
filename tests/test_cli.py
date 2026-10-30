@@ -2,10 +2,13 @@ import contextlib
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
+import shlex
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -78,6 +81,52 @@ class CLITests(unittest.TestCase):
             self.assertEqual(protected['revision'], merged['revision'])
             self.assertEqual(protected['digest'], merged['digest'])
             git('replace', '-d', merged['revision'])
+            with tempfile.TemporaryDirectory() as config_dir:
+                config_root = Path(config_dir)
+                ambient = config_root / 'ambient-execution'
+                script = config_root / 'ambient-filter.sh'
+                script.write_text('#!/bin/sh\nprintf ran >> %s\ncat\n' % shlex.quote(str(ambient)))
+                script.chmod(0o755)
+                system = config_root / 'system.gitconfig'
+                global_cfg = config_root / 'global.gitconfig'
+                driver = '[filter "ambient"]\n\tclean = %s\n\trequired = true\n' % shlex.quote(str(script))
+                system.write_text(driver)
+                global_cfg.write_text(driver)
+                ambient_env = {
+                    'GIT_CONFIG_NOSYSTEM': '0',
+                    'GIT_CONFIG_SYSTEM': str(system),
+                    'GIT_CONFIG_GLOBAL': str(global_cfg),
+                }
+                with mock.patch.dict(os.environ, ambient_env):
+                    isolated = capture(repo, 'task')
+                self.assertEqual(isolated['revision'], protected['revision'])
+                self.assertEqual(isolated['digest'], protected['digest'])
+                self.assertFalse(ambient.exists())
+                (repo / '.gitattributes').write_text('* filter=ambient\n')
+                (repo / 'document.txt').write_text('filter-dirty\n')
+                with mock.patch.dict(os.environ, ambient_env):
+                    with self.assertRaisesRegex(ValueError, 'clean'):
+                        capture(repo, 'task')
+                self.assertFalse(ambient.exists())
+                injected = dict(ambient_env)
+                injected.update({
+                    'GIT_CONFIG_COUNT': '1',
+                    'GIT_CONFIG_KEY_0': 'filter.injected.clean',
+                    'GIT_CONFIG_VALUE_0': shlex.quote(str(script)),
+                })
+                with mock.patch.dict(os.environ, injected):
+                    with self.assertRaisesRegex(ValueError, 'filters'):
+                        capture(repo, 'task')
+                self.assertFalse(ambient.exists())
+            host_filters = subprocess.run(
+                ['git', 'config', '--system', '--get-regexp', r'^filter\..*\.(clean|process)$'],
+                capture_output=True)
+            if host_filters.returncode == 0:
+                (repo / '.gitattributes').unlink()
+                git('checkout', '--', 'document.txt')
+                host_capture = capture(repo, 'task')
+                self.assertEqual(host_capture['revision'], protected['revision'])
+                self.assertEqual(host_capture['digest'], protected['digest'])
             marker = repo / 'unexpected-execution'
             git('config', 'filter.evil.clean', 'touch ' + str(marker) + '; cat')
             with self.assertRaisesRegex(ValueError, 'filters'):

@@ -52,12 +52,22 @@ def request(url, token, path, data=None):
 def capture(repo, task, title=None):
     """Read a clean revision; neither execute tests nor modify Git state."""
     repo = str(Path(repo).resolve())
+    # System and global Git config often define filter drivers (Git LFS on a
+    # hosted runner does). Git status can execute clean/process filters while
+    # refreshing the index. Drop those files for every invocation in this
+    # function so ambient drivers are not loaded and cannot run. Repository
+    # config, includes, and process-level overrides such as GIT_CONFIG_COUNT
+    # stay visible and are refused before any command that may refresh.
+    env = os.environ.copy()
+    env['GIT_CONFIG_NOSYSTEM'] = '1'
+    env['GIT_CONFIG_SYSTEM'] = os.devnull
+    env['GIT_CONFIG_GLOBAL'] = os.devnull
     def git(*args):
-        result = subprocess.run(['git', '--no-replace-objects', '--no-optional-locks', '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '-C', repo, *args], capture_output=True, check=True)
+        result = subprocess.run(['git', '--no-replace-objects', '--no-optional-locks', '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '-C', repo, *args], capture_output=True, check=True, env=env)
         return result.stdout
-    # Git status can execute configured clean/process filters while refreshing.
-    # Refuse them before any tree scan; vector arguments alone do not stop hooks.
-    configured = subprocess.run(['git', '--no-replace-objects', '--no-optional-locks', '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '-C', repo, 'config', '--get-regexp', r'^filter\..*\.(clean|process)$'], capture_output=True)
+    # Refuse filters that this same environment would actually execute.
+    # Vector arguments alone do not stop hooks or filter drivers.
+    configured = subprocess.run(['git', '--no-replace-objects', '--no-optional-locks', '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null', '-C', repo, 'config', '--get-regexp', r'^filter\..*\.(clean|process)$'], capture_output=True, env=env)
     if configured.returncode not in (0, 1):
         raise ValueError('Unable to inspect Git filter configuration')
     if configured.returncode == 0:

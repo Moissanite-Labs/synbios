@@ -50,6 +50,6 @@ Git capture is an explicit CLI action against a local repository. It reads the f
 
 No test command, URL, hook, external diff, or text conversion is intentionally executed.
 
-Capture refuses dirty or untracked content, assume-unchanged or skip-worktree index entries, configured clean/process filters, and submodules. This includes environments with globally configured Git LFS filters. These restrictions prevent ordinary Git inspection from invoking repository-controlled programs.
+Capture refuses dirty or untracked content, assume-unchanged or skip-worktree index entries, submodules, and clean or process filters in the Git configuration it actually uses. It does not load system or global Git configuration, so ambient drivers such as a machine-wide Git LFS filter cannot run. Repository config, included files, and explicit process overrides remain visible and are refused before any command that can refresh the index. These restrictions prevent Git inspection from invoking filter programs.
 
 Capture checks the working tree and HEAD again before returning. It is a best-effort local consistency check, not a filesystem lock or sandbox.

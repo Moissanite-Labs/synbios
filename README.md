@@ -62,7 +62,7 @@ python -m synbios export TASK_ID --output contribution.json
 python -m synbios verify contribution.json
 ```
 
-`capture` records the full commit ID and hashes the raw recursive Git tree manifest from `git ls-tree -r -z --full-tree REVISION`. It requires a clean working tree, including untracked files. Repositories with hidden index entries (assume-unchanged or skip-worktree), configured clean/process filters (including global Git LFS filters), or submodules are refused. It does not run tests, fetch URLs, push code, or merge changes.
+`capture` records the full commit ID and hashes the raw recursive Git tree manifest from `git ls-tree -r -z --full-tree REVISION`. It requires a clean working tree, including untracked files. Repositories with hidden index entries (assume-unchanged or skip-worktree), clean or process filters in the Git configuration capture actually uses, or submodules are refused. Capture does not load system or global Git configuration, so an ambient driver such as a machine-wide Git LFS filter is not executed. It does not run tests, fetch URLs, push code, or merge changes.
 
 See [the API contract](docs/implementation-contract.md), [the trust model](docs/trust-model.md), and [the roadmap](docs/roadmap.md).
 
