@@ -17,7 +17,7 @@ Minimal setup is **decode-sufficient**: all used cmd/status/kind wire mappings a
 | TOON (toon-format) | 0 | 805 | 805 | 0 | 805 | 0.0 | 805.0 |
 | Agora envelope (arXiv:2410.11905) | 48 | 979 | 1027 | 48 | 1027 | 4.8 | 983.8 |
 | SYM-2P v1 | 0 | 2719 | 2719 | 0 | 2719 | 0.0 | 2719.0 |
-| SYM-2P v2 session + handshake (PR #6) — PR #6 dense pilot numbers | 213 | 1202 | 1415 | 213 | 1415 | 21.3 | 1223.3 |
+| SYM-2P v2 session + handshake — quoted from unmerged PR #6, not measured by this bench | 213 | 1202 | 1415 | 213 | 1415 | 21.3 | 1223.3 |
 | SYM-3 delta | 250 | 349 | 599 | 524 | 873 | 25.0 | 374.0 |
 | SYM-3 refs — closest prior art: Agora (arXiv:2410.11905) | 250 | 241 | 491 | 524 | 765 | 25.0 | 266.0 |
 | SYM-3 positional | 251 | 256 | 507 | 524 | 780 | 25.1 | 281.1 |

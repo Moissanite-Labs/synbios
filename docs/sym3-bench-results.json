@@ -263,11 +263,11 @@
           }
         },
         {
-          "label": "SYM-2P v2 session + handshake (PR #6)",
+          "label": "SYM-2P v2 session + handshake",
           "messages": {
             "o200k_base": 1202
           },
-          "note": "PR #6 dense pilot numbers",
+          "note": "quoted from unmerged PR #6, not measured by this bench",
           "setup_cached": {
             "o200k_base": 21.3
           },

@@ -24,7 +24,7 @@ python -m synbios.sym3.reproduce
 
 This will:
 
-1. Recompute all lifecycle tables (11, 40, and 200 messages).
+1. Recompute all lifecycle tables (11, 40, and 200 messages). The one exception is the lifecycle_11 `SYM-2P v2 session + handshake` row: its numbers are quoted from the v2 dense pilot in PR #6, which was closed without merging, and no code here reproduces them.
 2. Compare the generated markdown to the committed [docs/sym3-bench.md](sym3-bench.md) and **exit non-zero** on any mismatch.
 3. Write [sym3-bench-results.json](sym3-bench-results.json) with structured results, pinned dependency versions, tokenizer metadata, and the current git SHA.
 
