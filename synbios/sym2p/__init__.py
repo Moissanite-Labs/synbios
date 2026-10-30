@@ -1,8 +1,15 @@
 """SYM-2P v1 integration for the Synbios local forge."""
 from .adapter import apply_packet
 from .audit import render_audit_line
-from .codec import EncodeContext, decode_command, encode_command, packet_hash
 from .canonical import packet_line, parse_packet_line
+from .codec import (
+    EncodeContext,
+    decode_command,
+    encode_command,
+    packet_hash,
+    status_field,
+    v1_size_breakdown,
+)
 
 __all__ = [
     "EncodeContext",
@@ -13,4 +20,6 @@ __all__ = [
     "packet_line",
     "parse_packet_line",
     "render_audit_line",
+    "status_field",
+    "v1_size_breakdown",
 ]

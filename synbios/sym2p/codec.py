@@ -1,4 +1,4 @@
-"""SYM-2P/1.0 codec for Synbios forge commands (lossless via ext.synbios)."""
+"""SYM-2P/1.0 codec for Synbios forge commands (native fields + minimal ext.synbios)."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -6,9 +6,10 @@ from dataclasses import dataclass
 from synbios.store import COMMAND_FIELDS
 
 from .canonical import packet_line, parse_packet_line
+from .fields import compute_tails, decode_native, encode_native
 from .ids import forge_role, sym_id
 
-SYNBIOS_EXT_VER = 1
+SYNBIOS_EXT_VER = 2
 FORGE_RECIPIENT = "forge"
 
 STATUS_TO_ST = {
@@ -30,7 +31,7 @@ COMMAND_ACT = {
     "task.create": "assign",
     "task.claim": "accept",
     "task.transition": "assert",
-    "artifact.add": "assert",
+    "artifact.add": "update",
     "evidence.add": "assert",
     "review.create": "accept",
 }
@@ -67,18 +68,14 @@ def _subject_ref(action: str, payload: dict, ctx: EncodeContext) -> str | None:
         task_id = payload.get("task_id") or ctx.task_hex
         if task_id:
             return sym_id("t", task_id)
-    if action in {"grant.create", "grant.revoke"}:
-        grant_or_task = payload.get("task_id")
-        if grant_or_task and len(grant_or_task) == 32:
-            return sym_id("t", grant_or_task)
+    if action == "grant.create" and payload.get("task_id"):
+        return sym_id("t", payload["task_id"])
     if action == "principal.revoke":
-        principal = payload.get("principal_id")
-        if principal:
-            return sym_id("h", principal)
+        return sym_id("h", payload["principal_id"])
     return None
 
 
-def _status_field(action: str, payload: dict) -> str | None:
+def status_field(action: str, payload: dict) -> str | None:
     if action == "task.transition":
         return STATUS_TO_ST.get(payload.get("status"))
     if action == "review.create":
@@ -94,7 +91,7 @@ def build_packet(action: str, payload: dict, ctx: EncodeContext) -> dict:
     act = COMMAND_ACT[action]
     if action == "review.create" and payload.get("decision") == "changes_requested":
         act = "reject"
-    packet = {
+    packet: dict = {
         "v": 2,
         "id": ctx.packet_id,
         "tk": ctx.task_sym,
@@ -104,17 +101,19 @@ def build_packet(action: str, payload: dict, ctx: EncodeContext) -> dict:
         "a": act,
         "rq": "ack",
         "exp": ctx.step,
-        "ext": {
-            "sym2p": {"rev": "1.0"},
-            "synbios": {"v": SYNBIOS_EXT_VER, "cmd": action, "payload": payload},
-        },
     }
     subject = _subject_ref(action, payload, ctx)
     if subject:
         packet["s"] = subject
-    status = _status_field(action, payload)
+    status = status_field(action, payload)
     if status:
         packet["st"] = status
+    encode_native(action, payload, packet)
+    tails = compute_tails(action, payload, packet)
+    synbios_ext: dict = {"v": SYNBIOS_EXT_VER, "cmd": action}
+    if tails:
+        synbios_ext["tails"] = tails
+    packet["ext"] = {"sym2p": {"rev": "1.0"}, "synbios": synbios_ext}
     return packet
 
 
@@ -130,17 +129,23 @@ def decode_command(line: str) -> tuple[str, dict]:
     syn = ext.get("synbios")
     if not isinstance(syn, dict):
         raise ValueError("packet missing ext.synbios")
-    if syn.get("v") != SYNBIOS_EXT_VER:
+    if syn.get("v") not in (SYNBIOS_EXT_VER, 1):
         raise ValueError("unsupported ext.synbios version")
     action = syn.get("cmd")
-    body = syn.get("payload")
     if not isinstance(action, str) or action not in COMMAND_FIELDS:
         raise ValueError("invalid ext.synbios.cmd")
-    if not isinstance(body, dict):
-        raise ValueError("invalid ext.synbios.payload")
+    if syn.get("v") == 1:
+        body = syn.get("payload")
+        if not isinstance(body, dict):
+            raise ValueError("invalid ext.synbios.payload")
+        return action, body
+    body = decode_native(action, packet)
     extra = set(body) - COMMAND_FIELDS[action]
     if extra:
         raise ValueError("unknown payload fields: " + ", ".join(sorted(extra)))
+    missing = COMMAND_FIELDS[action] - set(body)
+    if missing:
+        raise ValueError("missing payload fields: " + ", ".join(sorted(missing)))
     return action, body
 
 
@@ -148,3 +153,12 @@ def packet_hash(line: str) -> str:
     import hashlib
 
     return hashlib.sha256(line.strip().encode("utf-8")).hexdigest()
+
+
+def v1_size_breakdown(line: str) -> tuple[int, int, int]:
+    """Return total bytes, envelope bytes (header + ext), content bytes (cond + ops)."""
+    packet = parse_packet_line(line)
+    envelope = {k: v for k, v in packet.items() if k not in ("cond", "ops")}
+    total = len(line.encode("utf-8"))
+    env_b = len(packet_line(envelope).encode("utf-8"))
+    return total, env_b, total - env_b
