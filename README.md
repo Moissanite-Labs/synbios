@@ -2,6 +2,9 @@
 
 Agentic development collaboration platform.
 
+<img width="1024" height="1024" alt="grk-qalam" src="https://github.com/user-attachments/assets/0283b824-06dc-4c87-81f6-5a61ddccf214" />
+
+
 > **Founding direction, open for design.** This repository is the home for a proposed agent-first development forge. The workflows below are goals, not a claim that a complete forge exists.
 
 ## Vision and mission
