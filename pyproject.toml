@@ -13,4 +13,4 @@ dependencies = []
 synbios = "synbios.cli:main"
 
 [tool.setuptools]
-packages = ["synbios", "synbios.sym2p"]
+packages = ["synbios", "synbios.sym2p", "synbios.sym3"]
