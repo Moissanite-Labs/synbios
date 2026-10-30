@@ -9,7 +9,8 @@ def _quote(value: str) -> str:
 
 
 def render_audit_line(action: str, payload: dict, actor: dict) -> str:
-    name = actor["name"]
+    # Names and tools are free text; quote them so they cannot forge a line.
+    name = _quote(actor["name"])
     if action == "project.create":
         return f"Human {name} created project {_quote(payload['name'])}."
     if action == "principal.create":
@@ -39,7 +40,7 @@ def render_audit_line(action: str, payload: dict, actor: dict) -> str:
     if action == "evidence.add":
         return (
             f"Actor {name} recorded {payload['kind']} evidence ({payload['status']}) "
-            f"for artifact {payload['artifact_id']} on task {payload['task_id']} via {payload['tool']}."
+            f"for artifact {payload['artifact_id']} on task {payload['task_id']} via {_quote(payload['tool'])}."
         )
     if action == "review.create":
         return (

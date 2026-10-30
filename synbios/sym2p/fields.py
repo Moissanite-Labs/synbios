@@ -10,12 +10,18 @@ from .ids import sym_id
 _HEX32 = re.compile(r"^[0-9a-f]{32}$")
 FORGE_BASE = "forge:v1"
 COND_PREFIX = "synbios/"
+# Only these cond fields carry JSON. Every other cond value is a verbatim
+# string, so text that merely looks like JSON ("2024", "\"quoted\"", "true")
+# survives the round trip unchanged.
+JSON_COND_FIELDS = frozenset({"capabilities"})
 
 
 def _cond_key(field: str, value: Any) -> str:
-    if isinstance(value, str):
-        return f"{COND_PREFIX}{field}={value}"
-    return f"{COND_PREFIX}{field}={json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False)}"
+    if field in JSON_COND_FIELDS:
+        return f"{COND_PREFIX}{field}={json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False)}"
+    if not isinstance(value, str):
+        raise ValueError(f"cond field {field} must be a string")
+    return f"{COND_PREFIX}{field}={value}"
 
 
 def _parse_cond_line(line: str) -> tuple[str, Any] | None:
@@ -25,7 +31,7 @@ def _parse_cond_line(line: str) -> tuple[str, Any] | None:
     if "=" not in rest:
         return None
     field, raw = rest.split("=", 1)
-    if raw.startswith(("[", "{", '"')) or raw in {"true", "false", "null"} or raw.isdigit():
+    if field in JSON_COND_FIELDS:
         try:
             return field, json.loads(raw)
         except json.JSONDecodeError:
