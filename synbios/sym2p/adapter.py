@@ -48,6 +48,10 @@ def apply_packet(store: Store, token: str, line: str):
         task = next((t for t in snapshot["tasks"] if t["id"] == payload.get("task_id")), None)
         if task and packet["prj"] != sym_id("p", task["project_id"]):
             raise ValueError("packet prj is not the task's project")
+        # The store assigns a new project's id, so project.create's prj (and s)
+        # is a placeholder; it must not claim an existing project as subject.
+        if action == "project.create" and any(packet["prj"] == sym_id("p", p["id"]) for p in snapshot["projects"]):
+            raise ValueError("project.create prj names an existing project")
     except ValueError as exc:
         raise PacketRejected(str(exc)) from exc
     audit = render_audit_line(action, payload, actor)

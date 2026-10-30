@@ -24,10 +24,10 @@ class Sym2pPacketBindingTests(unittest.TestCase):
             self.owner, "task.create", {"project_id": self.project["id"], "title": "D", "criteria": ["c"], "scope": ["s"]}
         )
 
-    def ctx(self, packet_id="c001", step=1):
+    def ctx(self, packet_id="c001", step=1, project_hex=None):
         return EncodeContext(
             packet_id=packet_id,
-            project_hex=self.project["id"],
+            project_hex=project_hex or self.project["id"],
             task_hex=self.task["id"],
             sender_hex=self.actor["id"],
             sender_human=True,
@@ -37,8 +37,10 @@ class Sym2pPacketBindingTests(unittest.TestCase):
     def cancel_line(self, **kwargs):
         return encode_command("task.transition", {"task_id": self.task["id"], "status": "cancelled"}, self.ctx(**kwargs))
 
-    def project_line(self, name="Lab", **kwargs):
-        return encode_command("project.create", {"name": name, "description": "", "repository": ""}, self.ctx(**kwargs))
+    def project_line(self, name="Lab", project_hex="0f" * 16, **kwargs):
+        # The store assigns the new id; prj is a fresh placeholder by default.
+        payload = {"name": name, "description": "", "repository": ""}
+        return encode_command("project.create", payload, self.ctx(project_hex=project_hex, **kwargs))
 
     def events(self):
         return self.store.snapshot(self.owner)["events"]
@@ -96,6 +98,11 @@ class Sym2pPacketBindingTests(unittest.TestCase):
         names = [p["name"] for p in self.store.snapshot(self.owner)["projects"]]
         self.assertEqual(names.count(created["name"]), 1)
         apply_packet(self.store, self.owner, self.project_line(name="Other", packet_id="c002", step=2))
+
+    def test_project_create_cannot_name_an_existing_project(self):
+        self.assert_rejected(self.project_line(name="New", project_hex=self.project["id"]))
+        created = apply_packet(self.store, self.owner, self.project_line(name="New"))
+        self.assertNotEqual(created["id"], self.project["id"])
 
     def test_packet_ids_are_scoped_to_sender(self):
         apply_packet(self.store, self.owner, self.project_line())
