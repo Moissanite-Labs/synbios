@@ -387,6 +387,8 @@ def decode_transcript(encoder: Encoder, lines: list[str]) -> list[ForgeMessage]:
     return out
 
 
+from .decoder_context import FORMAT_HEADER
+
+
 def setup_prefix(lex: Lexicon | None = None) -> str:
-    lex = lex or load_lexicon()
-    return "sym3/1\n"
+    return FORMAT_HEADER

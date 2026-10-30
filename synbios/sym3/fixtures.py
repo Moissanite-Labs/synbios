@@ -129,3 +129,20 @@ def lifecycle_40() -> list[ForgeMessage]:
             )
         )
     return base + extra[: 40 - len(base)]
+
+
+def lifecycle_200() -> list[ForgeMessage]:
+    """Deterministic 200-message transcript: repeat lifecycle_40 segments five times."""
+    chunk = lifecycle_40()
+    out: list[ForgeMessage] = list(chunk)
+    # Append four more full cycles (40 * 5 = 200).
+    for cycle in range(1, 5):
+        for action, payload in chunk:
+            # Clone payload so cycles do not share mutable lists.
+            cloned = {k: (list(v) if isinstance(v, list) else v) for k, v in payload.items()}
+            if action == "evidence.add":
+                cloned["summary"] = f"{cloned['summary']} (cycle {cycle + 1})"
+            out.append((action, cloned))
+    assert len(out) == 200
+    return out
+

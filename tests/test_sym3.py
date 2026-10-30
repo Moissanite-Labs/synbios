@@ -2,13 +2,9 @@ import json
 import unittest
 
 from synbios.sym3.canonical import canonical_payload, messages_equal, normalize_message
-from synbios.sym3.encoders import (
-    all_encoders,
-    decode_transcript,
-    encode_transcript,
-    setup_prefix,
-)
-from synbios.sym3.fixtures import lifecycle_11, lifecycle_40
+from synbios.sym3.decoder_context import setup_sizes
+from synbios.sym3.encoders import all_encoders, decode_transcript, encode_transcript
+from synbios.sym3.fixtures import lifecycle_11, lifecycle_40, lifecycle_200
 from synbios.sym3.generate_lexicon import main as regen_lexicon
 from synbios.sym3.lexicon import LEXICON_PATH, load_lexicon
 from synbios.sym3.tokens import is_single_token, load_tokenizers
@@ -32,32 +28,41 @@ class Sym3LexiconTests(unittest.TestCase):
 
 
 class Sym3RoundTripTests(unittest.TestCase):
-    def test_all_encoders_round_trip_11(self):
-        messages = lifecycle_11()
-        for name, enc in all_encoders().items():
-            with self.subTest(encoder=name):
-                lines = encode_transcript(enc, messages)
-                back = decode_transcript(enc, lines)
-                self.assertEqual(len(back), len(messages))
-                for exp, got in zip(messages, back):
-                    self.assertTrue(messages_equal(exp, got), f"{name}: {exp} vs {got}")
-
-    def test_combined_round_trip_40(self):
-        messages = lifecycle_40()
-        enc = all_encoders()["combined"]
+    def _assert_round_trip(self, messages, encoder_name):
+        enc = all_encoders()[encoder_name]
         lines = encode_transcript(enc, messages)
         back = decode_transcript(enc, lines)
+        self.assertEqual(len(back), len(messages))
         for exp, got in zip(messages, back):
-            self.assertTrue(messages_equal(exp, got))
+            self.assertTrue(messages_equal(exp, got), f"{encoder_name}: {exp} vs {got}")
+
+    def test_all_encoders_round_trip_11(self):
+        messages = lifecycle_11()
+        for name in all_encoders():
+            with self.subTest(encoder=name, transcript="lifecycle_11"):
+                self._assert_round_trip(messages, name)
+
+    def test_all_encoders_round_trip_40(self):
+        messages = lifecycle_40()
+        for name in all_encoders():
+            with self.subTest(encoder=name, transcript="lifecycle_40"):
+                self._assert_round_trip(messages, name)
 
 
 class Sym3BenchSmokeTests(unittest.TestCase):
-    def test_setup_prefix_tokenizable(self):
+    def test_minimal_setup_larger_than_header_only(self):
         specs = load_tokenizers()
         if not specs:
             self.skipTest("tiktoken not installed")
-        text = setup_prefix()
-        self.assertGreater(len(text), 0)
+        messages = lifecycle_11()
+        enc = all_encoders()["combined"]
+        lines = encode_transcript(enc, messages)
+        sizes = setup_sizes(messages, lines)
+        self.assertGreater(sizes["minimal"], sizes["header_only"])
+        self.assertGreater(sizes["full"], sizes["minimal"])
+
+    def test_lifecycle_200_length(self):
+        self.assertEqual(len(lifecycle_200()), 200)
 
 
 class Sym3RegenLexiconTests(unittest.TestCase):

@@ -119,7 +119,13 @@ def _pick_unique(concepts: dict[str, list[str]], specs) -> dict[str, str]:
         cands = concepts[concept]
         singles = [c for c in cands if is_single_token(c, specs)]
         pool = singles if singles else cands
-        ranked = sorted(pool, key=lambda c: (max_token_count(c, specs), len(c)))
+
+        def rank_key(c: str) -> tuple:
+            stripped = c.strip()
+            natural = stripped == concept or stripped == concept.replace("_", "") or stripped == concept.split(".")[-1]
+            return (0 if natural else 1, max_token_count(c, specs), len(c))
+
+        ranked = sorted(pool, key=rank_key)
         chosen = None
         for c in ranked:
             key = c.strip()
@@ -171,7 +177,13 @@ def main() -> int:
             for concept, cands in sorted(mapping.items()):
                 singles = [c for c in cands if is_single_token(c, specs)]
                 pool = singles if singles else cands
-                word, _ = pick_cheapest(pool, specs)
+
+                def rank_key(c: str, _concept=concept) -> tuple:
+                    stripped = c.strip()
+                    natural = stripped == _concept or stripped == _concept.replace("_", "")
+                    return (0 if natural else 1, max_token_count(c, specs), len(c))
+
+                word = sorted(pool, key=rank_key)[0]
                 chosen[category][concept] = word
 
     format_tags: dict[str, str] = {}
