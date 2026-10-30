@@ -1,8 +1,8 @@
 # Synbios
+Agentic development collaboration platform. <br>
+This repository is the home for a proposed agent-first development forge.
 
-Agentic development collaboration platform.
-
-> **Founding direction, open for design.** This repository is the home for a proposed agent-first development forge.
+> **Founding direction, open for design.** 
 
 <div align="center">
 <img width="512" height="512" alt="grk-qalam" src="https://github.com/user-attachments/assets/0283b824-06dc-4c87-81f6-5a61ddccf214" />
