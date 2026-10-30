@@ -1,6 +1,7 @@
 """SYM-3 wire encoders and decoders."""
 from __future__ import annotations
 
+import copy
 import json
 import re
 import time
@@ -276,6 +277,14 @@ class AdaptiveResult:
     encode_cpu_ns: int
 
 
+def _snapshot_content(session: Sym3Session) -> ContentStore:
+    return copy.deepcopy(session.content)
+
+
+def _restore_content(session: Sym3Session, snap: ContentStore) -> None:
+    session.content = snap
+
+
 class AdaptiveEncoder(Encoder):
     tag_name = "adaptive"
 
@@ -300,7 +309,10 @@ class AdaptiveEncoder(Encoder):
         best_name = ""
         best_score = 10**9
         best_ns = 0
+        best_enc: Encoder | None = None
+        content_snap = _snapshot_content(session)
         for enc in self._choices:
+            _restore_content(session, copy.deepcopy(content_snap))
             t0 = time.perf_counter_ns()
             line = enc.encode(action, payload, session)
             ns = time.perf_counter_ns() - t0
@@ -310,9 +322,19 @@ class AdaptiveEncoder(Encoder):
                 best_line = line
                 best_name = enc.tag_name
                 best_ns = ns
+                best_enc = enc
+        _restore_content(session, content_snap)
+        assert best_enc is not None
+        t0 = time.perf_counter_ns()
+        final_line = best_enc.encode(action, payload, session)
+        best_ns = time.perf_counter_ns() - t0
         tag = self.lex.tag("adaptive")
         inner_tag = self.lex.tag(best_name)
-        wrapped = best_line.replace(inner_tag, tag, 1) if best_line.startswith(inner_tag) else f"{tag}{best_line}"
+        wrapped = (
+            final_line.replace(inner_tag, tag, 1)
+            if final_line.startswith(inner_tag)
+            else f"{tag}{final_line}"
+        )
         return AdaptiveResult(wrapped, best_name, best_ns)
 
     def decode(self, line: str, session: Sym3Session) -> ForgeMessage:
@@ -346,7 +368,12 @@ ADAPTIVE_TAG = "adaptive"
 
 
 def all_encoders(lex: Lexicon | None = None) -> dict[str, Encoder]:
-    lex = lex or load_lexicon()
+    base = load_lexicon()
+    lex = lex or base
+    lex = Lexicon(
+        raw=lex.raw,
+        format_tags={**base.format_tags, **lex.format_tags},
+    )
     return {
         DELTA_TAG: DeltaEncoder(lex),
         REFS_TAG: RefsEncoder(lex),

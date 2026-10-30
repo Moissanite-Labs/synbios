@@ -2,7 +2,7 @@ import json
 import unittest
 
 from synbios.sym3.canonical import canonical_payload, messages_equal, normalize_message
-from synbios.sym3.decoder_context import setup_sizes
+from synbios.sym3.decoder_context import parse_decoder_context, setup_sizes
 from synbios.sym3.encoders import all_encoders, decode_transcript, encode_transcript
 from synbios.sym3.fixtures import lifecycle_11, lifecycle_40, lifecycle_200
 from synbios.sym3.generate_lexicon import main as regen_lexicon
@@ -47,6 +47,36 @@ class Sym3RoundTripTests(unittest.TestCase):
         for name in all_encoders():
             with self.subTest(encoder=name, transcript="lifecycle_40"):
                 self._assert_round_trip(messages, name)
+
+    def test_all_encoders_round_trip_200(self):
+        messages = lifecycle_200()
+        for name in all_encoders():
+            with self.subTest(encoder=name, transcript="lifecycle_200"):
+                self._assert_round_trip(messages, name)
+
+
+class Sym3MinimalContextTests(unittest.TestCase):
+    LIFECYCLES = (
+        ("lifecycle_11", lifecycle_11),
+        ("lifecycle_40", lifecycle_40),
+        ("lifecycle_200", lifecycle_200),
+    )
+
+    def test_minimal_context_decodes_every_encoder(self):
+        full_lex = load_lexicon()
+        for tname, fn in self.LIFECYCLES:
+            messages = fn()
+            for enc_name in all_encoders():
+                with self.subTest(transcript=tname, encoder=enc_name):
+                    enc_full = all_encoders(full_lex)[enc_name]
+                    lines = encode_transcript(enc_full, messages)
+                    sizes = setup_sizes(messages, lines, full_lex)
+                    lex_min, _schema = parse_decoder_context(sizes["minimal_text"])
+                    enc_min = all_encoders(lex_min)[enc_name]
+                    back = decode_transcript(enc_min, lines)
+                    self.assertEqual(len(back), len(messages))
+                    for exp, got in zip(messages, back):
+                        self.assertTrue(messages_equal(exp, got))
 
 
 class Sym3BenchSmokeTests(unittest.TestCase):

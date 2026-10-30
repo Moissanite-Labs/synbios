@@ -17,21 +17,6 @@ def full_positional_schema() -> dict[str, list[str]]:
     return {k: list(v) for k, v in POSITIONAL_ORDER.items()}
 
 
-def _intrinsic(category: str, concept: str, wire: str) -> bool:
-    w = wire.strip()
-    if category == "field":
-        return w == concept
-    if category == "status":
-        return w in {concept, concept.replace("_", ""), concept.replace("_", " ")}
-    if category == "kind":
-        return w in {concept, concept.replace("_", ""), concept.split("_")[0]}
-    if category == "cmd":
-        # Self-describing when wire token equals the command suffix or full dotted name.
-        suffix = concept.split(".")[-1]
-        return w in {suffix, concept.replace(".", "_"), concept.replace(".", " ")}
-    return False
-
-
 def _collect_used_from_transcript(
     messages: list[tuple[str, dict]],
     encoded_lines: list[str],
@@ -58,6 +43,8 @@ def _collect_used_from_transcript(
             if line.startswith(tag):
                 tag_names.add(name)
                 break
+    if "adaptive" in tag_names:
+        tag_names = set(lex.format_tags.keys())
     return cmds, statuses, kinds, tag_names
 
 
@@ -68,20 +55,47 @@ def _minimal_lexicon_payload(
     kinds: set[str],
     tag_names: set[str],
 ) -> dict[str, Any]:
+    """Decode-sufficient lexicon: every used cmd/status/kind wire mapping + format tags."""
     out: dict[str, Any] = {"concepts": {}, "format_tags": {}}
-    for cat in ("cmd", "status", "kind"):
+    for cat, used in (
+        ("cmd", cmds),
+        ("status", statuses),
+        ("kind", kinds),
+    ):
         block = lex.raw.get(cat) or {}
-        used_concepts = cmds if cat == "cmd" else statuses if cat == "status" else kinds
-        for concept in sorted(used_concepts):
+        for concept in sorted(used):
             if concept not in block:
                 continue
-            wire = block[concept]
-            if _intrinsic(cat, concept, wire):
-                continue
-            out["concepts"].setdefault(cat, {})[concept] = wire
+            out["concepts"].setdefault(cat, {})[concept] = block[concept]
     for name in sorted(tag_names):
         out["format_tags"][name] = lex.format_tags[name]
     return out
+
+
+def parse_decoder_context(text: str) -> tuple[Lexicon, dict[str, list[str]]]:
+    """Parse rendered decoder context into Lexicon + schema (fresh, no committed file)."""
+    lines = text.strip().split("\n")
+    if not lines or not lines[0].startswith("sym3/"):
+        raise ValueError("missing sym3 format header")
+    lex_payload: dict[str, Any] = {"concepts": {}, "format_tags": {}}
+    schema: dict[str, list[str]] = {}
+    i = 1
+    while i < len(lines):
+        line = lines[i].strip()
+        if line == "lexicon:":
+            i += 1
+            lex_payload = json.loads(lines[i])
+            i += 1
+            continue
+        if line == "schema:":
+            i += 1
+            schema = json.loads(lines[i])
+            i += 1
+            continue
+        i += 1
+    concepts = lex_payload.get("concepts") or {}
+    format_tags = lex_payload.get("format_tags") or {}
+    return Lexicon(raw=concepts, format_tags=format_tags), schema
 
 
 def _minimal_schema(cmds: set[str]) -> dict[str, list[str]]:
