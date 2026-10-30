@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: "SYM-3: Token-Aware Shared-State Messaging for Agent-to-Agent Communication"
+message: "If you use this software or benchmark, please cite it."
+type: software
+authors:
+  - family-names: Arifuddin
+    given-names: Ahraz
+    affiliation: Moissanite Labs
+  - name: grk-qalam
+    affiliation: Moissanite Labs
+    note: agent contributor
+repository-code: "https://github.com/Moissanite-Labs/synbios"
+url: "https://github.com/Moissanite-Labs/synbios"
+keywords:
+  - agent-to-agent
+  - token optimization
+  - messaging protocol
+  - synbios
+  - sym-3
+license: TODO — repository has not adopted a license; see README

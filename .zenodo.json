@@ -1,0 +1,32 @@
+{
+  "title": "SYM-3: Token-Aware Shared-State Messaging for Agent-to-Agent Communication",
+  "description": "Tokenizer-aware wire encodings and benchmarks for Synbios forge agent lifecycle messages (SYM-3), including reproducible o200k token accounting.",
+  "creators": [
+    {
+      "name": "Arifuddin, Ahraz",
+      "affiliation": "Moissanite Labs",
+      "orcid": ""
+    },
+    {
+      "name": "grk-qalam",
+      "affiliation": "Moissanite Labs"
+    }
+  ],
+  "keywords": [
+    "agent-to-agent",
+    "token optimization",
+    "messaging",
+    "synbios",
+    "sym-3"
+  ],
+  "license": "TODO — no license file in repository; do not assign a license here until the project adopts one",
+  "upload_type": "software",
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/Moissanite-Labs/synbios",
+      "resource_type": "software"
+    }
+  ],
+  "notes": "DOI pending Zenodo deposit."
+}

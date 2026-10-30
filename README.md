@@ -4,6 +4,23 @@ Synbios is a development workspace for people and agents. Define a task, grant a
 
 **Status: working local reference implementation, version 0.1.** The repository includes a web interface, an HTTP API, a CLI, and a SQLite store. The broader forge, collaboration, and learning vision remains in [the founding direction](docs/vision.md).
 
+## SYM-3 (agent wire compression)
+
+**SYM-3** is a tokenizer-aware encoding family for forge lifecycle messages between agents. It uses a shared session lexicon, state deltas, content-addressed refs, and adaptive per-message format selection. Token counts use **o200k_base** with honest **decode-sufficient** setup accounting (see [sym3-bench.md](docs/sym3-bench.md)).
+
+| Transcript | Compact JSON (primary total) | SYM-3 refs | SYM-3 adaptive |
+| --- | ---: | ---: | ---: |
+| 11 messages | 682 | **491** | 512 |
+| 40 messages | 5343 | **1717** | 1738 |
+| 200 messages | 27363 | **7628** | 7649 |
+
+Primary total = setup (min) + messages. Savings grow with transcript length and repeated state; on 11 messages, **full** lexicon setup (524 + messages) can exceed JSON. Do not treat English lossy summaries as information-equivalent baselines.
+
+- Paper: [docs/paper/sym3.md](docs/paper/sym3.md)
+- Reproduce: `make bench` after `pip install -r requirements-bench.txt` ([REPRODUCE.md](docs/paper/REPRODUCE.md))
+- Project site (static): [site/](site/)
+- **DOI:** pending (see [CITATION.cff](CITATION.cff))
+
 <div align="center">
 <img width="512" height="512" alt="grk-qalam" src="https://github.com/user-attachments/assets/0283b824-06dc-4c87-81f6-5a61ddccf214" />
 </div>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="SYM-3 token-aware shared-state messaging for agent-to-agent communication — Moissanite Labs Synbios."
+    />
+    <title>SYM-3 — Synbios</title>
+    <link rel="stylesheet" href="styles.css?v=7978881" />
+  </head>
+  <body>
+    <header class="site-header">
+      <p class="eyebrow">Moissanite Labs · Synbios</p>
+      <h1>SYM-3</h1>
+      <p class="lede">
+        Token-aware shared-state messaging for agent-to-agent forge traffic. Primary metric:
+        <strong>o200k_base</strong> setup (decode-sufficient min) + messages.
+      </p>
+      <nav aria-label="Primary">
+        <a href="https://github.com/Moissanite-Labs/synbios">Repository</a>
+        <a href="https://github.com/Moissanite-Labs/synbios/blob/main/docs/paper/sym3.md">Paper</a>
+        <a href="https://github.com/Moissanite-Labs/synbios/blob/main/docs/sym3-bench.md">Benchmark</a>
+        <a href="https://github.com/Moissanite-Labs/synbios/blob/main/docs/paper/REPRODUCE.md">Reproduce</a>
+      </nav>
+    </header>
+
+    <main>
+      <section aria-labelledby="results-h">
+        <h2 id="results-h">Headline results (primary accounting)</h2>
+        <p>
+          Synthetic forge lifecycles; totals = setup min + messages. See the
+          <a href="https://github.com/Moissanite-Labs/synbios/blob/main/docs/sym3-bench.md">full tables</a>
+          for baselines and break-even.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <caption>
+              SYM-3 refs vs compact JSON (o200k)
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Transcript</th>
+                <th scope="col">Compact JSON</th>
+                <th scope="col">SYM-3 refs</th>
+                <th scope="col">SYM-3 adaptive</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">11 messages</th>
+                <td>682</td>
+                <td><strong>491</strong></td>
+                <td>512</td>
+              </tr>
+              <tr>
+                <th scope="row">40 messages</th>
+                <td>5343</td>
+                <td><strong>1717</strong></td>
+                <td>1738</td>
+              </tr>
+              <tr>
+                <th scope="row">200 messages</th>
+                <td>27363</td>
+                <td><strong>7628</strong></td>
+                <td>7649</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caveat">
+          Caveats: wins depend on shared session state and repeated content; very short sessions pay
+          decode setup; full lexicon setup (524 tokens) exceeds JSON on 11 messages. Not a substitute
+          for MCP/A2A — application-specific wire compression.
+        </p>
+      </section>
+
+      <section aria-labelledby="repro-h">
+        <h2 id="repro-h">Reproduction</h2>
+        <pre><code>python -m pip install -e .
+python -m pip install -r requirements-bench.txt
+make bench</code></pre>
+        <p>
+          Verification compares regenerated tables to committed
+          <code>docs/sym3-bench.md</code> and writes
+          <code>docs/paper/sym3-bench-results.json</code> with git SHA and tokenizer pins.
+        </p>
+      </section>
+
+      <section aria-labelledby="cite-h">
+        <h2 id="cite-h">Citation</h2>
+        <p>
+          Ahraz Arifuddin (Moissanite Labs) and grk-qalam. SYM-3 benchmark and encoders in Synbios.
+          <strong>DOI: pending</strong>.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>Plain static site — serve with <code>python3 -m http.server</code> from <code>site/</code>.</p>
+    </footer>
+  </body>
+</html>
