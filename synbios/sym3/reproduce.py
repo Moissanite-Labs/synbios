@@ -11,12 +11,16 @@ from pathlib import Path
 
 from .bench import format_markdown, run_bench_for_transcript
 from .fixtures import lifecycle_11, lifecycle_40, lifecycle_200
-from .tokens import load_tokenizers
+from .tokens import TokenizerUnavailable, load_tokenizers, require_bench_tokenizers
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BENCH_MD = REPO_ROOT / "docs" / "sym3-bench.md"
 RESULTS_JSON = REPO_ROOT / "docs" / "sym3-bench-results.json"
 REQUIREMENTS_BENCH = REPO_ROOT / "requirements-bench.txt"
+
+
+def _display(path: Path) -> str:
+    return str(path.relative_to(REPO_ROOT)) if path.is_relative_to(REPO_ROOT) else str(path)
 
 
 def _git_sha(full: bool = True) -> str:
@@ -62,8 +66,13 @@ def _tokenizer_metadata() -> dict:
 
 
 def run_all_benches() -> tuple[list[dict], str, str]:
-    specs = load_tokenizers()
-    primary = specs[0].name if specs else "n/a"
+    # Without the pinned tokenizers every count silently changes; say why
+    # instead of reporting a table mismatch.
+    try:
+        specs = require_bench_tokenizers()
+    except TokenizerUnavailable as exc:
+        raise SystemExit(str(exc)) from exc
+    primary = specs[0].name
     assert len(lifecycle_11()) == 11
     assert len(lifecycle_40()) == 40
     assert len(lifecycle_200()) == 200
@@ -88,7 +97,7 @@ def verify_against_committed(generated_md: str) -> None:
     if committed != generated:
         diff_hint = "Re-run with --write-md after intentional bench changes."
         raise SystemExit(
-            f"SYM-3 benchmark mismatch: generated tables differ from {BENCH_MD.relative_to(REPO_ROOT)}. "
+            f"SYM-3 benchmark mismatch: generated tables differ from {_display(BENCH_MD)}. "
             f"{diff_hint}"
         )
 
@@ -101,7 +110,7 @@ def write_results_json(results: list[dict], primary: str) -> None:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "primary_tokenizer": primary,
         "tokenizers": _tokenizer_metadata(),
-        "benchmark_source": str(BENCH_MD.relative_to(REPO_ROOT)),
+        "benchmark_source": _display(BENCH_MD),
         "transcripts": results,
     }
     RESULTS_JSON.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
