@@ -172,11 +172,16 @@ function App() {
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
-    const data = await r.json();
+    const data = await r.json().catch(() => ({}));
     if (!r.ok) {
-      if (r.status === 401 && requestGeneration === generation.current)
+      const message = data.error || `Request failed (${r.status})`;
+      if (r.status === 401 && requestGeneration === generation.current) {
+        // Signing out starts a new generation, so callers drop their errors;
+        // report the rejected credential here instead.
         logout();
-      throw new Error(data.error || `Request failed (${r.status})`);
+        setError(message);
+      }
+      throw Object.assign(new Error(message), { status: r.status });
     }
     return data;
   }
@@ -200,8 +205,14 @@ function App() {
       const snapshot = await api("state");
       if (requestGeneration === generation.current) setState(snapshot);
     } catch (e) {
-      if (requestGeneration === generation.current)
-        setError((e as Error).message);
+      if (requestGeneration !== generation.current) return;
+      setError((e as Error).message);
+      // The server refuses state whose audit chain fails (409); the last
+      // snapshot shown must no longer claim an intact record.
+      if ((e as Error & { status?: number }).status === 409)
+        setState(
+          (s) => s && { ...s, integrity: { ...s.integrity, valid: false } },
+        );
     }
   }
   useEffect(() => {
@@ -385,11 +396,11 @@ function App() {
           "POST",
           JSON.parse(String(d.get("bundle"))),
         );
-        setNotice(
-          result.valid
-            ? "Bundle verification passed."
-            : "Bundle verification failed: " + (result.errors || []).join("; "),
-        );
+        if (result.valid) setNotice("Bundle verification passed.");
+        else
+          setError(
+            "Bundle verification failed: " + (result.errors || []).join("; "),
+          );
         setModal("");
       } catch (e) {
         setError((e as Error).message);
@@ -693,7 +704,7 @@ function App() {
                     ["claimed", "in_progress", "changes_requested"],
                   ],
                   ["Human review", ["in_review"]],
-                  ["Accepted", ["accepted", "cancelled"]],
+                  ["Closed", ["accepted", "cancelled"]],
                 ].map(([title, ss]) => (
                   <section className="column" key={String(title)}>
                     <h3>
@@ -1041,6 +1052,7 @@ function App() {
                 </button>
                 {human && mutable && (
                   <button
+                    disabled={busy}
                     onClick={() =>
                       void command("task.transition", {
                         task_id: selected,
@@ -1053,6 +1065,7 @@ function App() {
                 )}
                 {human && task.status === "cancelled" && (
                   <button
+                    disabled={busy}
                     onClick={() =>
                       void command("task.transition", {
                         task_id: selected,
