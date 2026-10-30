@@ -108,5 +108,27 @@ class Sym3RegenLexiconTests(unittest.TestCase):
         self.assertEqual(before, after)
 
 
+class Sym3ReproduceVerificationTests(unittest.TestCase):
+    def test_reproduce_fails_when_committed_bench_corrupted(self):
+        from synbios.sym3 import reproduce
+
+        path = reproduce.BENCH_MD
+        original = path.read_text(encoding="utf-8")
+        corrupted = original.replace("| 682 |", "| 999 |", 1)
+        self.assertNotEqual(corrupted, original)
+        try:
+            path.write_text(corrupted, encoding="utf-8")
+            with self.assertRaises(SystemExit) as ctx:
+                reproduce.main([])
+            self.assertNotEqual(ctx.exception.code, 0)
+        finally:
+            path.write_text(original, encoding="utf-8")
+
+    def test_reproduce_passes_against_committed_bench(self):
+        from synbios.sym3 import reproduce
+
+        self.assertEqual(reproduce.main([]), 0)
+
+
 if __name__ == "__main__":
     unittest.main()

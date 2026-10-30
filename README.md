@@ -18,6 +18,10 @@ Headline results on synthetic lifecycles (**o200k_base**, primary total = decode
 
 Savings depend on repeated content and shared state—they scale with conversation length, not single-turn prompts. On 11 messages, **full** lexicon setup (524 + messages) can exceed compact JSON. Do not compare against English lossy summaries for information equivalence.
 
+**Model comprehension** on SYM-3 wire lines (decode accuracy, session questions, generation round-trip) is **pending**; see `synbios.sym3.comprehension` (not run in CI).
+
+The bench row labeled **English terse (lossless, CoD-style)** is a **mislabel**: it is key=value English and is **costlier than lossless English** on these fixtures; renaming or replacing that baseline is a known follow-up.
+
 Reproduce locally: `make bench` after `pip install -r requirements-bench.txt` ([sym3-bench-reproduce.md](docs/sym3-bench-reproduce.md)).
 
 <div align="center">

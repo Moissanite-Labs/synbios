@@ -1,8 +1,8 @@
 {
   "benchmark_source": "docs/sym3-bench.md",
-  "generated_at": "2026-10-30T18:48:30.202296+00:00",
-  "git_sha": "3889de9e90077c33c790f71d19ae12e8d0e2bdf5",
-  "git_sha_short": "3889de9",
+  "generated_at": "2026-10-30T18:53:01.678040+00:00",
+  "git_sha": "3422091d3b1a9a02139f60847f5e89ae02283e2d",
+  "git_sha_short": "3422091",
   "primary_tokenizer": "o200k_base",
   "tokenizers": {
     "dependency_pins": {

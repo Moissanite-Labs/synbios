@@ -2,6 +2,7 @@
 """SYM-3 benchmark with honest decoder setup and break-even analysis."""
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import sys
@@ -259,20 +260,29 @@ def format_markdown(results: list[dict], primary: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def main() -> int:
-    specs = load_tokenizers()
-    primary = _primary(specs)
-    assert len(lifecycle_11()) == 11 and len(lifecycle_40()) == 40 and len(lifecycle_200()) == 200
-    results = [
-        run_bench_for_transcript("lifecycle_11", lifecycle_11()),
-        run_bench_for_transcript("lifecycle_40", lifecycle_40()),
-        run_bench_for_transcript("lifecycle_200", lifecycle_200()),
-    ]
-    md = format_markdown(results, primary)
-    out = __import__("pathlib").Path(__file__).resolve().parents[2] / "docs" / "sym3-bench.md"
-    out.write_text(md, encoding="utf-8")
+def main(argv: list[str] | None = None) -> int:
+    from .reproduce import BENCH_MD, run_all_benches, verify_against_committed
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--write-md",
+        action="store_true",
+        help="Overwrite docs/sym3-bench.md (use after intentional bench changes; default is verify-only).",
+    )
+    args = parser.parse_args(argv)
+
+    _results, md, _primary = run_all_benches()
+
+    if args.write_md:
+        normalized = md if md.endswith("\n") else md + "\n"
+        BENCH_MD.write_text(normalized, encoding="utf-8")
+        print(md)
+        print(f"Wrote {BENCH_MD}")
+        return 0
+
+    verify_against_committed(md)
     print(md)
-    print(f"Wrote {out}")
+    print(f"Verified {BENCH_MD}")
     return 0
 
 

@@ -41,7 +41,7 @@ Versions are pinned in [requirements-bench.txt](../requirements-bench.txt) (`tik
 
 ## Optional checks
 
-- Regenerate markdown only (no verify): `python -m synbios.sym3.bench` (overwrites `docs/sym3-bench.md`).
+- Regenerate committed markdown after review: `python -m synbios.sym3.bench --write-md` or `python -m synbios.sym3.reproduce --write-md`.
 - LLM comprehension experiments (requires `OPENAI_API_KEY`, not run in CI): `python -m synbios.sym3.comprehension`.
 
 ## Unit tests
