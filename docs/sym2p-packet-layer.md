@@ -12,9 +12,9 @@ Synbios can carry forge commands as [SYM-2P/1.0](https://github.com/aska-digital
 | `synbios/sym2p/audit.py` | Deterministic English audit line per packet |
 | `synbios/sym2p/bench.py` | JSON vs v1 vs v2 draft size comparison |
 
-Forge events record `sym2p_packet_hash` and `sym2p_audit` when commands arrive through the adapter.
+Forge events record `sym2p_packet_hash`, `sym2p_audit`, and `sym2p_packet_key` (`f/id`) when commands arrive through the adapter.
 
-`apply_packet` validates each line in-process with the pinned `sym-validate.py` rules (canonical bytes, duplicate-key rejection, schema), rejects any `ext.synbios.payload`, checks `f` against the bearer actor, then decodes native fields only. Failures do not append audit events.
+`apply_packet` validates each line in-process with the pinned `sym-validate.py` rules (canonical bytes, duplicate-key rejection, schema), rejects any `ext.synbios.payload`, checks `f` against the bearer actor, then decodes native fields only. It re-encodes the decoded command with the packet's routing ids (`id`, `exp`, `prj`, `tk`) and the authenticated sender, and rejects the packet unless the bytes match. The header (`t`, `a`, `s`, `st`, `rq`), `cond`, `ops`, and `ext` must therefore describe exactly the command applied, with no repeated or unknown field lines. For task commands, `prj` must be the task's project. Each `(f,id)` applies at most once; the store rejects a repeat with 409. Failures do not append audit events.
 
 ## Native mapping
 

@@ -217,10 +217,12 @@ class Store:
         state['credentials'][hashlib.sha256(token.encode()).hexdigest()] = principal['id']
         return {'principal': principal, 'token': token}
 
-    def _save(self, state, events, actor, action, entity, task=None, *, sym2p_packet_hash=None, sym2p_audit=None):
+    def _save(self, state, events, actor, action, entity, task=None, *, sym2p_packet_hash=None, sym2p_audit=None, sym2p_packet_key=None):
         payload = {'state_digest': digest(state), 'entity': entity}
         if sym2p_packet_hash:
             payload['sym2p_packet_hash'] = sym2p_packet_hash
+        if sym2p_packet_key:
+            payload['sym2p_packet_key'] = sym2p_packet_key
         if sym2p_audit:
             payload['sym2p_audit'] = sym2p_audit
         if task:
@@ -297,7 +299,7 @@ class Store:
             raise DomainError('Dependencies must be accepted', 409)
         return current
 
-    def command(self, token, action, payload, *, sym2p_packet_hash=None, sym2p_audit=None):
+    def command(self, token, action, payload, *, sym2p_packet_hash=None, sym2p_audit=None, sym2p_packet_key=None):
         if not isinstance(action, str):
             raise DomainError('Invalid command')
         if not isinstance(payload, dict):
@@ -308,17 +310,23 @@ class Store:
             raise DomainError('Invalid sym2p packet hash')
         if sym2p_audit is not None and (not isinstance(sym2p_audit, str) or not sym2p_audit.strip()):
             raise DomainError('Invalid sym2p audit line')
+        if sym2p_packet_key is not None and (not isinstance(sym2p_packet_key, str) or not sym2p_packet_key.strip()):
+            raise DomainError('Invalid sym2p packet key')
         with self._lock:
             self.db.execute('BEGIN IMMEDIATE')
             try:
                 state, events = self._load()
                 actor = self._auth(state, token)
+                # SYM-2P (f,id) names one packet; applying it twice is a replay.
+                if sym2p_packet_key and any(e['payload'].get('sym2p_packet_key') == sym2p_packet_key for e in events):
+                    raise DomainError('Duplicate SYM-2P packet', 409)
                 result, task = self._command(state, actor, action, payload)
                 entity = result.get('principal', result) if isinstance(result, dict) else result
                 self._save(
                     state, events, actor, action, entity, task,
                     sym2p_packet_hash=sym2p_packet_hash,
                     sym2p_audit=sym2p_audit,
+                    sym2p_packet_key=sym2p_packet_key,
                 )
                 self.db.commit()
                 return copy.deepcopy(result)
