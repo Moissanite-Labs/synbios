@@ -6,20 +6,19 @@ Synbios is a development workspace for people and agents. Define a task, grant a
 
 ## SYM-3 (agent wire compression)
 
-**SYM-3** is a tokenizer-aware encoding family for forge lifecycle messages between agents. It uses a shared session lexicon, state deltas, content-addressed refs, and adaptive per-message format selection. Token counts use **o200k_base** with honest **decode-sufficient** setup accounting (see [sym3-bench.md](docs/sym3-bench.md)).
+**SYM-3** is a tokenizer-aware wire format for forge lifecycle messages between agents (shared session lexicon, state deltas, content-addressed refs, adaptive encodings). The **protocol spec, paper, canonical benchmarks, and project site** live in **[aska-digital/protean-sym2p](https://github.com/aska-digital/protean-sym2p)** (**DOI:** pending). This repo holds the Synbios integration implementation and verified integration bench ([sym3-integration.md](docs/sym3-integration.md)).
 
-| Transcript | Compact JSON (primary total) | SYM-3 refs | SYM-3 adaptive |
+Headline results on synthetic lifecycles (**o200k_base**, primary total = decode-sufficient setup min + messages; see [sym3-bench.md](docs/sym3-bench.md)):
+
+| Transcript | Compact JSON | SYM-3 refs | SYM-3 adaptive |
 | --- | ---: | ---: | ---: |
 | 11 messages | 682 | **491** | 512 |
 | 40 messages | 5343 | **1717** | 1738 |
 | 200 messages | 27363 | **7628** | 7649 |
 
-Primary total = setup (min) + messages. Savings grow with transcript length and repeated state; on 11 messages, **full** lexicon setup (524 + messages) can exceed JSON. Do not treat English lossy summaries as information-equivalent baselines.
+Savings depend on repeated content and shared state—they scale with conversation length, not single-turn prompts. On 11 messages, **full** lexicon setup (524 + messages) can exceed compact JSON. Do not compare against English lossy summaries for information equivalence.
 
-- Paper: [docs/paper/sym3.md](docs/paper/sym3.md)
-- Reproduce: `make bench` after `pip install -r requirements-bench.txt` ([REPRODUCE.md](docs/paper/REPRODUCE.md))
-- Project site (static): [site/](site/)
-- **DOI:** pending (see [CITATION.cff](CITATION.cff))
+Reproduce locally: `make bench` after `pip install -r requirements-bench.txt` ([sym3-bench-reproduce.md](docs/sym3-bench-reproduce.md)).
 
 <div align="center">
 <img width="512" height="512" alt="grk-qalam" src="https://github.com/user-attachments/assets/0283b824-06dc-4c87-81f6-5a61ddccf214" />

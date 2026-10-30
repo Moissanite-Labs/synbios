@@ -15,7 +15,7 @@ from .tokens import load_tokenizers
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BENCH_MD = REPO_ROOT / "docs" / "sym3-bench.md"
-RESULTS_JSON = REPO_ROOT / "docs" / "paper" / "sym3-bench-results.json"
+RESULTS_JSON = REPO_ROOT / "docs" / "sym3-bench-results.json"
 REQUIREMENTS_BENCH = REPO_ROOT / "requirements-bench.txt"
 
 
