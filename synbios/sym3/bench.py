@@ -261,7 +261,7 @@ def format_markdown(results: list[dict], primary: str) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    from .reproduce import BENCH_MD, run_all_benches, verify_against_committed
+    from .reproduce import BENCH_MD, run_all_benches, verify_against_committed, write_bench_md
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -274,8 +274,7 @@ def main(argv: list[str] | None = None) -> int:
     _results, md, _primary = run_all_benches()
 
     if args.write_md:
-        normalized = md if md.endswith("\n") else md + "\n"
-        BENCH_MD.write_text(normalized, encoding="utf-8")
+        write_bench_md(md)
         print(md)
         print(f"Wrote {BENCH_MD}")
         return 0

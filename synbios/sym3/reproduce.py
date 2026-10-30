@@ -89,6 +89,11 @@ def _normalize_md(text: str) -> str:
     return text.replace("\r\n", "\n").strip() + "\n"
 
 
+def write_bench_md(generated_md: str) -> None:
+    """Write tables exactly as format_markdown renders them, so a refresh with no changes is a no-op."""
+    BENCH_MD.write_text(generated_md if generated_md.endswith("\n") else generated_md + "\n", encoding="utf-8")
+
+
 def verify_against_committed(generated_md: str) -> None:
     if not BENCH_MD.is_file():
         raise SystemExit(f"Missing committed benchmark: {BENCH_MD}")
@@ -132,12 +137,13 @@ def main(argv: list[str] | None = None) -> int:
 
     results, md, primary = run_all_benches()
 
+    # Write before verifying: --write-md exists to refresh tables that differ.
+    if args.write_md:
+        write_bench_md(md)
+        print(f"Wrote {BENCH_MD}")
+
     if not args.skip_verify:
         verify_against_committed(md)
-
-    if args.write_md:
-        BENCH_MD.write_text(_normalize_md(md), encoding="utf-8")
-        print(f"Wrote {BENCH_MD}")
 
     write_results_json(results, primary)
     print(f"Wrote {RESULTS_JSON}")

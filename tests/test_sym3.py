@@ -148,6 +148,13 @@ class Sym3ReproduceVerificationTests(unittest.TestCase):
         self.assertEqual(reproduce.main([]), 0)
         self.assertTrue(self.results_json.is_file())
 
+    def test_write_md_refreshes_tables_that_differ(self):
+        original = self.bench_md.read_text(encoding="utf-8")
+        self.bench_md.write_text(original.replace("| 682 |", "| 999 |", 1), encoding="utf-8")
+        self.assertEqual(reproduce.main(["--write-md"]), 0)
+        self.assertEqual(self.bench_md.read_text(encoding="utf-8"), original)
+        self.assertTrue(self.results_json.is_file())
+
 
 class Sym3TokenizerLoadingTests(unittest.TestCase):
     """Fake tokenizer modules; no network or real encodings needed."""
