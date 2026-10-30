@@ -1,58 +1,96 @@
 # Synbios
-Agentic development collaboration platform. <br>
-This repository is the home for a proposed agent-first development forge.
 
-> **Founding direction, open for design.** 
+Synbios is a development workspace for people and agents. Define a task, grant an agent permission to work on it, collect a change and its test evidence, and record a human review.
+
+**Status: working local reference implementation, version 0.1.** The repository includes a web interface, an HTTP API, a CLI, and a SQLite store. The broader forge, collaboration, and learning vision remains in [the founding direction](docs/vision.md).
 
 <div align="center">
 <img width="512" height="512" alt="grk-qalam" src="https://github.com/user-attachments/assets/0283b824-06dc-4c87-81f6-5a61ddccf214" />
 </div>
 
-> The workflows below are goals, not a claim that a complete forge exists.
+![Synbios forge with synthetic demonstration tasks](docs/screenshots/forge.png)
 
-## Vision and mission
+## Run it
 
-Synbios aims to make software development a shared workspace where agents can exchange inputs and outputs, coordinate work, produce evidence, and collaborate effectively with people. Its mission is an agent-first forge: a place to scope work, build and review artifacts, and trace how they came to be.
+Requirements: Python 3.11 or newer, Node.js 22 or newer, npm, and Git for Git intake. The Python runtime uses only the standard library. Run from this checkout. The Python wheel does not include the web build.
 
-The name evokes symbiosis, synthetic agents, and a play on the computing acronym BIOS. The shared [naming record](https://github.com/Moissanite-Labs/constitution/blob/main/NAMING.md) explains the founder's intent and the distinction between wordplay and etymology.
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e .
+npm --prefix web ci
+npm --prefix web run build
+python -m synbios init --db synbios.db --name Maintainer
+python -m synbios serve --db synbios.db
+```
 
-## Who it serves
+Open **http://127.0.0.1:8765** and paste the token printed by `init`. Keep it private. The browser keeps the credential for the current tab session. The store saves a hash of each credential, never the token itself.
 
-Agents need structured tasks, discoverable context, controlled delegation, and feedback they can act on. Human maintainers and collaborators need understandable diffs, evidence, review, and control over what is accepted. Tool builders need usable interfaces rather than a requirement to adopt one agent harness.
+For a separate populated demonstration, replace `init` with:
 
-## Goals and boundaries
+```sh
+python -m synbios demo --db demo.db
+python -m synbios serve --db demo.db
+```
 
-- Represent scoped work, artifacts, tests, review decisions, and provenance so that agents and humans can follow a development task from request to acceptance.
-- Give humans meaningful oversight and let agents act only within separately granted authority. Learned preferences are not permissions.
-- Start with Git-compatible adoption and integrations where useful, while exploring agent-native workflows; replacing all existing developer tooling is not a prerequisite for an initial slice.
-- Work alongside Exofab, the prospective human-first collaboration hub, and Koinos, the proposed reusable collaboration and economic protocol. Ethos is a separate preference protocol; Exo provides the wider agent foundation.
+Demo data and evidence are explicitly synthetic. The command refuses an existing database. It prints separate operator and reviewer credentials so the independent review flow can be explored.
 
-Synbios does not decide ownership, legal rights, compensation, or autonomous authority merely by recording a contribution. Those decisions belong to participants and the relevant agreements.
+## The workflow
 
-## The wider collaboration loop
+1. Create a project and a task with scope, acceptance criteria, and dependencies.
+2. Create an agent identity. Give it only the capabilities needed for that task.
+3. Claim and start the task. Attach a Git revision or document identified by its SHA-256 digest.
+4. Record test evidence tied to that exact artifact. Proof and analysis records can provide additional context.
+5. Submit for review. Submission requires passing current test evidence, no current failed tests, and accepted dependencies.
+6. A human other than the current artifact's author approves it or requests changes. Approval repeats the checks in the same database transaction and seals the accepted task.
+7. Export a portable record containing the task, artifacts, evidence, reviews, and relevant audit events.
 
-In an October 2026 discussion, the founder envisioned an agent-first alternative to GitHub as the working environment counterpart to Exofab's human-first social and economic collaboration: Exo can help people develop ideas and bring projects into the hub, while Synbios supports the actual building, research, and review. Feedback and learnings from the hub and forge could inform improvements to the Exo harness and OS in a continuing loop. Consent, privacy, and controls for that feedback are design recommendations rather than assumed permissions.
+A new artifact makes previous evidence stale. Old reviews cannot accept a new revision. Revoking a grant prevents further use of its capabilities. Revoking a principal also removes its credential and read access. Task scope describes the permitted work. Synbios does not execute or sandbox the agent's tools.
 
-One possible workflow is for agents, within their granted authority, to draft issues or pull requests when their work reveals improvements; people can review the evidence and decide what to accept. The founder also wants to explore the Sym-2P language for agent-to-agent communication, and eventually the forge as a source of data and an environment for training and evaluation. Those are research directions, not implemented features; any data use needs appropriate permission, privacy, and provenance. Longer-term links to decentralized learning and skill sharing are also possibilities, while Exofab remains the hub for people and agents to find collaborators and bring ventures into the world.
+## Connect an agent
 
-## First vertical slice
+The public discovery document is at `/.well-known/synbios.json`. The authenticated OpenAPI description is at `/api/schema`. All workspace API calls require `Authorization: Bearer TOKEN`.
 
-The following Git-compatible sequence and acceptance criteria are implementation recommendations for discussion; they do not limit the longer-term GitHub-alternative ambition or establish an adopted migration plan.
+```sh
+# Use a task-scoped agent credential supplied by the operator.
+export SYNBIOS_TOKEN='your-token'
+python -m synbios state
+python -m synbios command task.claim --data '{"task_id":"TASK_ID"}'
+python -m synbios command task.transition --data '{"task_id":"TASK_ID","status":"in_progress"}'
+python -m synbios capture --task TASK_ID --repo /path/to/clean/repository
+python -m synbios export TASK_ID --output contribution.json
+python -m synbios verify contribution.json
+```
 
-1. Define a task with a clear scope, authorized agent role, expected artifact, and acceptance criteria.
-2. Produce a Git-compatible change and test evidence, with provenance linking the task, agent activity, and artifact.
-3. Present the result for human review; record acceptance or requested changes and expose a portable contribution record that another tool can consume.
+`capture` records the full commit ID and hashes the raw recursive Git tree manifest from `git ls-tree -r -z --full-tree REVISION`. It requires a clean working tree, including untracked files. Repositories with hidden index entries (assume-unchanged or skip-worktree), clean or process filters in the Git configuration capture actually uses, or submodules are refused. Capture does not load system or global Git configuration, so an ambient driver such as a machine-wide Git LFS filter is not executed. It does not run tests, fetch URLs, push code, or merge changes.
 
-The slice is ready for review when a maintainer can inspect the task and change, reproduce the documented checks, make a review decision, and follow the accepted artifact back to its source. No particular model, provider, or deployment architecture is assumed.
+See [the API contract](docs/implementation-contract.md), [the trust model](docs/trust-model.md), and [the roadmap](docs/roadmap.md).
 
-## Working together
+## Evidence and trust
 
-Propose changes through issues or pull requests with a concrete example, test evidence, and an explanation of compatibility and authority boundaries. Make human review and agent-facing behavior understandable. Contribution conventions and maintainership are still being established.
+Test results are reports from authenticated submitters. Synbios checks their bindings and acceptance rules. It does not independently run the reported commands. A hash chain helps detect local changes to the stored history. It is not a signature, proof of identity, or protection against replacement of the whole database.
 
-## Design explorations
+Every human identity in this local reference is an administrator. An agent credential can read the workspace and can mutate only tasks covered by its grants. Keep separate stores for workspaces that must not share context. The server binds only to loopback and refuses cross-origin requests. Do not expose it through a public proxy.
 
-- [Proof evidence and the Bend pilot](docs/proof-evidence-rfc.md) — a proposed, shadow-mode experiment for formal verification; no toolchain or merge policy has been adopted.
+Exports omit unrelated task contents and credentials. They can still contain task text, local repository paths, evidence, and participant names. Exporting is an explicit operator action. Review a bundle before sharing it.
 
-## Open decisions
+Proof records remain in shadow mode. The [proof-evidence RFC](docs/proof-evidence-rfc.md) is preserved. A bounded executable experiment exercises its exact-revision review predicate and detects three deliberately weakened versions:
 
-Task and artifact models, identity and delegation, review and trust signals, Git interoperability, execution isolation, storage and transport, privacy, harness adapters, licensing, and governance require design. Koinos integration and the division of responsibility with Exofab should be validated against a real end-to-end workflow.
+```sh
+python -m synbios.shadow
+```
+
+This experiment is not a formal proof. Bend verification, authenticated attestations, remote execution, Git-host enforcement, payments, training-data use, and federation are not implemented.
+
+## Development
+
+```sh
+python -m unittest discover -s tests -v
+npm --prefix web run check
+npm --prefix web exec playwright install chromium
+npm --prefix web run test:e2e
+```
+
+Use `npm --prefix web run dev` for frontend development alongside the Python server. CI checks Python 3.11 and 3.14 and builds the web client. [Contribution guidance](CONTRIBUTING.md) explains the review and evidence expectations.
+
+The repository has not adopted a license. No license or economic rights are implied by recording a contribution.
