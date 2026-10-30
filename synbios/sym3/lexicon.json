@@ -1,0 +1,92 @@
+{
+  "concepts": {
+    "cmd": {
+      "artifact.add": "aar",
+      "evidence.add": "add",
+      "grant.create": "mk",
+      "grant.revoke": "cap",
+      "principal.create": "new",
+      "principal.revoke": "who",
+      "project.create": "open",
+      "review.create": "cre",
+      "task.claim": "cta",
+      "task.create": "job",
+      "task.transition": "go"
+    },
+    "field": {
+      "artifact_digest": "art",
+      "artifact_id": "art",
+      "assumptions": " assumptions",
+      "capabilities": "caps",
+      "command": "command",
+      "comment": "comment",
+      "criteria": "criteria",
+      "decision": "decision",
+      "dependencies": "deps",
+      "description": "desc",
+      "digest": "digest",
+      "grant_id": "cap",
+      "kind": "kind",
+      "name": "name",
+      "principal_id": "who",
+      "priority": "pri",
+      "project_id": "proj",
+      "repository": "git",
+      "revision": "revision",
+      "scope": "scope",
+      "status": "status",
+      "summary": "summary",
+      "task_id": "job",
+      "title": "title",
+      "tool": "tool",
+      "tool_version": "tool_version",
+      "uri": "uri"
+    },
+    "kind": {
+      "agent": "ai",
+      "approved": "ok",
+      "changes_requested": "no",
+      "document": "document",
+      "git_commit": "git",
+      "high": "high",
+      "human": "user",
+      "normal": "std",
+      "test": "test"
+    },
+    "misc": {
+      "false": "0",
+      "list_sep": ";",
+      "ref_prefix": "#",
+      "true": "1"
+    },
+    "status": {
+      "accepted": "accepted",
+      "assumed": " assumed",
+      "cancelled": " cancelled",
+      "disputed": " disputed",
+      "failed": "failed",
+      "in_progress": "run",
+      "in_review": "rev",
+      "inferred": " inferred",
+      "observed": " observed",
+      "open": "open",
+      "passed": "ok",
+      "proposed": " proposed",
+      "rejected": " rejected",
+      "verified": "verified"
+    }
+  },
+  "format_tags": {
+    "adaptive": "U",
+    "combined": "Q",
+    "delta": "A",
+    "omit": "M",
+    "positional": "I",
+    "refs": "E"
+  },
+  "tokenizers": [
+    "o200k_base",
+    "cl100k_base"
+  ],
+  "version": 1
+}
