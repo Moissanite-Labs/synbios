@@ -4,6 +4,10 @@ Synbios is a development workspace for people and agents. Define a task, grant a
 
 **Status: working local reference implementation, version 0.1.** The repository includes a web interface, an HTTP API, a CLI, and a SQLite store. The broader forge, collaboration, and learning vision remains in [the founding direction](docs/vision.md).
 
+<div align="center">
+<img width="512" height="512" alt="grk-qalam" src="https://github.com/user-attachments/assets/0283b824-06dc-4c87-81f6-5a61ddccf214" />
+</div>
+
 ![Synbios forge with synthetic demonstration tasks](docs/screenshots/forge.png)
 
 ## Run it
