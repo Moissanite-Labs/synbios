@@ -216,22 +216,35 @@ def _verdict(results: list[dict], primary: str) -> str:
     json_total = total("compact JSON")
     english = total("English (lossless)")
     refs, adaptive = total("SYM-3 refs"), total("SYM-3 adaptive")
-    refs_full, adaptive_full = total("SYM-3 refs", "total_full"), total("SYM-3 adaptive", "total_full")
-    setup_full = rows["SYM-3 refs"]["setup_full"][primary]
     agora = next(label for label in rows if label.startswith("Agora envelope"))
-    full = (
-        f"refs/adaptive **{refs_full}**"
-        if refs_full == adaptive_full
-        else f"refs **{refs_full}** / adaptive **{adaptive_full}**"
-    )
-    full_vs = versus(max(refs_full, adaptive_full), json_total)
+    # One shared phrase only when both encoders have the same full setup and
+    # total; otherwise each gets its own setup and comparison with JSON.
+    full_rows = [
+        (name, rows[label]["setup_full"][primary], total(label, "total_full"))
+        for name, label in (("refs", "SYM-3 refs"), ("adaptive", "SYM-3 adaptive"))
+    ]
+    if full_rows[0][1:] == full_rows[1][1:]:
+        _, setup_full, value = full_rows[0]
+        full = (
+            f"Under **full** setup ({setup_full} + messages), refs/adaptive **{value}** — "
+            f"**{versus(value, json_total)}** compact JSON at {n} messages. "
+        )
+    else:
+        full = (
+            "Under **full** setup, "
+            + " and ".join(
+                f"{name} **{value}** ({setup_full} + messages, **{versus(value, json_total)}** compact JSON)"
+                for name, setup_full, value in full_rows
+            )
+            + f" at {n} messages. "
+        )
     return (
         f"Under **primary** totals (decode-sufficient setup min + messages), SYM-3 **refs** totals **{refs}** "
         f"vs compact JSON **{json_total}** and lossless English **{english}** on lifecycle_{n} "
         f"({'wins' if refs < min(json_total, english) else 'does not win'}). "
         f"**Adaptive** is **{adaptive}** ({'also ' if refs < json_total and adaptive < json_total else ''}"
         f"{versus(adaptive, json_total)} JSON). "
-        f"Under **full** setup ({setup_full} + messages), {full} — **{full_vs}** compact JSON at {n} messages. "
+        f"{full}"
         f"Prior-art rows: TOON **{total('TOON (toon-format)')}**, {KEY_VALUE_LABEL.split(' (')[0]} "
         f"**{total(KEY_VALUE_LABEL)}**, Agora envelope **{total(agora)}** "
         "(messages-only baselines except Agora setup). "
