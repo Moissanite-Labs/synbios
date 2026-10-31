@@ -82,6 +82,12 @@ function pyCanonical(value: unknown): unknown {
   return value;
 }
 
+function canonicalEqual(left: unknown, right: unknown): boolean {
+  return (
+    JSON.stringify(pyCanonical(left)) === JSON.stringify(pyCanonical(right))
+  );
+}
+
 async function chainDigest(value: unknown): Promise<string> {
   const text = JSON.stringify(pyCanonical(value));
   const hash = await crypto.subtle.digest(
@@ -296,9 +302,9 @@ export class DemoStore {
   ): Promise<void> {
     const payload: JsonObject = {
       state_digest: await chainDigest(this.state),
-      entity,
+      entity: structuredClone(entity),
     };
-    if (task) payload.task = task;
+    if (task) payload.task = structuredClone(task);
     const event: Event = {
       seq: this.events.length + 1,
       id: uid(),
@@ -361,7 +367,7 @@ export class DemoStore {
       this.state.projects.push(result);
     } else if (action === "principal.create") {
       result = await this.createPrincipal(
-        String(payload.name),
+        payload.name,
         this.choice(payload.kind, ["human", "agent"], "kind"),
       );
     } else if (action === "principal.revoke") {
@@ -525,7 +531,7 @@ export class DemoStore {
         const sha = this.text(payload.digest, "digest");
         const revPattern =
           kind === "git_commit"
-            ? /^[0-9a-fA-F]{40}|[0-9a-fA-F]{64}$/
+            ? /^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$/
             : /^[0-9a-fA-F]{64}$/;
         if (!/^[0-9a-fA-F]{64}$/.test(sha) || !revPattern.test(revision)) {
           throw new DemoError("Invalid revision or SHA-256 digest");
@@ -633,7 +639,7 @@ export class DemoStore {
   }
 
   private async createPrincipal(
-    name: string,
+    name: unknown,
     kind: string,
   ): Promise<JsonObject> {
     const principal: JsonObject = {
@@ -770,7 +776,7 @@ export async function demoRequest(
   }
 }
 
-async function verifyBundle(bundle: unknown): Promise<JsonObject> {
+export async function verifyBundle(bundle: unknown): Promise<JsonObject> {
   const errors: string[] = [];
   try {
     if (
@@ -828,6 +834,113 @@ async function verifyBundle(bundle: unknown): Promise<JsonObject> {
         event.previous_hash !== link.previous_hash
       ) {
         throw new Error("Event commitment mismatch");
+      }
+    }
+    const task = record.task as JsonObject;
+    const validStatuses = new Set([
+      "open",
+      "claimed",
+      "in_progress",
+      "in_review",
+      "changes_requested",
+      "accepted",
+      "cancelled",
+    ]);
+    if (!validStatuses.has(String(task.status))) {
+      throw new Error("Invalid task status");
+    }
+    if ((events as JsonObject[]).some((event) => event.task_id !== task.id)) {
+      throw new Error("Unrelated task event");
+    }
+    const records = (events as JsonObject[])
+      .filter((event) => event.task_id === task.id)
+      .map((event) => (event.payload as JsonObject).task);
+    if (!records.length || !canonicalEqual(records[records.length - 1], task)) {
+      throw new Error("Task does not match audit");
+    }
+    const artifactsList = task.artifacts as JsonObject[];
+    const artifacts: Record<string, JsonObject> = {};
+    for (const artifact of artifactsList) {
+      artifacts[String(artifact.id)] = artifact;
+    }
+    if (Object.keys(artifacts).length !== artifactsList.length) {
+      throw new Error("Duplicate artifact identifiers");
+    }
+    for (const artifact of Object.values(artifacts)) {
+      if (
+        artifact.task_id !== task.id ||
+        !/^[0-9a-f]{64}$/.test(String(artifact.digest))
+      ) {
+        throw new Error("Invalid artifact binding");
+      }
+      const revisionPattern =
+        artifact.kind === "git_commit"
+          ? /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/
+          : /^[0-9a-f]{64}$/;
+      if (
+        !["git_commit", "document"].includes(String(artifact.kind)) ||
+        !revisionPattern.test(String(artifact.revision))
+      ) {
+        throw new Error("Invalid artifact revision");
+      }
+    }
+    for (const evidence of task.evidence as JsonObject[]) {
+      if (
+        !["test", "proof", "analysis"].includes(String(evidence.kind)) ||
+        !["passed", "failed", "unavailable"].includes(String(evidence.status))
+      ) {
+        throw new Error("Invalid evidence kind or status");
+      }
+      const artifact = artifacts[String(evidence.artifact_id)];
+      if (
+        evidence.task_id !== task.id ||
+        evidence.revision !== artifact.revision ||
+        evidence.artifact_digest !== artifact.digest
+      ) {
+        throw new Error("Invalid evidence binding");
+      }
+    }
+    for (const review of task.reviews as JsonObject[]) {
+      if (
+        !["approved", "changes_requested"].includes(String(review.decision))
+      ) {
+        throw new Error("Invalid review decision");
+      }
+      const artifact = artifacts[String(review.artifact_id)];
+      if (
+        review.task_id !== task.id ||
+        review.revision !== artifact.revision ||
+        review.created_by === artifact.created_by
+      ) {
+        throw new Error("Invalid independent review binding");
+      }
+    }
+    const project = record.project as JsonObject;
+    if (project.id !== task.project_id) {
+      throw new Error("Project binding mismatch");
+    }
+    if (task.status === "accepted") {
+      const artifact = artifactsList[artifactsList.length - 1];
+      const tests = (task.evidence as JsonObject[]).filter(
+        (row) => row.artifact_id === artifact.id && row.kind === "test",
+      );
+      const reviewers = Object.fromEntries(
+        (record.principals as JsonObject[]).map((principal) => [
+          principal.id,
+          principal,
+        ]),
+      );
+      const review = (task.reviews as JsonObject[])[
+        (task.reviews as JsonObject[]).length - 1
+      ];
+      if (
+        !tests.some((row) => row.status === "passed") ||
+        tests.some((row) => row.status === "failed") ||
+        review.decision !== "approved" ||
+        review.artifact_id !== artifact.id ||
+        reviewers[String(review.created_by)]?.kind !== "human"
+      ) {
+        throw new Error("Invalid accepted-task evidence or human review");
       }
     }
     const digestValue = await chainDigest(
