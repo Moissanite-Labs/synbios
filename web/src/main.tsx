@@ -33,6 +33,7 @@ import "@fontsource/space-grotesk/latin-400.css";
 import "@fontsource/space-grotesk/latin-500.css";
 import "@fontsource/space-grotesk/latin-600.css";
 import "./style.css";
+import { Guide, GuideButton, GUIDE_STORAGE_KEY } from "./Guide";
 
 const demoMode = import.meta.env.VITE_DEMO_MODE === "true";
 type CommandPayload = Record<string, unknown>;
@@ -166,6 +167,14 @@ function App() {
   const [mobile, setMobile] = useState(false);
   const [demoOperatorToken, setDemoOperatorToken] = useState("");
   const [demoReviewerToken, setDemoReviewerToken] = useState("");
+  const [guideOpen, setGuideOpen] = useState(false);
+  useEffect(() => {
+    if (localStorage.getItem(GUIDE_STORAGE_KEY) !== "1") setGuideOpen(true);
+  }, []);
+  function closeGuide() {
+    localStorage.setItem(GUIDE_STORAGE_KEY, "1");
+    setGuideOpen(false);
+  }
   useEffect(() => {
     if (!demoMode) return;
     void import("./demo/store").then((mod) => {
@@ -439,1236 +448,1252 @@ function App() {
   }
   if (!state)
     return (
-      <main className="login">
-        <div className="login-art">
-          <Logo />
-          <div className="orbit">
-            <Hexagon size={150} strokeWidth={0.5} />
-            <span className="orbit-point" />
-          </div>
-          <div>
-            <p className="eyebrow">HUMAN JUDGMENT. AGENT CAPABILITY.</p>
-            <h1>
-              Build together.
-              <br />
-              Keep the evidence.
-            </h1>
-            <p>
-              A shared forge for work that can be inspected,
-              <br />
-              reviewed, and carried forward.
-            </p>
-          </div>
-          <small>
-            {demoMode
-              ? "GITHUB PAGES DEMO / IN-BROWSER MOCK"
-              : "LOCAL-FIRST / REFERENCE IMPLEMENTATION"}
-          </small>
-        </div>
-        <section className="login-form">
-          <p className="eyebrow">ENTER YOUR WORKSPACE</p>
-          <h2>Welcome to the forge.</h2>
-          <p>
-            {demoMode
-              ? "Static demo: forge rules run in your browser with seeded synthetic data. Changes are lost when you close the tab."
-              : "Connect with a credential issued by your local operator."}
-          </p>
-          {demoMode && (
-            <div className="notice" role="status">
-              <AlertTriangle size={18} />
-              <p>
-                This is not the Python backend. Bundle export and task flows
-                follow the same rules, but nothing is persisted or
-                network-authenticated.
-              </p>
+      <>
+        <main className="login">
+          <div className="login-art">
+            <Logo />
+            <div className="orbit">
+              <Hexagon size={150} strokeWidth={0.5} />
+              <span className="orbit-point" />
             </div>
-          )}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setToken(String(new FormData(e.currentTarget).get("token")));
-            }}
-          >
-            <label>
-              Local access token
-              <input
-                name="token"
-                type="password"
-                required
-                autoComplete="off"
-                placeholder="Paste your credential"
-              />
-            </label>
-            <button className="primary" disabled={busy}>
-              Open workspace <ArrowRight size={17} />
-            </button>
-          </form>
-          {demoMode && (
-            <div className="demo-credentials">
-              <button
-                type="button"
-                className="secondary"
-                onClick={() => setToken(demoOperatorToken)}
-                disabled={!demoOperatorToken}
-              >
-                Use demo operator credential
-              </button>
-              <button
-                type="button"
-                className="text"
-                onClick={() => setToken(demoReviewerToken)}
-                disabled={!demoReviewerToken}
-              >
-                Switch to demo reviewer
-              </button>
-            </div>
-          )}
-          {error && (
-            <div role="alert" className="error">
-              {error}
-              <button className="text" onClick={() => void refresh()}>
-                Retry
-              </button>
-            </div>
-          )}
-          <div className="trust">
-            <ShieldCheck size={20} />
-            <p>
-              Your token stays in this tab’s session storage. The local operator
-              controls identity and access. This is not a remote identity
-              service.
-            </p>
-          </div>
-        </section>
-      </main>
-    );
-  return (
-    <div className="app">
-      <aside className={mobile ? "sidebar show" : "sidebar"}>
-        <Logo />
-        {demoMode && (
-          <p className="demo-sidebar-note">
-            Pages demo — in-browser mock only.
-          </p>
-        )}
-        <p className="nav-label">WORKSPACE</p>
-        {[
-          ["board", "The forge", LayoutGrid],
-          ["projects", "Projects", FolderKanban],
-          ["activity", "Provenance", Activity],
-          ["access", "Access & trust", ShieldCheck],
-        ].map(([id, title, Icon]) => (
-          <button
-            key={String(id)}
-            className={"nav " + (view === id ? "active" : "")}
-            onClick={() => {
-              setView(String(id));
-              setSelected("");
-              setMobile(false);
-            }}
-          >
-            {React.createElement(Icon as any, { size: 19 })}
-            {String(title)}
-            {id === "board" && <span>{state.tasks.length}</span>}
-          </button>
-        ))}
-        <div className="sidebar-bottom">
-          <div className="local-indicator">
-            <i /> LOCAL WORKSPACE
-          </div>
-          <p>
-            Deliberate work.
-            <br />A durable record.
-          </p>
-          <div className="identity">
-            <div className="avatar">{state.actor.name.slice(0, 1)}</div>
             <div>
-              <strong>{state.actor.name}</strong>
-              <small>{state.actor.kind} principal</small>
-            </div>
-            <button aria-label="Sign out" title="Sign out" onClick={logout}>
-              <LogOut size={17} />
-            </button>
-          </div>
-        </div>
-      </aside>
-      <div className="main">
-        <header className="topbar">
-          <button
-            className="mobile-menu"
-            aria-label="Toggle navigation"
-            onClick={() => setMobile(!mobile)}
-          >
-            <Menu size={21} />
-          </button>
-          <span>
-            Workspace <ChevronRight size={13} />{" "}
-            {view === "board" ? "The forge" : label(view)}
-          </span>
-          <div className="top-actions">
-            <span className="integrity">
-              <i className={state.integrity.valid ? "good" : "bad"} />
-              {state.integrity.valid ? "Record intact" : "Integrity alert"}
-            </span>
-            <button
-              aria-label="Refresh workspace"
-              onClick={() => void refresh()}
-            >
-              <RefreshCw size={17} />
-            </button>
-          </div>
-        </header>
-        <main className="content">
-          {error && (
-            <div className="error" role="alert">
-              {error}
-              <button aria-label="Dismiss error" onClick={() => setError("")}>
-                <X size={16} />
-              </button>
-            </div>
-          )}
-          {notice && (
-            <div className="notice" role="status">
-              {notice}
-              <button
-                aria-label="Dismiss notification"
-                onClick={() => setNotice("")}
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
-          <div className="page-heading">
-            <div>
-              <p className="eyebrow">
-                SYNBIOS /{" "}
-                {view === "board"
-                  ? "COLLABORATIVE WORK"
-                  : label(view).toUpperCase()}
-              </p>
+              <p className="eyebrow">HUMAN JUDGMENT. AGENT CAPABILITY.</p>
               <h1>
-                {view === "board"
-                  ? "The forge."
-                  : view === "projects"
-                    ? "Project ground."
-                    : view === "activity"
-                      ? "Every step, recorded."
-                      : "Access is explicit."}
+                Build together.
+                <br />
+                Keep the evidence.
               </h1>
               <p>
-                {view === "board"
-                  ? "Turn intent into artifacts. Let evidence carry the work."
-                  : view === "projects"
-                    ? "A clear boundary for every body of work."
-                    : view === "activity"
-                      ? "A local, hash-chained history of workspace decisions."
-                      : "Named principals, scoped capabilities, human accountability."}
+                A shared forge for work that can be inspected,
+                <br />
+                reviewed, and carried forward.
               </p>
             </div>
-            {human && ["board", "projects"].includes(view) && (
-              <button
-                className="primary"
-                onClick={() =>
-                  setModal(
-                    view === "projects" ? "project.create" : "task.create",
-                  )
-                }
-              >
-                <Plus size={17} />
-                {view === "projects" ? "New project" : "Create task"}
-              </button>
-            )}
+            <small>
+              {demoMode
+                ? "GITHUB PAGES DEMO / IN-BROWSER MOCK"
+                : "LOCAL-FIRST / REFERENCE IMPLEMENTATION"}
+            </small>
           </div>
-          {view === "board" && (
-            <>
-              <section className="stats">
-                {[
-                  [
-                    "In the forge",
-                    state.tasks.filter(
-                      (t) => !["accepted", "cancelled"].includes(t.status),
-                    ).length,
-                    "Active tasks",
-                  ],
-                  [
-                    "Awaiting judgment",
-                    state.tasks.filter((t) => t.status === "in_review").length,
-                    "Ready for human review",
-                  ],
-                  [
-                    "Accepted work",
-                    state.tasks.filter((t) => t.status === "accepted").length,
-                    "Evidence-backed decisions",
-                  ],
-                  [
-                    "Connected projects",
-                    state.projects.length,
-                    "Defined boundaries",
-                  ],
-                ].map(([title, value, sub], i) => (
-                  <div className="stat" key={String(title)}>
-                    <span>{title}</span>
-                    <strong>
-                      {String(value).padStart(2, "0")}
-                      <span className="stat-symbol">
-                        {i === 1 ? (
-                          <ArrowUpRight size={23} />
-                        ) : i === 2 ? (
-                          <Check size={23} />
-                        ) : (
-                          <Hexagon size={23} />
-                        )}
-                      </span>
-                    </strong>
-                    <small>{sub}</small>
-                  </div>
-                ))}
-              </section>
-              <div className="section-heading">
-                <h2>
-                  Work in motion <span>{filtered.length}</span>
-                </h2>
-                <span className="eyebrow">INTENT → EVIDENCE → REVIEW</span>
+          <section className="login-form">
+            <div className="login-form-top">
+              <p className="eyebrow">ENTER YOUR WORKSPACE</p>
+              <GuideButton onClick={() => setGuideOpen(true)} />
+            </div>
+            <h2>Welcome to the forge.</h2>
+            <p>
+              {demoMode
+                ? "Static demo: forge rules run in your browser with seeded synthetic data. Changes are lost when you close the tab."
+                : "Connect with a credential issued by your local operator."}
+            </p>
+            {demoMode && (
+              <div className="notice" role="status">
+                <AlertTriangle size={18} />
+                <p>
+                  This is not the Python backend. Bundle export and task flows
+                  follow the same rules, but nothing is persisted or
+                  network-authenticated.
+                </p>
               </div>
-              <div className="filters">
-                <div className="search">
-                  <Search size={17} />
-                  <input
-                    aria-label="Search tasks"
-                    placeholder="Find work by title or intent…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-                <select
-                  aria-label="Filter by project"
-                  value={project}
-                  onChange={(e) => setProject(e.target.value)}
-                >
-                  <option value="">All projects</option>
-                  {state.projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  aria-label="Filter by status"
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                >
-                  <option value="">All states</option>
-                  {statuses.map((s) => (
-                    <option key={s} value={s}>
-                      {label(s)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="board">
-                {[
-                  ["Ready to begin", ["open"]],
-                  [
-                    "In motion",
-                    ["claimed", "in_progress", "changes_requested"],
-                  ],
-                  ["Human review", ["in_review"]],
-                  ["Closed", ["accepted", "cancelled"]],
-                ].map(([title, ss]) => (
-                  <section className="column" key={String(title)}>
-                    <h3>
-                      <Circle size={10} />
-                      {title}
-                      <span>
-                        {
-                          filtered.filter((t) =>
-                            (ss as string[]).includes(t.status),
-                          ).length
-                        }
-                      </span>
-                    </h3>
-                    {filtered
-                      .filter((t) => (ss as string[]).includes(t.status))
-                      .map((t) => (
-                        <button
-                          className="task-card"
-                          key={t.id}
-                          onClick={() => setSelected(t.id)}
-                        >
-                          <div className="card-top">
-                            <span className="project-tag">
-                              {state.projects.find((p) => p.id === t.project_id)
-                                ?.name || "Project"}
-                            </span>
-                            <span className={"priority " + t.priority}>
-                              {t.priority}
-                            </span>
-                          </div>
-                          <h4>{t.title}</h4>
-                          <p>{t.description}</p>
-                          <div className="card-state">
-                            <Badge status={t.status} />
-                            {t.evidence.some((e) => e.kind === "proof") && (
-                              <span className="shadow">Proof · shadow</span>
-                            )}
-                          </div>
-                          <footer>
-                            <span>
-                              <FileCheck2 size={14} />
-                              {t.artifacts.length} artifacts ·{" "}
-                              {t.evidence.length} evidence
-                            </span>
-                            <ArrowUpRight size={16} />
-                          </footer>
-                        </button>
-                      ))}
-                    {!filtered.some((t) =>
-                      (ss as string[]).includes(t.status),
-                    ) && (
-                      <div className="empty-column">
-                        <Plus size={18} />
-                        <span>No work here yet</span>
-                      </div>
-                    )}
-                  </section>
-                ))}
-              </div>
-              <div className="bottom-note">
-                <Fingerprint size={16} /> Built for accountable collaboration.
-                Acceptance records a human decision; it does not merge code or
-                execute work.
-              </div>
-            </>
-          )}
-          {view === "projects" && (
-            <div className="project-grid">
-              {state.projects.map((p) => (
-                <button
-                  className="project-card"
-                  key={p.id}
-                  onClick={() => {
-                    setProject(p.id);
-                    setView("board");
-                  }}
-                >
-                  <FolderKanban size={26} />
-                  <h2>{p.name}</h2>
-                  <p>{p.description || "No description supplied."}</p>
-                  <code>{p.repository || "No repository linked"}</code>
-                  <footer>
-                    {state.tasks.filter((t) => t.project_id === p.id).length}{" "}
-                    tasks
-                    <ArrowUpRight size={19} />
-                  </footer>
-                </button>
-              ))}
-              {!state.projects.length && (
-                <Empty
-                  title="Start with a shared boundary."
-                  text="Create a project to organize the work, scope, and evidence."
+            )}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setToken(String(new FormData(e.currentTarget).get("token")));
+              }}
+            >
+              <label>
+                Local access token
+                <input
+                  name="token"
+                  type="password"
+                  required
+                  autoComplete="off"
+                  placeholder="Paste your credential"
                 />
+              </label>
+              <button className="primary" disabled={busy}>
+                Open workspace <ArrowRight size={17} />
+              </button>
+            </form>
+            {demoMode && (
+              <div className="demo-credentials">
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setToken(demoOperatorToken)}
+                  disabled={!demoOperatorToken}
+                >
+                  Use demo operator credential
+                </button>
+                <button
+                  type="button"
+                  className="text"
+                  onClick={() => setToken(demoReviewerToken)}
+                  disabled={!demoReviewerToken}
+                >
+                  Switch to demo reviewer
+                </button>
+              </div>
+            )}
+            {error && (
+              <div role="alert" className="error">
+                {error}
+                <button className="text" onClick={() => void refresh()}>
+                  Retry
+                </button>
+              </div>
+            )}
+            <div className="trust">
+              <ShieldCheck size={20} />
+              <p>
+                Your token stays in this tab’s session storage. The local
+                operator controls identity and access. This is not a remote
+                identity service.
+              </p>
+            </div>
+          </section>
+        </main>
+        <Guide open={guideOpen} onClose={closeGuide} demoMode={demoMode} />
+      </>
+    );
+  return (
+    <>
+      <div className="app">
+        <aside className={mobile ? "sidebar show" : "sidebar"}>
+          <Logo />
+          {demoMode && (
+            <p className="demo-sidebar-note">
+              Pages demo — in-browser mock only.
+            </p>
+          )}
+          <p className="nav-label">WORKSPACE</p>
+          {[
+            ["board", "The forge", LayoutGrid],
+            ["projects", "Projects", FolderKanban],
+            ["activity", "Provenance", Activity],
+            ["access", "Access & trust", ShieldCheck],
+          ].map(([id, title, Icon]) => (
+            <button
+              key={String(id)}
+              className={"nav " + (view === id ? "active" : "")}
+              onClick={() => {
+                setView(String(id));
+                setSelected("");
+                setMobile(false);
+              }}
+            >
+              {React.createElement(Icon as any, { size: 19 })}
+              {String(title)}
+              {id === "board" && <span>{state.tasks.length}</span>}
+            </button>
+          ))}
+          <div className="sidebar-bottom">
+            <div className="local-indicator">
+              <i /> LOCAL WORKSPACE
+            </div>
+            <p>
+              Deliberate work.
+              <br />A durable record.
+            </p>
+            <div className="identity">
+              <div className="avatar">{state.actor.name.slice(0, 1)}</div>
+              <div>
+                <strong>{state.actor.name}</strong>
+                <small>{state.actor.kind} principal</small>
+              </div>
+              <button aria-label="Sign out" title="Sign out" onClick={logout}>
+                <LogOut size={17} />
+              </button>
+            </div>
+          </div>
+        </aside>
+        <div className="main">
+          <header className="topbar">
+            <button
+              className="mobile-menu"
+              aria-label="Toggle navigation"
+              onClick={() => setMobile(!mobile)}
+            >
+              <Menu size={21} />
+            </button>
+            <span>
+              Workspace <ChevronRight size={13} />{" "}
+              {view === "board" ? "The forge" : label(view)}
+            </span>
+            <div className="top-actions">
+              <GuideButton onClick={() => setGuideOpen(true)} />
+              <span className="integrity">
+                <i className={state.integrity.valid ? "good" : "bad"} />
+                {state.integrity.valid ? "Record intact" : "Integrity alert"}
+              </span>
+              <button
+                aria-label="Refresh workspace"
+                onClick={() => void refresh()}
+              >
+                <RefreshCw size={17} />
+              </button>
+            </div>
+          </header>
+          <main className="content">
+            {error && (
+              <div className="error" role="alert">
+                {error}
+                <button aria-label="Dismiss error" onClick={() => setError("")}>
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+            {notice && (
+              <div className="notice" role="status">
+                {notice}
+                <button
+                  aria-label="Dismiss notification"
+                  onClick={() => setNotice("")}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+            <div className="page-heading">
+              <div>
+                <p className="eyebrow">
+                  SYNBIOS /{" "}
+                  {view === "board"
+                    ? "COLLABORATIVE WORK"
+                    : label(view).toUpperCase()}
+                </p>
+                <h1>
+                  {view === "board"
+                    ? "The forge."
+                    : view === "projects"
+                      ? "Project ground."
+                      : view === "activity"
+                        ? "Every step, recorded."
+                        : "Access is explicit."}
+                </h1>
+                <p>
+                  {view === "board"
+                    ? "Turn intent into artifacts. Let evidence carry the work."
+                    : view === "projects"
+                      ? "A clear boundary for every body of work."
+                      : view === "activity"
+                        ? "A local, hash-chained history of workspace decisions."
+                        : "Named principals, scoped capabilities, human accountability."}
+                </p>
+              </div>
+              {human && ["board", "projects"].includes(view) && (
+                <button
+                  className="primary"
+                  onClick={() =>
+                    setModal(
+                      view === "projects" ? "project.create" : "task.create",
+                    )
+                  }
+                >
+                  <Plus size={17} />
+                  {view === "projects" ? "New project" : "Create task"}
+                </button>
               )}
             </div>
-          )}
-          {view === "activity" && (
-            <>
-              <div className="record-banner">
-                <ShieldCheck size={26} />
-                <div>
-                  <strong>
-                    {state.integrity.valid
-                      ? "Local event chain verifies."
-                      : "Local event chain failed verification."}
-                  </strong>
-                  <p>
-                    {state.integrity.event_count} events · Tamper detection
-                    within this store. Not signatures, external authenticity, or
-                    protection from whole-store replacement.
-                  </p>
-                </div>
-                <button onClick={() => setModal("verify")}>
-                  Verify a bundle
-                </button>
-              </div>
-              <div className="timeline">
-                {[...state.events].reverse().map((e) => (
-                  <div className="event" key={e.id}>
-                    <span className="event-dot" />
-                    <div>
-                      <strong>{label(e.type.replaceAll(".", " · "))}</strong>
-                      <p>
-                        {state.principals.find((p) => p.id === e.actor_id)
-                          ?.name || e.actor_id}{" "}
-                        {e.task_id && (
-                          <>
-                            →{" "}
-                            <button
-                              className="text"
-                              onClick={() => setSelected(e.task_id || "")}
-                            >
-                              {state.tasks.find((t) => t.id === e.task_id)
-                                ?.title || e.task_id}
-                            </button>
-                          </>
-                        )}
-                      </p>
-                      <code title={e.hash}>
-                        #{e.seq} / {e.hash.slice(0, 24)}…
-                      </code>
-                    </div>
-                    <time>{date(e.created_at)}</time>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-          {view === "access" && (
-            <>
-              <div className="record-banner">
-                <KeyRound size={26} />
-                <div>
-                  <strong>Local trust, clearly bounded.</strong>
-                  <p>
-                    Human principals administer this workspace. Agents need
-                    explicit task grants. Tokens identify a principal; proof
-                    evidence remains unverified shadow evidence.
-                  </p>
-                </div>
-              </div>
-              <div className="section-heading">
-                <h2>
-                  Principals <span>{state.principals.length}</span>
-                </h2>
-                {human && (
-                  <button onClick={() => setModal("principal.create")}>
-                    <Plus size={16} />
-                    Add principal
-                  </button>
-                )}
-              </div>
-              <div className="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Principal</th>
-                      <th>Kind</th>
-                      <th>State</th>
-                      <th>Created</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {state.principals.map((p) => (
-                      <tr key={p.id}>
-                        <td>
-                          <strong>{p.name}</strong>
-                          <small>{p.id}</small>
-                        </td>
-                        <td>{p.kind}</td>
-                        <td>
-                          <Badge status={p.active ? "active" : "inactive"} />
-                        </td>
-                        <td>
-                          {date(p.created_at)}
-                          {human && p.active && p.id !== state.actor.id && (
-                            <button
-                              className="revoke-principal"
-                              disabled={busy}
-                              onClick={() =>
-                                void command("principal.revoke", {
-                                  principal_id: p.id,
-                                })
-                              }
-                            >
-                              Deactivate credential
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="section-heading">
-                <h2>
-                  Task grants{" "}
-                  <span>
-                    {state.grants.filter((g) => !g.revoked_at).length} active
-                  </span>
-                </h2>
-                {human && (
-                  <button onClick={() => setModal("grant.create")}>
-                    <Plus size={16} />
-                    Grant access
-                  </button>
-                )}
-              </div>
-              <div className="grant-list">
-                {state.grants.map((g) => (
-                  <div className="grant" key={g.id}>
-                    <div>
+            {view === "board" && (
+              <>
+                <section className="stats">
+                  {[
+                    [
+                      "In the forge",
+                      state.tasks.filter(
+                        (t) => !["accepted", "cancelled"].includes(t.status),
+                      ).length,
+                      "Active tasks",
+                    ],
+                    [
+                      "Awaiting judgment",
+                      state.tasks.filter((t) => t.status === "in_review")
+                        .length,
+                      "Ready for human review",
+                    ],
+                    [
+                      "Accepted work",
+                      state.tasks.filter((t) => t.status === "accepted").length,
+                      "Evidence-backed decisions",
+                    ],
+                    [
+                      "Connected projects",
+                      state.projects.length,
+                      "Defined boundaries",
+                    ],
+                  ].map(([title, value, sub], i) => (
+                    <div className="stat" key={String(title)}>
+                      <span>{title}</span>
                       <strong>
-                        {
-                          state.principals.find((p) => p.id === g.principal_id)
-                            ?.name
-                        }
+                        {String(value).padStart(2, "0")}
+                        <span className="stat-symbol">
+                          {i === 1 ? (
+                            <ArrowUpRight size={23} />
+                          ) : i === 2 ? (
+                            <Check size={23} />
+                          ) : (
+                            <Hexagon size={23} />
+                          )}
+                        </span>
                       </strong>
-                      <p>
-                        {state.tasks.find((t) => t.id === g.task_id)?.title ||
-                          g.task_id}
-                      </p>
-                      <div className="caps">
-                        {g.capabilities.map((c: string) => (
-                          <span key={c}>{c}</span>
-                        ))}
-                      </div>
+                      <small>{sub}</small>
                     </div>
-                    {g.revoked_at ? (
-                      <Badge status="revoked" />
-                    ) : (
-                      human && (
-                        <button
-                          onClick={() =>
-                            void command("grant.revoke", { grant_id: g.id })
-                          }
-                          disabled={busy}
-                        >
-                          Revoke grant
-                        </button>
-                      )
-                    )}
+                  ))}
+                </section>
+                <div className="section-heading">
+                  <h2>
+                    Work in motion <span>{filtered.length}</span>
+                  </h2>
+                  <span className="eyebrow">INTENT → EVIDENCE → REVIEW</span>
+                </div>
+                <div className="filters">
+                  <div className="search">
+                    <Search size={17} />
+                    <input
+                      aria-label="Search tasks"
+                      placeholder="Find work by title or intent…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
                   </div>
+                  <select
+                    aria-label="Filter by project"
+                    value={project}
+                    onChange={(e) => setProject(e.target.value)}
+                  >
+                    <option value="">All projects</option>
+                    {state.projects.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    aria-label="Filter by status"
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                  >
+                    <option value="">All states</option>
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {label(s)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="board">
+                  {[
+                    ["Ready to begin", ["open"]],
+                    [
+                      "In motion",
+                      ["claimed", "in_progress", "changes_requested"],
+                    ],
+                    ["Human review", ["in_review"]],
+                    ["Closed", ["accepted", "cancelled"]],
+                  ].map(([title, ss]) => (
+                    <section className="column" key={String(title)}>
+                      <h3>
+                        <Circle size={10} />
+                        {title}
+                        <span>
+                          {
+                            filtered.filter((t) =>
+                              (ss as string[]).includes(t.status),
+                            ).length
+                          }
+                        </span>
+                      </h3>
+                      {filtered
+                        .filter((t) => (ss as string[]).includes(t.status))
+                        .map((t) => (
+                          <button
+                            className="task-card"
+                            key={t.id}
+                            onClick={() => setSelected(t.id)}
+                          >
+                            <div className="card-top">
+                              <span className="project-tag">
+                                {state.projects.find(
+                                  (p) => p.id === t.project_id,
+                                )?.name || "Project"}
+                              </span>
+                              <span className={"priority " + t.priority}>
+                                {t.priority}
+                              </span>
+                            </div>
+                            <h4>{t.title}</h4>
+                            <p>{t.description}</p>
+                            <div className="card-state">
+                              <Badge status={t.status} />
+                              {t.evidence.some((e) => e.kind === "proof") && (
+                                <span className="shadow">Proof · shadow</span>
+                              )}
+                            </div>
+                            <footer>
+                              <span>
+                                <FileCheck2 size={14} />
+                                {t.artifacts.length} artifacts ·{" "}
+                                {t.evidence.length} evidence
+                              </span>
+                              <ArrowUpRight size={16} />
+                            </footer>
+                          </button>
+                        ))}
+                      {!filtered.some((t) =>
+                        (ss as string[]).includes(t.status),
+                      ) && (
+                        <div className="empty-column">
+                          <Plus size={18} />
+                          <span>No work here yet</span>
+                        </div>
+                      )}
+                    </section>
+                  ))}
+                </div>
+                <div className="bottom-note">
+                  <Fingerprint size={16} /> Built for accountable collaboration.
+                  Acceptance records a human decision; it does not merge code or
+                  execute work.
+                </div>
+              </>
+            )}
+            {view === "projects" && (
+              <div className="project-grid">
+                {state.projects.map((p) => (
+                  <button
+                    className="project-card"
+                    key={p.id}
+                    onClick={() => {
+                      setProject(p.id);
+                      setView("board");
+                    }}
+                  >
+                    <FolderKanban size={26} />
+                    <h2>{p.name}</h2>
+                    <p>{p.description || "No description supplied."}</p>
+                    <code>{p.repository || "No repository linked"}</code>
+                    <footer>
+                      {state.tasks.filter((t) => t.project_id === p.id).length}{" "}
+                      tasks
+                      <ArrowUpRight size={19} />
+                    </footer>
+                  </button>
                 ))}
-                {!state.grants.length && (
+                {!state.projects.length && (
                   <Empty
-                    title="No delegated access."
-                    text="Grant only the capabilities an agent needs for a specific task."
+                    title="Start with a shared boundary."
+                    text="Create a project to organize the work, scope, and evidence."
                   />
                 )}
               </div>
-            </>
-          )}
-        </main>
-      </div>
-      {task && (
-        <div className="drawer-backdrop" onClick={() => setSelected("")}>
-          <section
-            className="drawer"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="task-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <header>
-              <span className="eyebrow">TASK RECORD</span>
-              <button aria-label="Close task" onClick={() => setSelected("")}>
-                <X />
-              </button>
-            </header>
-            <div className="drawer-body">
-              <Badge status={task.status} />
-              <h2 id="task-title">{task.title}</h2>
-              <p>{task.description}</p>
-              <div className="action-row">
-                {task.status === "open" && (
-                  <button
-                    disabled={!can("claim") || busy}
-                    onClick={() =>
-                      void command("task.claim", { task_id: selected })
-                    }
-                  >
-                    Claim task
+            )}
+            {view === "activity" && (
+              <>
+                <div className="record-banner">
+                  <ShieldCheck size={26} />
+                  <div>
+                    <strong>
+                      {state.integrity.valid
+                        ? "Local event chain verifies."
+                        : "Local event chain failed verification."}
+                    </strong>
+                    <p>
+                      {state.integrity.event_count} events · Tamper detection
+                      within this store. Not signatures, external authenticity,
+                      or protection from whole-store replacement.
+                    </p>
+                  </div>
+                  <button onClick={() => setModal("verify")}>
+                    Verify a bundle
                   </button>
-                )}
-                {["claimed", "changes_requested"].includes(task.status) && (
-                  <button
-                    disabled={!can("work") || busy}
-                    onClick={() =>
-                      void command("task.transition", {
-                        task_id: selected,
-                        status: "in_progress",
-                      })
-                    }
-                  >
-                    Start work
-                  </button>
-                )}
-                {mutable &&
-                  ["in_progress", "changes_requested"].includes(
-                    task.status,
-                  ) && (
+                </div>
+                <div className="timeline">
+                  {[...state.events].reverse().map((e) => (
+                    <div className="event" key={e.id}>
+                      <span className="event-dot" />
+                      <div>
+                        <strong>{label(e.type.replaceAll(".", " · "))}</strong>
+                        <p>
+                          {state.principals.find((p) => p.id === e.actor_id)
+                            ?.name || e.actor_id}{" "}
+                          {e.task_id && (
+                            <>
+                              →{" "}
+                              <button
+                                className="text"
+                                onClick={() => setSelected(e.task_id || "")}
+                              >
+                                {state.tasks.find((t) => t.id === e.task_id)
+                                  ?.title || e.task_id}
+                              </button>
+                            </>
+                          )}
+                        </p>
+                        <code title={e.hash}>
+                          #{e.seq} / {e.hash.slice(0, 24)}…
+                        </code>
+                      </div>
+                      <time>{date(e.created_at)}</time>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+            {view === "access" && (
+              <>
+                <div className="record-banner">
+                  <KeyRound size={26} />
+                  <div>
+                    <strong>Local trust, clearly bounded.</strong>
+                    <p>
+                      Human principals administer this workspace. Agents need
+                      explicit task grants. Tokens identify a principal; proof
+                      evidence remains unverified shadow evidence.
+                    </p>
+                  </div>
+                </div>
+                <div className="section-heading">
+                  <h2>
+                    Principals <span>{state.principals.length}</span>
+                  </h2>
+                  {human && (
+                    <button onClick={() => setModal("principal.create")}>
+                      <Plus size={16} />
+                      Add principal
+                    </button>
+                  )}
+                </div>
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Principal</th>
+                        <th>Kind</th>
+                        <th>State</th>
+                        <th>Created</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {state.principals.map((p) => (
+                        <tr key={p.id}>
+                          <td>
+                            <strong>{p.name}</strong>
+                            <small>{p.id}</small>
+                          </td>
+                          <td>{p.kind}</td>
+                          <td>
+                            <Badge status={p.active ? "active" : "inactive"} />
+                          </td>
+                          <td>
+                            {date(p.created_at)}
+                            {human && p.active && p.id !== state.actor.id && (
+                              <button
+                                className="revoke-principal"
+                                disabled={busy}
+                                onClick={() =>
+                                  void command("principal.revoke", {
+                                    principal_id: p.id,
+                                  })
+                                }
+                              >
+                                Deactivate credential
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="section-heading">
+                  <h2>
+                    Task grants{" "}
+                    <span>
+                      {state.grants.filter((g) => !g.revoked_at).length} active
+                    </span>
+                  </h2>
+                  {human && (
+                    <button onClick={() => setModal("grant.create")}>
+                      <Plus size={16} />
+                      Grant access
+                    </button>
+                  )}
+                </div>
+                <div className="grant-list">
+                  {state.grants.map((g) => (
+                    <div className="grant" key={g.id}>
+                      <div>
+                        <strong>
+                          {
+                            state.principals.find(
+                              (p) => p.id === g.principal_id,
+                            )?.name
+                          }
+                        </strong>
+                        <p>
+                          {state.tasks.find((t) => t.id === g.task_id)?.title ||
+                            g.task_id}
+                        </p>
+                        <div className="caps">
+                          {g.capabilities.map((c: string) => (
+                            <span key={c}>{c}</span>
+                          ))}
+                        </div>
+                      </div>
+                      {g.revoked_at ? (
+                        <Badge status="revoked" />
+                      ) : (
+                        human && (
+                          <button
+                            onClick={() =>
+                              void command("grant.revoke", { grant_id: g.id })
+                            }
+                            disabled={busy}
+                          >
+                            Revoke grant
+                          </button>
+                        )
+                      )}
+                    </div>
+                  ))}
+                  {!state.grants.length && (
+                    <Empty
+                      title="No delegated access."
+                      text="Grant only the capabilities an agent needs for a specific task."
+                    />
+                  )}
+                </div>
+              </>
+            )}
+          </main>
+        </div>
+        {task && (
+          <div className="drawer-backdrop" onClick={() => setSelected("")}>
+            <section
+              className="drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="task-title"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <header>
+                <span className="eyebrow">TASK RECORD</span>
+                <button aria-label="Close task" onClick={() => setSelected("")}>
+                  <X />
+                </button>
+              </header>
+              <div className="drawer-body">
+                <Badge status={task.status} />
+                <h2 id="task-title">{task.title}</h2>
+                <p>{task.description}</p>
+                <div className="action-row">
+                  {task.status === "open" && (
                     <button
-                      className="primary"
-                      disabled={
-                        !can("submit") ||
-                        !current ||
-                        !passing ||
-                        !dependenciesReady ||
-                        busy
+                      disabled={!can("claim") || busy}
+                      onClick={() =>
+                        void command("task.claim", { task_id: selected })
                       }
+                    >
+                      Claim task
+                    </button>
+                  )}
+                  {["claimed", "changes_requested"].includes(task.status) && (
+                    <button
+                      disabled={!can("work") || busy}
                       onClick={() =>
                         void command("task.transition", {
                           task_id: selected,
-                          status: "in_review",
+                          status: "in_progress",
                         })
                       }
                     >
-                      Submit for review
+                      Start work
                     </button>
                   )}
-                <button onClick={() => void download()}>
-                  <Download size={15} />
-                  Export
-                </button>
-                {human && mutable && (
-                  <button
-                    disabled={busy}
-                    onClick={() =>
-                      void command("task.transition", {
-                        task_id: selected,
-                        status: "cancelled",
-                      })
-                    }
-                  >
-                    Cancel task
-                  </button>
-                )}
-                {human && task.status === "cancelled" && (
-                  <button
-                    disabled={busy}
-                    onClick={() =>
-                      void command("task.transition", {
-                        task_id: selected,
-                        status: "open",
-                      })
-                    }
-                  >
-                    Reopen
-                  </button>
-                )}
-              </div>
-              {mutable && (
-                <p className="gate">
-                  Submission requires a current artifact, passing current tests,
-                  no failed current tests, accepted dependencies, and submit
-                  permission.
-                </p>
-              )}
-              <section className="detail-section">
-                <h3>Acceptance criteria</h3>
-                {task.criteria.map((c: string, i: number) => (
-                  <p className="criterion" key={i}>
-                    <span>{i + 1}.</span>
-                    {c}
-                  </p>
-                ))}
-                <h3>Scope boundary</h3>
-                <div className="caps">
-                  {task.scope.map((s: string) => (
-                    <code key={s}>{s}</code>
-                  ))}
-                </div>
-                <h3>Dependencies</h3>
-                {task.dependencies.length ? (
-                  task.dependencies.map((id: string) => (
-                    <button
-                      className="dependency"
-                      key={id}
-                      onClick={() => setSelected(id)}
-                    >
-                      {state.tasks.find((t) => t.id === id)?.title || id}
-                      <Badge
-                        status={
-                          state.tasks.find((t) => t.id === id)?.status ||
-                          "unknown"
+                  {mutable &&
+                    ["in_progress", "changes_requested"].includes(
+                      task.status,
+                    ) && (
+                      <button
+                        className="primary"
+                        disabled={
+                          !can("submit") ||
+                          !current ||
+                          !passing ||
+                          !dependenciesReady ||
+                          busy
                         }
-                      />
-                    </button>
-                  ))
-                ) : (
-                  <p className="muted">No dependencies.</p>
-                )}
-              </section>
-              <section className="detail-section">
-                <div className="section-heading">
-                  <h3>Artifact candidates</h3>
-                  {mutable && can("artifact") && (
-                    <button onClick={() => setModal("artifact.add")}>
-                      <Plus size={14} />
-                      Add artifact
-                    </button>
-                  )}
-                </div>
-                {[...task.artifacts].reverse().map((a) => (
-                  <div className="artifact" key={a.id}>
-                    <strong>{a.title}</strong>
-                    <span className="freshness">
-                      {a.id === current?.id
-                        ? "CURRENT CANDIDATE"
-                        : "SUPERSEDED"}
-                    </span>
-                    <p>{a.summary}</p>
-                    <dl>
-                      <dt>Revision</dt>
-                      <dd>{a.revision}</dd>
-                      <dt>SHA-256</dt>
-                      <dd>{a.digest}</dd>
-                      <dt>Reference</dt>
-                      <dd>{a.uri || "None"}</dd>
-                    </dl>
-                    <small>{date(a.created_at)}</small>
-                  </div>
-                ))}
-                {!current && (
-                  <p className="muted">
-                    Add an artifact revision and content digest to begin the
-                    evidence trail.
-                  </p>
-                )}
-              </section>
-              <section className="detail-section">
-                <div className="section-heading">
-                  <h3>Evidence ledger</h3>
-                  {mutable && current && can("evidence") && (
-                    <button onClick={() => setModal("evidence.add")}>
-                      <Plus size={14} />
-                      Add evidence
-                    </button>
-                  )}
-                </div>
-                {[...task.evidence].reverse().map((e) => {
-                  const fresh = evidence.some((x) => x.id === e.id);
-                  return (
-                    <div
-                      className={"evidence " + (!fresh ? "stale" : "")}
-                      key={e.id}
-                    >
-                      <div>
-                        <Badge status={e.status} />
-                        <strong>
-                          {e.kind === "proof"
-                            ? "Proof · shadow evidence"
-                            : label(e.kind)}
-                        </strong>
-                        <span className="freshness">
-                          {fresh
-                            ? "Current candidate"
-                            : "Stale · older candidate"}
-                        </span>
-                      </div>
-                      <p>{e.summary}</p>
-                      <code>{e.command || "No command recorded"}</code>
-                      <small>
-                        {e.tool} {e.tool_version} · {date(e.created_at)}
-                      </small>
-                      {e.kind === "proof" && (
-                        <p className="gate">
-                          Supplied proof output. Not independently verified by
-                          Synbios.
-                        </p>
-                      )}
-                      {e.assumptions.length > 0 && (
-                        <p>Assumptions: {e.assumptions.join("; ")}</p>
-                      )}
-                    </div>
-                  );
-                })}
-                {!task.evidence.length && (
-                  <p className="muted">
-                    No evidence yet. This workspace records supplied results; it
-                    does not execute commands.
-                  </p>
-                )}
-              </section>
-              <section className="detail-section">
-                <div className="section-heading">
-                  <h3>Human judgment</h3>
-                  {human && task.status === "in_review" && current && (
+                        onClick={() =>
+                          void command("task.transition", {
+                            task_id: selected,
+                            status: "in_review",
+                          })
+                        }
+                      >
+                        Submit for review
+                      </button>
+                    )}
+                  <button onClick={() => void download()}>
+                    <Download size={15} />
+                    Export
+                  </button>
+                  {human && mutable && (
                     <button
-                      disabled={current.created_by === state.actor.id}
-                      onClick={() => setModal("review.create")}
+                      disabled={busy}
+                      onClick={() =>
+                        void command("task.transition", {
+                          task_id: selected,
+                          status: "cancelled",
+                        })
+                      }
                     >
-                      Review candidate
+                      Cancel task
+                    </button>
+                  )}
+                  {human && task.status === "cancelled" && (
+                    <button
+                      disabled={busy}
+                      onClick={() =>
+                        void command("task.transition", {
+                          task_id: selected,
+                          status: "open",
+                        })
+                      }
+                    >
+                      Reopen
                     </button>
                   )}
                 </div>
-                {human &&
-                  current?.created_by === state.actor.id &&
-                  task.status === "in_review" && (
-                    <p className="gate">
-                      A different human principal must review your artifact.
+                {mutable && (
+                  <p className="gate">
+                    Submission requires a current artifact, passing current
+                    tests, no failed current tests, accepted dependencies, and
+                    submit permission.
+                  </p>
+                )}
+                <section className="detail-section">
+                  <h3>Acceptance criteria</h3>
+                  {task.criteria.map((c: string, i: number) => (
+                    <p className="criterion" key={i}>
+                      <span>{i + 1}.</span>
+                      {c}
+                    </p>
+                  ))}
+                  <h3>Scope boundary</h3>
+                  <div className="caps">
+                    {task.scope.map((s: string) => (
+                      <code key={s}>{s}</code>
+                    ))}
+                  </div>
+                  <h3>Dependencies</h3>
+                  {task.dependencies.length ? (
+                    task.dependencies.map((id: string) => (
+                      <button
+                        className="dependency"
+                        key={id}
+                        onClick={() => setSelected(id)}
+                      >
+                        {state.tasks.find((t) => t.id === id)?.title || id}
+                        <Badge
+                          status={
+                            state.tasks.find((t) => t.id === id)?.status ||
+                            "unknown"
+                          }
+                        />
+                      </button>
+                    ))
+                  ) : (
+                    <p className="muted">No dependencies.</p>
+                  )}
+                </section>
+                <section className="detail-section">
+                  <div className="section-heading">
+                    <h3>Artifact candidates</h3>
+                    {mutable && can("artifact") && (
+                      <button onClick={() => setModal("artifact.add")}>
+                        <Plus size={14} />
+                        Add artifact
+                      </button>
+                    )}
+                  </div>
+                  {[...task.artifacts].reverse().map((a) => (
+                    <div className="artifact" key={a.id}>
+                      <strong>{a.title}</strong>
+                      <span className="freshness">
+                        {a.id === current?.id
+                          ? "CURRENT CANDIDATE"
+                          : "SUPERSEDED"}
+                      </span>
+                      <p>{a.summary}</p>
+                      <dl>
+                        <dt>Revision</dt>
+                        <dd>{a.revision}</dd>
+                        <dt>SHA-256</dt>
+                        <dd>{a.digest}</dd>
+                        <dt>Reference</dt>
+                        <dd>{a.uri || "None"}</dd>
+                      </dl>
+                      <small>{date(a.created_at)}</small>
+                    </div>
+                  ))}
+                  {!current && (
+                    <p className="muted">
+                      Add an artifact revision and content digest to begin the
+                      evidence trail.
                     </p>
                   )}
-                {[...task.reviews].reverse().map((r) => (
-                  <div className="review" key={r.id}>
-                    <Badge status={r.decision} />
-                    <p>{r.comment}</p>
-                    <small>
-                      {
-                        state.principals.find((p) => p.id === r.created_by)
-                          ?.name
-                      }{" "}
-                      · {date(r.created_at)} ·{" "}
-                      {r.artifact_id === current?.id
-                        ? "current candidate"
-                        : "superseded candidate"}
-                    </small>
+                </section>
+                <section className="detail-section">
+                  <div className="section-heading">
+                    <h3>Evidence ledger</h3>
+                    {mutable && current && can("evidence") && (
+                      <button onClick={() => setModal("evidence.add")}>
+                        <Plus size={14} />
+                        Add evidence
+                      </button>
+                    )}
                   </div>
-                ))}
-                {!task.reviews.length && (
-                  <p className="muted">No human decision yet.</p>
+                  {[...task.evidence].reverse().map((e) => {
+                    const fresh = evidence.some((x) => x.id === e.id);
+                    return (
+                      <div
+                        className={"evidence " + (!fresh ? "stale" : "")}
+                        key={e.id}
+                      >
+                        <div>
+                          <Badge status={e.status} />
+                          <strong>
+                            {e.kind === "proof"
+                              ? "Proof · shadow evidence"
+                              : label(e.kind)}
+                          </strong>
+                          <span className="freshness">
+                            {fresh
+                              ? "Current candidate"
+                              : "Stale · older candidate"}
+                          </span>
+                        </div>
+                        <p>{e.summary}</p>
+                        <code>{e.command || "No command recorded"}</code>
+                        <small>
+                          {e.tool} {e.tool_version} · {date(e.created_at)}
+                        </small>
+                        {e.kind === "proof" && (
+                          <p className="gate">
+                            Supplied proof output. Not independently verified by
+                            Synbios.
+                          </p>
+                        )}
+                        {e.assumptions.length > 0 && (
+                          <p>Assumptions: {e.assumptions.join("; ")}</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {!task.evidence.length && (
+                    <p className="muted">
+                      No evidence yet. This workspace records supplied results;
+                      it does not execute commands.
+                    </p>
+                  )}
+                </section>
+                <section className="detail-section">
+                  <div className="section-heading">
+                    <h3>Human judgment</h3>
+                    {human && task.status === "in_review" && current && (
+                      <button
+                        disabled={current.created_by === state.actor.id}
+                        onClick={() => setModal("review.create")}
+                      >
+                        Review candidate
+                      </button>
+                    )}
+                  </div>
+                  {human &&
+                    current?.created_by === state.actor.id &&
+                    task.status === "in_review" && (
+                      <p className="gate">
+                        A different human principal must review your artifact.
+                      </p>
+                    )}
+                  {[...task.reviews].reverse().map((r) => (
+                    <div className="review" key={r.id}>
+                      <Badge status={r.decision} />
+                      <p>{r.comment}</p>
+                      <small>
+                        {
+                          state.principals.find((p) => p.id === r.created_by)
+                            ?.name
+                        }{" "}
+                        · {date(r.created_at)} ·{" "}
+                        {r.artifact_id === current?.id
+                          ? "current candidate"
+                          : "superseded candidate"}
+                      </small>
+                    </div>
+                  ))}
+                  {!task.reviews.length && (
+                    <p className="muted">No human decision yet.</p>
+                  )}
+                </section>
+              </div>
+            </section>
+          </div>
+        )}
+        {modal && (
+          <div className="modal-backdrop">
+            <section
+              className="modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="modal-title"
+            >
+              <header>
+                <h2 id="modal-title">
+                  {
+                    (
+                      {
+                        "project.create": "Create a project",
+                        "task.create": "Define the work",
+                        "artifact.add": "Add an artifact",
+                        "evidence.add": "Record evidence",
+                        "review.create": "Review current candidate",
+                        "principal.create": "Create a principal",
+                        "grant.create": "Delegate capabilities",
+                        verify: "Verify portable bundle",
+                      } as Record<string, string>
+                    )[modal]
+                  }
+                </h2>
+                <button aria-label="Close form" onClick={() => setModal("")}>
+                  <X size={21} />
+                </button>
+              </header>
+              <form onSubmit={submit}>
+                {modal === "project.create" && (
+                  <>
+                    {field("name", "Project name")}
+                    {field(
+                      "description",
+                      "Intent",
+                      false,
+                      "What will this project accomplish?",
+                      true,
+                    )}
+                    {field(
+                      "repository",
+                      "Repository reference",
+                      false,
+                      "https://…",
+                    )}
+                  </>
                 )}
-              </section>
-            </div>
-          </section>
-        </div>
-      )}
-      {modal && (
-        <div className="modal-backdrop">
-          <section
-            className="modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-title"
-          >
-            <header>
-              <h2 id="modal-title">
-                {
-                  (
-                    {
-                      "project.create": "Create a project",
-                      "task.create": "Define the work",
-                      "artifact.add": "Add an artifact",
-                      "evidence.add": "Record evidence",
-                      "review.create": "Review current candidate",
-                      "principal.create": "Create a principal",
-                      "grant.create": "Delegate capabilities",
-                      verify: "Verify portable bundle",
-                    } as Record<string, string>
-                  )[modal]
-                }
-              </h2>
-              <button aria-label="Close form" onClick={() => setModal("")}>
-                <X size={21} />
-              </button>
-            </header>
-            <form onSubmit={submit}>
-              {modal === "project.create" && (
-                <>
-                  {field("name", "Project name")}
-                  {field(
-                    "description",
-                    "Intent",
-                    false,
-                    "What will this project accomplish?",
-                    true,
-                  )}
-                  {field(
-                    "repository",
-                    "Repository reference",
-                    false,
-                    "https://…",
-                  )}
-                </>
-              )}
-              {modal === "task.create" && (
-                <>
-                  <label>
-                    Project
-                    <select name="project_id" required defaultValue={project}>
-                      <option value="" disabled>
-                        Select a project
-                      </option>
-                      {state.projects.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
+                {modal === "task.create" && (
+                  <>
+                    <label>
+                      Project
+                      <select name="project_id" required defaultValue={project}>
+                        <option value="" disabled>
+                          Select a project
                         </option>
-                      ))}
-                    </select>
-                  </label>
-                  {!state.projects.length && (
-                    <p className="gate">Create a project first.</p>
-                  )}
-                  {field("title", "Task title")}
-                  {field(
-                    "description",
-                    "Intent and context",
-                    true,
-                    "Describe the outcome.",
-                    true,
-                  )}
-                  {field(
-                    "criteria",
-                    "Acceptance criteria",
-                    true,
-                    "One criterion per line",
-                    true,
-                  )}
-                  {field(
-                    "scope",
-                    "Scope boundary",
-                    true,
-                    "One path or boundary per line",
-                    true,
-                  )}
-                  <label>
-                    Priority
-                    <select name="priority">
-                      <option value="normal">Normal</option>
-                      <option value="high">High</option>
-                      <option value="low">Low</option>
-                    </select>
-                  </label>
-                  <fieldset>
-                    <legend>Dependencies (optional)</legend>
-                    {state.tasks.map((t) => (
-                      <label className="checkbox" key={t.id}>
-                        <input
-                          type="checkbox"
-                          name="dependencies"
-                          value={t.id}
-                        />
-                        {t.title}
-                      </label>
-                    ))}
-                  </fieldset>
-                </>
-              )}
-              {modal === "artifact.add" && (
-                <>
-                  <p className="gate">
-                    A new candidate supersedes previous evidence and reviews.
-                  </p>
-                  {field("title", "Artifact title")}
-                  <label>
-                    Kind
-                    <select name="kind">
-                      <option value="git_commit">Git commit</option>
-                      <option value="document">Document</option>
-                    </select>
-                  </label>
-                  {field(
-                    "revision",
-                    "Exact revision",
-                    true,
-                    "Full Git SHA or document SHA-256",
-                  )}
-                  {field(
-                    "digest",
-                    "Content SHA-256",
-                    true,
-                    "64 hexadecimal characters",
-                  )}
-                  {field(
-                    "uri",
-                    "Reference URI",
-                    false,
-                    "Recorded only; never fetched",
-                  )}
-                  {field("summary", "Summary", true, "What changed?", true)}
-                </>
-              )}
-              {modal === "evidence.add" && (
-                <>
-                  <p className="gate">
-                    Bound to current artifact: {current?.title}. Evidence is
-                    supplied; Synbios does not run commands.
-                  </p>
-                  <label>
-                    Kind
-                    <select name="kind">
-                      <option value="test">Test</option>
-                      <option value="analysis">Analysis</option>
-                      <option value="proof">Proof (shadow evidence)</option>
-                    </select>
-                  </label>
-                  <label>
-                    Result
-                    <select name="status">
-                      <option value="passed">Passed</option>
-                      <option value="failed">Failed</option>
-                      <option value="unavailable">Unavailable</option>
-                    </select>
-                  </label>
-                  {field("command", "Command or procedure", false)}
-                  {field(
-                    "summary",
-                    "Result summary",
-                    true,
-                    "What does this evidence establish?",
-                    true,
-                  )}
-                  {field("tool", "Tool")}
-                  {field("tool_version", "Tool version")}
-                  {field(
-                    "assumptions",
-                    "Assumptions and limits",
-                    false,
-                    "One assumption per line",
-                    true,
-                  )}
-                </>
-              )}
-              {modal === "review.create" && (
-                <>
-                  <p className="gate">
-                    Reviewing {current?.title} at exact revision{" "}
-                    {current?.revision}. Acceptance does not merge or deploy.
-                  </p>
-                  <label>
-                    Decision
-                    <select name="decision">
-                      <option value="approved">Approve and accept</option>
-                      <option value="changes_requested">Request changes</option>
-                    </select>
-                  </label>
-                  {field(
-                    "comment",
-                    "Review rationale",
-                    true,
-                    "State your judgment.",
-                    true,
-                  )}
-                </>
-              )}
-              {modal === "principal.create" && (
-                <>
-                  {field("name", "Principal name")}
-                  <label>
-                    Kind
-                    <select name="kind">
-                      <option value="agent">Agent</option>
-                      <option value="human">Human administrator</option>
-                    </select>
-                  </label>
-                  <p className="gate">
-                    Human principals administer all local work. Credential shown
-                    once.
-                  </p>
-                </>
-              )}
-              {modal === "grant.create" && (
-                <>
-                  <label>
-                    Principal
-                    <select required name="principal_id">
-                      <option value="">Select principal</option>
-                      {state.principals
-                        .filter((p) => p.active)
-                        .map((p) => (
+                        {state.projects.map((p) => (
                           <option key={p.id} value={p.id}>
-                            {p.name} ({p.kind})
+                            {p.name}
                           </option>
                         ))}
-                    </select>
-                  </label>
-                  <label>
-                    Task
-                    <select required name="task_id">
-                      <option value="">Select task</option>
+                      </select>
+                    </label>
+                    {!state.projects.length && (
+                      <p className="gate">Create a project first.</p>
+                    )}
+                    {field("title", "Task title")}
+                    {field(
+                      "description",
+                      "Intent and context",
+                      true,
+                      "Describe the outcome.",
+                      true,
+                    )}
+                    {field(
+                      "criteria",
+                      "Acceptance criteria",
+                      true,
+                      "One criterion per line",
+                      true,
+                    )}
+                    {field(
+                      "scope",
+                      "Scope boundary",
+                      true,
+                      "One path or boundary per line",
+                      true,
+                    )}
+                    <label>
+                      Priority
+                      <select name="priority">
+                        <option value="normal">Normal</option>
+                        <option value="high">High</option>
+                        <option value="low">Low</option>
+                      </select>
+                    </label>
+                    <fieldset>
+                      <legend>Dependencies (optional)</legend>
                       {state.tasks.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.title}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <fieldset>
-                    <legend>Capabilities</legend>
-                    {["claim", "work", "artifact", "evidence", "submit"].map(
-                      (c) => (
-                        <label className="checkbox" key={c}>
+                        <label className="checkbox" key={t.id}>
                           <input
                             type="checkbox"
-                            name="capabilities"
-                            value={c}
+                            name="dependencies"
+                            value={t.id}
                           />
-                          {label(c)}
+                          {t.title}
                         </label>
-                      ),
+                      ))}
+                    </fieldset>
+                  </>
+                )}
+                {modal === "artifact.add" && (
+                  <>
+                    <p className="gate">
+                      A new candidate supersedes previous evidence and reviews.
+                    </p>
+                    {field("title", "Artifact title")}
+                    <label>
+                      Kind
+                      <select name="kind">
+                        <option value="git_commit">Git commit</option>
+                        <option value="document">Document</option>
+                      </select>
+                    </label>
+                    {field(
+                      "revision",
+                      "Exact revision",
+                      true,
+                      "Full Git SHA or document SHA-256",
                     )}
-                  </fieldset>
-                </>
-              )}
-              {modal === "verify" && (
-                <>
-                  <p className="gate">
-                    Checks internal bundle consistency. Does not authenticate
-                    identity, external facts, or dependency acceptance outside
-                    this bundle.
+                    {field(
+                      "digest",
+                      "Content SHA-256",
+                      true,
+                      "64 hexadecimal characters",
+                    )}
+                    {field(
+                      "uri",
+                      "Reference URI",
+                      false,
+                      "Recorded only; never fetched",
+                    )}
+                    {field("summary", "Summary", true, "What changed?", true)}
+                  </>
+                )}
+                {modal === "evidence.add" && (
+                  <>
+                    <p className="gate">
+                      Bound to current artifact: {current?.title}. Evidence is
+                      supplied; Synbios does not run commands.
+                    </p>
+                    <label>
+                      Kind
+                      <select name="kind">
+                        <option value="test">Test</option>
+                        <option value="analysis">Analysis</option>
+                        <option value="proof">Proof (shadow evidence)</option>
+                      </select>
+                    </label>
+                    <label>
+                      Result
+                      <select name="status">
+                        <option value="passed">Passed</option>
+                        <option value="failed">Failed</option>
+                        <option value="unavailable">Unavailable</option>
+                      </select>
+                    </label>
+                    {field("command", "Command or procedure", false)}
+                    {field(
+                      "summary",
+                      "Result summary",
+                      true,
+                      "What does this evidence establish?",
+                      true,
+                    )}
+                    {field("tool", "Tool")}
+                    {field("tool_version", "Tool version")}
+                    {field(
+                      "assumptions",
+                      "Assumptions and limits",
+                      false,
+                      "One assumption per line",
+                      true,
+                    )}
+                  </>
+                )}
+                {modal === "review.create" && (
+                  <>
+                    <p className="gate">
+                      Reviewing {current?.title} at exact revision{" "}
+                      {current?.revision}. Acceptance does not merge or deploy.
+                    </p>
+                    <label>
+                      Decision
+                      <select name="decision">
+                        <option value="approved">Approve and accept</option>
+                        <option value="changes_requested">
+                          Request changes
+                        </option>
+                      </select>
+                    </label>
+                    {field(
+                      "comment",
+                      "Review rationale",
+                      true,
+                      "State your judgment.",
+                      true,
+                    )}
+                  </>
+                )}
+                {modal === "principal.create" && (
+                  <>
+                    {field("name", "Principal name")}
+                    <label>
+                      Kind
+                      <select name="kind">
+                        <option value="agent">Agent</option>
+                        <option value="human">Human administrator</option>
+                      </select>
+                    </label>
+                    <p className="gate">
+                      Human principals administer all local work. Credential
+                      shown once.
+                    </p>
+                  </>
+                )}
+                {modal === "grant.create" && (
+                  <>
+                    <label>
+                      Principal
+                      <select required name="principal_id">
+                        <option value="">Select principal</option>
+                        {state.principals
+                          .filter((p) => p.active)
+                          .map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name} ({p.kind})
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                    <label>
+                      Task
+                      <select required name="task_id">
+                        <option value="">Select task</option>
+                        {state.tasks.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <fieldset>
+                      <legend>Capabilities</legend>
+                      {["claim", "work", "artifact", "evidence", "submit"].map(
+                        (c) => (
+                          <label className="checkbox" key={c}>
+                            <input
+                              type="checkbox"
+                              name="capabilities"
+                              value={c}
+                            />
+                            {label(c)}
+                          </label>
+                        ),
+                      )}
+                    </fieldset>
+                  </>
+                )}
+                {modal === "verify" && (
+                  <>
+                    <p className="gate">
+                      Checks internal bundle consistency. Does not authenticate
+                      identity, external facts, or dependency acceptance outside
+                      this bundle.
+                    </p>
+                    {field(
+                      "bundle",
+                      "Portable bundle JSON",
+                      true,
+                      "Paste exported bundle",
+                      true,
+                    )}
+                  </>
+                )}
+                {error && (
+                  <p className="error" role="alert">
+                    {error}
                   </p>
-                  {field(
-                    "bundle",
-                    "Portable bundle JSON",
-                    true,
-                    "Paste exported bundle",
-                    true,
-                  )}
-                </>
-              )}
-              {error && (
-                <p className="error" role="alert">
-                  {error}
-                </p>
-              )}
-              <footer>
-                <button type="button" onClick={() => setModal("")}>
-                  Cancel
-                </button>
-                <button
-                  className="primary"
-                  disabled={
-                    busy || (modal === "task.create" && !state.projects.length)
-                  }
-                >
-                  {busy
-                    ? "Saving…"
-                    : modal === "verify"
-                      ? "Verify bundle"
-                      : "Save to record"}
-                  <ArrowRight size={16} />
-                </button>
-              </footer>
-            </form>
-          </section>
-        </div>
-      )}
-      {secret && (
-        <div className="modal-backdrop">
-          <section
-            className="modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="secret-title"
-          >
-            <KeyRound size={32} />
-            <h2 id="secret-title">One credential. Shown once.</h2>
-            <p>
-              Copy this token now and give it securely to the intended
-              principal. It cannot be retrieved again.
-            </p>
-            <pre className="secret">{secret}</pre>
-            <button
-              onClick={() => {
-                void navigator.clipboard
-                  .writeText(secret)
-                  .then(() => setNotice("Credential copied."))
-                  .catch(() =>
-                    setError(
-                      "Clipboard unavailable. Select and copy the credential manually.",
-                    ),
-                  );
-              }}
+                )}
+                <footer>
+                  <button type="button" onClick={() => setModal("")}>
+                    Cancel
+                  </button>
+                  <button
+                    className="primary"
+                    disabled={
+                      busy ||
+                      (modal === "task.create" && !state.projects.length)
+                    }
+                  >
+                    {busy
+                      ? "Saving…"
+                      : modal === "verify"
+                        ? "Verify bundle"
+                        : "Save to record"}
+                    <ArrowRight size={16} />
+                  </button>
+                </footer>
+              </form>
+            </section>
+          </div>
+        )}
+        {secret && (
+          <div className="modal-backdrop">
+            <section
+              className="modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="secret-title"
             >
-              <Copy size={15} />
-              Copy credential
-            </button>
-            <button className="primary" onClick={() => setSecret("")}>
-              I have saved it <Check size={16} />
-            </button>
-          </section>
-        </div>
-      )}
-    </div>
+              <KeyRound size={32} />
+              <h2 id="secret-title">One credential. Shown once.</h2>
+              <p>
+                Copy this token now and give it securely to the intended
+                principal. It cannot be retrieved again.
+              </p>
+              <pre className="secret">{secret}</pre>
+              <button
+                onClick={() => {
+                  void navigator.clipboard
+                    .writeText(secret)
+                    .then(() => setNotice("Credential copied."))
+                    .catch(() =>
+                      setError(
+                        "Clipboard unavailable. Select and copy the credential manually.",
+                      ),
+                    );
+                }}
+              >
+                <Copy size={15} />
+                Copy credential
+              </button>
+              <button className="primary" onClick={() => setSecret("")}>
+                I have saved it <Check size={16} />
+              </button>
+            </section>
+          </div>
+        )}
+      </div>
+      <Guide open={guideOpen} onClose={closeGuide} demoMode={demoMode} />
+    </>
   );
 }
 function Logo() {
