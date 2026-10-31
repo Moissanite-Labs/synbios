@@ -89,19 +89,22 @@ finally:
     }
   },
 });
+export async function dismissGuideIfOpen(page: Page) {
+  const dismiss = page.getByRole("button", { name: "Got it", exact: true });
+  if (await dismiss.isVisible().catch(() => false)) {
+    await dismiss.click();
+  }
+}
 export async function login(
   page: Page,
   workspace: Workspace,
   reviewer = false,
 ) {
   await page.goto(workspace.url);
-  // Traces, screenshots and videos are disabled to protect ephemeral credentials.
-  await page.evaluate(
-    (token) => {
-      const input = document.querySelector<HTMLInputElement>("[name=token]");
-      if (!input) throw new Error("Credential input missing");
-      input.value = token;
-    },
+  const tokenInput = page.locator("[name=token]");
+  await tokenInput.waitFor();
+  await dismissGuideIfOpen(page);
+  await tokenInput.fill(
     reviewer ? workspace.reviewer_token : workspace.token,
   );
   await page.getByRole("button", { name: "Open workspace" }).click();

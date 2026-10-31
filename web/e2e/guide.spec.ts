@@ -10,6 +10,7 @@ test("orientation guide opens on first visit and can be reopened", async ({
     localStorage.removeItem(key);
   }, GUIDE_STORAGE_KEY);
   await page.goto(workspace.url);
+  await page.locator("[name=token]").waitFor();
   const dialog = page.getByRole("dialog", { name: /how to use the forge/i });
   await expect(dialog).toBeVisible();
   await page.getByRole("button", { name: "Got it", exact: true }).click();
