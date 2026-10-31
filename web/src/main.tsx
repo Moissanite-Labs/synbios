@@ -33,6 +33,9 @@ import "@fontsource/space-grotesk/latin-400.css";
 import "@fontsource/space-grotesk/latin-500.css";
 import "@fontsource/space-grotesk/latin-600.css";
 import "./style.css";
+import { demoRequest, demoTokens, DemoError } from "./demo/store";
+
+const demoMode = import.meta.env.VITE_DEMO_MODE === "true";
 type CommandPayload = Record<string, unknown>;
 type Principal = {
   id: string;
@@ -164,6 +167,20 @@ function App() {
   const [mobile, setMobile] = useState(false);
   async function api(path: string, method = "GET", body?: unknown) {
     const requestGeneration = generation.current;
+    if (demoMode) {
+      try {
+        return await demoRequest(path, method, token, body);
+      } catch (e) {
+        const message =
+          e instanceof DemoError ? e.message : (e as Error).message;
+        const status = e instanceof DemoError ? e.status : 500;
+        if (status === 401 && requestGeneration === generation.current) {
+          logout();
+          setError(message);
+        }
+        throw Object.assign(new Error(message), { status });
+      }
+    }
     const r = await fetch("/api/" + path, {
       method,
       headers: {
@@ -433,12 +450,30 @@ function App() {
               reviewed, and carried forward.
             </p>
           </div>
-          <small>LOCAL-FIRST / REFERENCE IMPLEMENTATION</small>
+          <small>
+            {demoMode
+              ? "GITHUB PAGES DEMO / IN-BROWSER MOCK"
+              : "LOCAL-FIRST / REFERENCE IMPLEMENTATION"}
+          </small>
         </div>
         <section className="login-form">
           <p className="eyebrow">ENTER YOUR WORKSPACE</p>
           <h2>Welcome to the forge.</h2>
-          <p>Connect with a credential issued by your local operator.</p>
+          <p>
+            {demoMode
+              ? "Static demo: forge rules run in your browser with seeded synthetic data. Changes are lost when you close the tab."
+              : "Connect with a credential issued by your local operator."}
+          </p>
+          {demoMode && (
+            <div className="notice" role="status">
+              <AlertTriangle size={18} />
+              <p>
+                This is not the Python backend. Bundle export and task flows
+                follow the same rules, but nothing is persisted or
+                network-authenticated.
+              </p>
+            </div>
+          )}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -459,6 +494,24 @@ function App() {
               Open workspace <ArrowRight size={17} />
             </button>
           </form>
+          {demoMode && (
+            <div className="demo-credentials">
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => setToken(demoTokens.operator)}
+              >
+                Use demo operator credential
+              </button>
+              <button
+                type="button"
+                className="text"
+                onClick={() => setToken(demoTokens.reviewer)}
+              >
+                Switch to demo reviewer
+              </button>
+            </div>
+          )}
           {error && (
             <div role="alert" className="error">
               {error}
@@ -482,6 +535,11 @@ function App() {
     <div className="app">
       <aside className={mobile ? "sidebar show" : "sidebar"}>
         <Logo />
+        {demoMode && (
+          <p className="demo-sidebar-note">
+            Pages demo — in-browser mock only.
+          </p>
+        )}
         <p className="nav-label">WORKSPACE</p>
         {[
           ["board", "The forge", LayoutGrid],
