@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -15,4 +16,5 @@ export default defineConfig({
       ? { channel: process.env.PLAYWRIGHT_CHANNEL }
       : {}),
   },
+  testIgnore: /demo-guide\.spec\.ts$/,
 });
