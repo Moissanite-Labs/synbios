@@ -71,3 +71,24 @@ test("guide is available inside the workspace", async ({ page, workspace }) => {
   ).toBeVisible();
   await expect(page.getByText("What Synbios is")).toBeVisible();
 });
+
+test("guide points bundle verification at Provenance", async ({
+  page,
+  workspace,
+}) => {
+  await page.addInitScript((key) => {
+    localStorage.setItem(key, "1");
+  }, GUIDE_STORAGE_KEY);
+  await login(page, workspace);
+  await page.getByRole("button", { name: "Open guide", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: /how to use the forge/i });
+  await expect(dialog.getByText("Open Provenance")).toBeVisible();
+  await expect(
+    dialog.getByRole("listitem").filter({ hasText: "Verify a bundle" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Close guide", exact: true }).click();
+  await page.getByRole("button", { name: "Provenance", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Verify a bundle", exact: true }),
+  ).toBeVisible();
+});

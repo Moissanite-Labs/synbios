@@ -67,16 +67,19 @@ function WalkthroughSteps({ demoMode }: { demoMode: boolean }) {
       <li>
         Click <Ui>Sign out</Ui>, then sign in with{" "}
         <Ui>Switch to demo reviewer</Ui> (demo) or paste the reviewer credential
-        (local). Open the same task and click <Ui>Review candidate</Ui>. Choose
-        approve or request changes, then <Ui>Save to record</Ui>.
+        printed by <code>python -m synbios demo</code> (local). After{" "}
+        <code>init</code>, add a second human principal under{" "}
+        <Ui>Access &amp; trust</Ui> before signing in as reviewer. Open the same
+        task and click <Ui>Review candidate</Ui>. Choose approve or request
+        changes, then <Ui>Save to record</Ui>.
       </li>
       <li>
         With the operator again, open the accepted task and click{" "}
         <Ui>Export</Ui> to download a portable bundle JSON.
       </li>
       <li>
-        Open <Ui>Access &amp; trust</Ui>, click <Ui>Verify a bundle</Ui>, paste
-        the export, and run verification.
+        Open <Ui>Provenance</Ui>, click <Ui>Verify a bundle</Ui>, paste the
+        export, and run verification.
       </li>
     </ol>
   );
@@ -176,13 +179,15 @@ export function Guide({ open, onClose, demoMode }: GuideProps) {
               <dt>Provenance</dt>
               <dd>
                 The hash-chained event log—who did what, when, with commits to
-                state integrity (<Ui>Record intact</Ui> in the header).
+                state integrity (<Ui>Record intact</Ui> in the header). Verify
+                exported bundles here without importing records (
+                <Ui>Verify a bundle</Ui>).
               </dd>
               <dt>Access &amp; trust</dt>
               <dd>
                 Human and agent <Ui>principals</Ui>, task-scoped <Ui>grants</Ui>{" "}
-                (claim, work, artifact, evidence, submit), and bundle
-                verification without importing records.
+                (claim, work, artifact, evidence, submit), and workspace
+                administration.
               </dd>
               <dt>Principals &amp; grants</dt>
               <dd>
