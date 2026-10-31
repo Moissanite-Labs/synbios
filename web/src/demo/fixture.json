@@ -1,0 +1,1308 @@
+{
+  "synthetic": true,
+  "message": "Synthetic fixture seeded. Store credentials securely; they are shown only here.",
+  "tokens": {
+    "operator": "r4VFFbRYWdGbFOeEHD8BLOfj6wOoo5oE9V0as1922Pw",
+    "reviewer": "xkmfL2KRaK1HWBH4TROfL-9McqlxMX_weIKutZ452ew",
+    "agent": "nJ2wiqinW5h7FwiEMZIS8pHglhNPmjf5BtRPk6IjKZg"
+  },
+  "state": {
+    "projects": [
+      {
+        "created_at": "2026-10-31T13:04:25.176978+00:00",
+        "description": "Demonstration records only. Evidence is a labeled fixture, not executed validation.",
+        "id": "5d333a838ace4d21b79271d0bfc90604",
+        "name": "Synthetic \u00b7 Commons starter",
+        "repository": "https://example.invalid/synthetic/commons"
+      }
+    ],
+    "tasks": [
+      {
+        "artifacts": [
+          {
+            "created_at": "2026-10-31T13:04:25.183446+00:00",
+            "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+            "digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+            "id": "3cb60d39a0ad426884691e66ac8e52b6",
+            "kind": "document",
+            "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+            "summary": "SYNTHETIC fixture; no external content fetched.",
+            "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+            "title": "Synthetic document fixture",
+            "uri": "https://example.invalid/synthetic/document"
+          }
+        ],
+        "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+        "created_at": "2026-10-31T13:04:25.177627+00:00",
+        "created_by": "0b06883166e548dbb6e8c6515b280543",
+        "criteria": [
+          "Artifact has exact revision binding",
+          "Independent human reviews evidence"
+        ],
+        "dependencies": [],
+        "description": "Synthetic demonstration task",
+        "evidence": [
+          {
+            "artifact_digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+            "artifact_id": "3cb60d39a0ad426884691e66ac8e52b6",
+            "assumptions": ["Synthetic evidence, not executed validation"],
+            "command": "SYNTHETIC FIXTURE \u2014 no command executed",
+            "created_at": "2026-10-31T13:04:25.184542+00:00",
+            "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+            "id": "b6131602184048e6abdf44ab6c13be7c",
+            "kind": "test",
+            "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+            "status": "passed",
+            "summary": "SYNTHETIC demonstration only; this is not an actual test result.",
+            "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+            "tool": "synthetic-fixture",
+            "tool_version": "1"
+          }
+        ],
+        "id": "cc4f9e2297944665a800c4b3c25458e5",
+        "priority": "normal",
+        "project_id": "5d333a838ace4d21b79271d0bfc90604",
+        "reviews": [
+          {
+            "artifact_id": "3cb60d39a0ad426884691e66ac8e52b6",
+            "comment": "Synthetic independent human review for demonstration.",
+            "created_at": "2026-10-31T13:04:25.187611+00:00",
+            "created_by": "53bf9e0ebaaf470a8a12950387f59b0a",
+            "decision": "approved",
+            "id": "3dd335f2163d484c96483ec147647f16",
+            "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+            "task_id": "cc4f9e2297944665a800c4b3c25458e5"
+          }
+        ],
+        "scope": ["docs/"],
+        "status": "accepted",
+        "title": "Define contribution guide",
+        "updated_at": "2026-10-31T13:04:25.187623+00:00"
+      },
+      {
+        "artifacts": [
+          {
+            "created_at": "2026-10-31T13:04:25.193820+00:00",
+            "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+            "digest": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+            "id": "79f6cec9e563454aa3f70ad177ab58ac",
+            "kind": "document",
+            "revision": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+            "summary": "SYNTHETIC fixture; no external content fetched.",
+            "task_id": "a6eae14d053f4a069fba401ee25b2523",
+            "title": "Synthetic document fixture",
+            "uri": "https://example.invalid/synthetic/document"
+          }
+        ],
+        "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+        "created_at": "2026-10-31T13:04:25.178491+00:00",
+        "created_by": "0b06883166e548dbb6e8c6515b280543",
+        "criteria": [
+          "Artifact has exact revision binding",
+          "Independent human reviews evidence"
+        ],
+        "dependencies": [],
+        "description": "Synthetic demonstration task",
+        "evidence": [
+          {
+            "artifact_digest": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+            "artifact_id": "79f6cec9e563454aa3f70ad177ab58ac",
+            "assumptions": ["Synthetic evidence, not executed validation"],
+            "command": "SYNTHETIC FIXTURE \u2014 no command executed",
+            "created_at": "2026-10-31T13:04:25.195340+00:00",
+            "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+            "id": "099e7bb9d4d54cb2b4067dc84086ea9e",
+            "kind": "test",
+            "revision": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+            "status": "passed",
+            "summary": "SYNTHETIC demonstration only; this is not an actual test result.",
+            "task_id": "a6eae14d053f4a069fba401ee25b2523",
+            "tool": "synthetic-fixture",
+            "tool_version": "1"
+          }
+        ],
+        "id": "a6eae14d053f4a069fba401ee25b2523",
+        "priority": "normal",
+        "project_id": "5d333a838ace4d21b79271d0bfc90604",
+        "reviews": [],
+        "scope": ["docs/"],
+        "status": "in_review",
+        "title": "Build evidence intake",
+        "updated_at": "2026-10-31T13:04:25.197079+00:00"
+      },
+      {
+        "artifacts": [],
+        "assignee_id": null,
+        "created_at": "2026-10-31T13:04:25.179313+00:00",
+        "created_by": "0b06883166e548dbb6e8c6515b280543",
+        "criteria": [
+          "Artifact has exact revision binding",
+          "Independent human reviews evidence"
+        ],
+        "dependencies": [],
+        "description": "Synthetic demonstration task",
+        "evidence": [],
+        "id": "e1c0ca414eed4de3a01e0ea6d4739788",
+        "priority": "normal",
+        "project_id": "5d333a838ace4d21b79271d0bfc90604",
+        "reviews": [],
+        "scope": ["docs/"],
+        "status": "open",
+        "title": "Review release readiness",
+        "updated_at": "2026-10-31T13:04:25.179322+00:00"
+      }
+    ],
+    "principals": [
+      {
+        "active": true,
+        "created_at": "2026-10-31T13:04:25.174861+00:00",
+        "id": "0b06883166e548dbb6e8c6515b280543",
+        "kind": "human",
+        "name": "Synthetic demo operator"
+      },
+      {
+        "active": true,
+        "created_at": "2026-10-31T13:04:25.175718+00:00",
+        "id": "53bf9e0ebaaf470a8a12950387f59b0a",
+        "kind": "human",
+        "name": "Synthetic independent reviewer"
+      },
+      {
+        "active": true,
+        "created_at": "2026-10-31T13:04:25.176356+00:00",
+        "id": "2e29dac63e3d4b5d98ad42e54472e879",
+        "kind": "agent",
+        "name": "Synthetic build agent"
+      }
+    ],
+    "grants": [
+      {
+        "capabilities": ["claim", "work", "artifact", "evidence", "submit"],
+        "created_at": "2026-10-31T13:04:25.180298+00:00",
+        "created_by": "0b06883166e548dbb6e8c6515b280543",
+        "id": "a1bbe2cbae504f598a3a320c73d80766",
+        "principal_id": "2e29dac63e3d4b5d98ad42e54472e879",
+        "revoked_at": null,
+        "task_id": "cc4f9e2297944665a800c4b3c25458e5"
+      },
+      {
+        "capabilities": ["claim", "work", "artifact", "evidence", "submit"],
+        "created_at": "2026-10-31T13:04:25.189308+00:00",
+        "created_by": "0b06883166e548dbb6e8c6515b280543",
+        "id": "ca957a281e024632a3b52b0a834aa3c9",
+        "principal_id": "2e29dac63e3d4b5d98ad42e54472e879",
+        "revoked_at": null,
+        "task_id": "a6eae14d053f4a069fba401ee25b2523"
+      }
+    ]
+  },
+  "credentials": {
+    "07fc5450487356b27a096ede19b3202e22ff47473f54f45feafa1053ef156b03": "0b06883166e548dbb6e8c6515b280543",
+    "89165628e866a760f476b1de7167064fea5f84ee5e6a9e210172d18014c7ab7b": "53bf9e0ebaaf470a8a12950387f59b0a",
+    "8c6a6be89db3f60461e4d77424b99856160d39fb3d941dee983be0c6bb45a8d9": "2e29dac63e3d4b5d98ad42e54472e879"
+  },
+  "events": [
+    {
+      "actor_id": "0b06883166e548dbb6e8c6515b280543",
+      "created_at": "2026-10-31T13:04:25.174948+00:00",
+      "hash": "d55aad32dcc5c3065fa8ab9cdf6b94db09427f00ac8ebb997b24ccc9b431d8b2",
+      "id": "3a19dfa3a090429ca552904240534e17",
+      "payload": {
+        "entity": {
+          "active": true,
+          "created_at": "2026-10-31T13:04:25.174861+00:00",
+          "id": "0b06883166e548dbb6e8c6515b280543",
+          "kind": "human",
+          "name": "Synthetic demo operator"
+        },
+        "state_digest": "abe02bedf346f8fa138079d9510a263e4b69c65702119fea51338293cfebc115"
+      },
+      "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "seq": 1,
+      "task_id": null,
+      "type": "bootstrap"
+    },
+    {
+      "actor_id": "0b06883166e548dbb6e8c6515b280543",
+      "created_at": "2026-10-31T13:04:25.175763+00:00",
+      "hash": "26a1f57b6dc2e5236797e73c75c92afd3f6c36d323523a88705ccdbe3ae5c02c",
+      "id": "82e5e86e44304f1f806459384d4e2f3b",
+      "payload": {
+        "entity": {
+          "active": true,
+          "created_at": "2026-10-31T13:04:25.175718+00:00",
+          "id": "53bf9e0ebaaf470a8a12950387f59b0a",
+          "kind": "human",
+          "name": "Synthetic independent reviewer"
+        },
+        "state_digest": "b0f0a8678e8ed3a20caee0a000b5f455f9909cfd0426c8d26d28102c575a9ebd"
+      },
+      "previous_hash": "d55aad32dcc5c3065fa8ab9cdf6b94db09427f00ac8ebb997b24ccc9b431d8b2",
+      "seq": 2,
+      "task_id": null,
+      "type": "principal.create"
+    },
+    {
+      "actor_id": "0b06883166e548dbb6e8c6515b280543",
+      "created_at": "2026-10-31T13:04:25.176398+00:00",
+      "hash": "00c4b3868590be4c52c9e9bf27817a30e0b274566ebbfb08e43dc277a2fc9cb7",
+      "id": "1e9d5b63a24c4b61bb57a6eb1280395a",
+      "payload": {
+        "entity": {
+          "active": true,
+          "created_at": "2026-10-31T13:04:25.176356+00:00",
+          "id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "kind": "agent",
+          "name": "Synthetic build agent"
+        },
+        "state_digest": "660c5a03aae6ef083efdcf09b03095fa54fc1fbe599c83de1931d90456d6384a"
+      },
+      "previous_hash": "26a1f57b6dc2e5236797e73c75c92afd3f6c36d323523a88705ccdbe3ae5c02c",
+      "seq": 3,
+      "task_id": null,
+      "type": "principal.create"
+    },
+    {
+      "actor_id": "0b06883166e548dbb6e8c6515b280543",
+      "created_at": "2026-10-31T13:04:25.177022+00:00",
+      "hash": "cfbb2be8caec49eb2792a9ae76fccef3303981c055fdfbb4bad09e9a6852ef89",
+      "id": "634b49a27cda41cb9cf0dd49ba2f03c2",
+      "payload": {
+        "entity": {
+          "created_at": "2026-10-31T13:04:25.176978+00:00",
+          "description": "Demonstration records only. Evidence is a labeled fixture, not executed validation.",
+          "id": "5d333a838ace4d21b79271d0bfc90604",
+          "name": "Synthetic \u00b7 Commons starter",
+          "repository": "https://example.invalid/synthetic/commons"
+        },
+        "state_digest": "0a33c1ff7d496b7be94f3827fb9d7619fc7904a08db0c6a7b50d378cfea623cd"
+      },
+      "previous_hash": "00c4b3868590be4c52c9e9bf27817a30e0b274566ebbfb08e43dc277a2fc9cb7",
+      "seq": 4,
+      "task_id": null,
+      "type": "project.create"
+    },
+    {
+      "actor_id": "0b06883166e548dbb6e8c6515b280543",
+      "created_at": "2026-10-31T13:04:25.177682+00:00",
+      "hash": "25900a8465132a29191f83e5d8e4ce0fa2a6b1956a7162c7c344817ecc5f606b",
+      "id": "8f238c484b12422db24dab7397d2e362",
+      "payload": {
+        "entity": {
+          "artifacts": [],
+          "assignee_id": null,
+          "created_at": "2026-10-31T13:04:25.177627+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "cc4f9e2297944665a800c4b3c25458e5",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "open",
+          "title": "Define contribution guide",
+          "updated_at": "2026-10-31T13:04:25.177636+00:00"
+        },
+        "state_digest": "afc3f9045bcceefac9fbe2027a224162ab53b6e62460eac4ee5dea048543049f",
+        "task": {
+          "artifacts": [],
+          "assignee_id": null,
+          "created_at": "2026-10-31T13:04:25.177627+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "cc4f9e2297944665a800c4b3c25458e5",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "open",
+          "title": "Define contribution guide",
+          "updated_at": "2026-10-31T13:04:25.177636+00:00"
+        }
+      },
+      "previous_hash": "cfbb2be8caec49eb2792a9ae76fccef3303981c055fdfbb4bad09e9a6852ef89",
+      "seq": 5,
+      "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+      "type": "task.create"
+    },
+    {
+      "actor_id": "0b06883166e548dbb6e8c6515b280543",
+      "created_at": "2026-10-31T13:04:25.178551+00:00",
+      "hash": "42c4d11b2346fd527a276f7fbb8bfff85ea92904d089464f350c6701bc8276c3",
+      "id": "73d0e8c8f45143f789657fe9c5f20679",
+      "payload": {
+        "entity": {
+          "artifacts": [],
+          "assignee_id": null,
+          "created_at": "2026-10-31T13:04:25.178491+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "a6eae14d053f4a069fba401ee25b2523",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "open",
+          "title": "Build evidence intake",
+          "updated_at": "2026-10-31T13:04:25.178500+00:00"
+        },
+        "state_digest": "137c5dc37bbc43b9f3386bc4c548798b8a70bb75db4d664566bf4093392ea91b",
+        "task": {
+          "artifacts": [],
+          "assignee_id": null,
+          "created_at": "2026-10-31T13:04:25.178491+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "a6eae14d053f4a069fba401ee25b2523",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "open",
+          "title": "Build evidence intake",
+          "updated_at": "2026-10-31T13:04:25.178500+00:00"
+        }
+      },
+      "previous_hash": "25900a8465132a29191f83e5d8e4ce0fa2a6b1956a7162c7c344817ecc5f606b",
+      "seq": 6,
+      "task_id": "a6eae14d053f4a069fba401ee25b2523",
+      "type": "task.create"
+    },
+    {
+      "actor_id": "0b06883166e548dbb6e8c6515b280543",
+      "created_at": "2026-10-31T13:04:25.179378+00:00",
+      "hash": "22160ccbbc01de4b48dfcbf4f956b5d709c757fda31929d083c8c41dcee9b9ca",
+      "id": "d801d274908744fda2cb2de5193d9c4a",
+      "payload": {
+        "entity": {
+          "artifacts": [],
+          "assignee_id": null,
+          "created_at": "2026-10-31T13:04:25.179313+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "e1c0ca414eed4de3a01e0ea6d4739788",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "open",
+          "title": "Review release readiness",
+          "updated_at": "2026-10-31T13:04:25.179322+00:00"
+        },
+        "state_digest": "57091586732a5e6bc148181ba13d1c1b5a5a36114b17c1d827fdf99749917734",
+        "task": {
+          "artifacts": [],
+          "assignee_id": null,
+          "created_at": "2026-10-31T13:04:25.179313+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "e1c0ca414eed4de3a01e0ea6d4739788",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "open",
+          "title": "Review release readiness",
+          "updated_at": "2026-10-31T13:04:25.179322+00:00"
+        }
+      },
+      "previous_hash": "42c4d11b2346fd527a276f7fbb8bfff85ea92904d089464f350c6701bc8276c3",
+      "seq": 7,
+      "task_id": "e1c0ca414eed4de3a01e0ea6d4739788",
+      "type": "task.create"
+    },
+    {
+      "actor_id": "0b06883166e548dbb6e8c6515b280543",
+      "created_at": "2026-10-31T13:04:25.180361+00:00",
+      "hash": "42144873ecafcdb57aaccd4b93a426e467b709e3ca8deac4bdc317d1efcd9396",
+      "id": "325f9d71ff6848ae931a293b87e0417b",
+      "payload": {
+        "entity": {
+          "capabilities": ["claim", "work", "artifact", "evidence", "submit"],
+          "created_at": "2026-10-31T13:04:25.180298+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "id": "a1bbe2cbae504f598a3a320c73d80766",
+          "principal_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "revoked_at": null,
+          "task_id": "cc4f9e2297944665a800c4b3c25458e5"
+        },
+        "state_digest": "dd6c5151a8f473ab58c2bf1c6d91017e6220fd808938873a93c33930465f2015"
+      },
+      "previous_hash": "22160ccbbc01de4b48dfcbf4f956b5d709c757fda31929d083c8c41dcee9b9ca",
+      "seq": 8,
+      "task_id": null,
+      "type": "grant.create"
+    },
+    {
+      "actor_id": "2e29dac63e3d4b5d98ad42e54472e879",
+      "created_at": "2026-10-31T13:04:25.181279+00:00",
+      "hash": "3d1dbb9519366edd4aa77a7db27f5beaebdcde868f88965e6646f39cc6ed3c5a",
+      "id": "97980776cd134e3db5b16dfedb1a6195",
+      "payload": {
+        "entity": {
+          "artifacts": [],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.177627+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "cc4f9e2297944665a800c4b3c25458e5",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "claimed",
+          "title": "Define contribution guide",
+          "updated_at": "2026-10-31T13:04:25.181196+00:00"
+        },
+        "state_digest": "88deaa248f92a1aaa7251d2f2fdffb03afd1ba6b480bb2c2898a8720d0e5f438",
+        "task": {
+          "artifacts": [],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.177627+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "cc4f9e2297944665a800c4b3c25458e5",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "claimed",
+          "title": "Define contribution guide",
+          "updated_at": "2026-10-31T13:04:25.181196+00:00"
+        }
+      },
+      "previous_hash": "42144873ecafcdb57aaccd4b93a426e467b709e3ca8deac4bdc317d1efcd9396",
+      "seq": 9,
+      "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+      "type": "task.claim"
+    },
+    {
+      "actor_id": "2e29dac63e3d4b5d98ad42e54472e879",
+      "created_at": "2026-10-31T13:04:25.182258+00:00",
+      "hash": "236396596530f1883ce101182942f0227ba8e3ce3ec8a5fd4babd5b908693035",
+      "id": "1b7bf479b60f4c059eaa6abe0c962b54",
+      "payload": {
+        "entity": {
+          "artifacts": [],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.177627+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "cc4f9e2297944665a800c4b3c25458e5",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_progress",
+          "title": "Define contribution guide",
+          "updated_at": "2026-10-31T13:04:25.182188+00:00"
+        },
+        "state_digest": "a9075f1ce9fc2105a585eec12fb8a4ec63e0528ffb05bd4c9acaaf06fdcf8c22",
+        "task": {
+          "artifacts": [],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.177627+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "cc4f9e2297944665a800c4b3c25458e5",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_progress",
+          "title": "Define contribution guide",
+          "updated_at": "2026-10-31T13:04:25.182188+00:00"
+        }
+      },
+      "previous_hash": "3d1dbb9519366edd4aa77a7db27f5beaebdcde868f88965e6646f39cc6ed3c5a",
+      "seq": 10,
+      "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+      "type": "task.transition"
+    },
+    {
+      "actor_id": "2e29dac63e3d4b5d98ad42e54472e879",
+      "created_at": "2026-10-31T13:04:25.183533+00:00",
+      "hash": "ac2ebae3440cf56929a860cfee943a459f5a093e7bffa8c93331ffa7a45a83a1",
+      "id": "4bca455597114d4e998a8af0a81bc53d",
+      "payload": {
+        "entity": {
+          "created_at": "2026-10-31T13:04:25.183446+00:00",
+          "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+          "digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+          "id": "3cb60d39a0ad426884691e66ac8e52b6",
+          "kind": "document",
+          "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+          "summary": "SYNTHETIC fixture; no external content fetched.",
+          "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+          "title": "Synthetic document fixture",
+          "uri": "https://example.invalid/synthetic/document"
+        },
+        "state_digest": "21324cc6584cc96c72a27971dfa040af8af22daa2cc6941168b88ac59a3dfba6",
+        "task": {
+          "artifacts": [
+            {
+              "created_at": "2026-10-31T13:04:25.183446+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "id": "3cb60d39a0ad426884691e66ac8e52b6",
+              "kind": "document",
+              "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "summary": "SYNTHETIC fixture; no external content fetched.",
+              "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+              "title": "Synthetic document fixture",
+              "uri": "https://example.invalid/synthetic/document"
+            }
+          ],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.177627+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "cc4f9e2297944665a800c4b3c25458e5",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_progress",
+          "title": "Define contribution guide",
+          "updated_at": "2026-10-31T13:04:25.183456+00:00"
+        }
+      },
+      "previous_hash": "236396596530f1883ce101182942f0227ba8e3ce3ec8a5fd4babd5b908693035",
+      "seq": 11,
+      "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+      "type": "artifact.add"
+    },
+    {
+      "actor_id": "2e29dac63e3d4b5d98ad42e54472e879",
+      "created_at": "2026-10-31T13:04:25.184637+00:00",
+      "hash": "9501563a2aaca0a3edeba8f09824e0e22e29991b2501f31a2b6c961d9f051d39",
+      "id": "38963472f9b6452eaf79ce3f5f6ab22f",
+      "payload": {
+        "entity": {
+          "artifact_digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+          "artifact_id": "3cb60d39a0ad426884691e66ac8e52b6",
+          "assumptions": ["Synthetic evidence, not executed validation"],
+          "command": "SYNTHETIC FIXTURE \u2014 no command executed",
+          "created_at": "2026-10-31T13:04:25.184542+00:00",
+          "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+          "id": "b6131602184048e6abdf44ab6c13be7c",
+          "kind": "test",
+          "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+          "status": "passed",
+          "summary": "SYNTHETIC demonstration only; this is not an actual test result.",
+          "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+          "tool": "synthetic-fixture",
+          "tool_version": "1"
+        },
+        "state_digest": "795cdef731f8f725e3ec7f4db3e740b135117582f484e646d863b3c15b230ebb",
+        "task": {
+          "artifacts": [
+            {
+              "created_at": "2026-10-31T13:04:25.183446+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "id": "3cb60d39a0ad426884691e66ac8e52b6",
+              "kind": "document",
+              "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "summary": "SYNTHETIC fixture; no external content fetched.",
+              "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+              "title": "Synthetic document fixture",
+              "uri": "https://example.invalid/synthetic/document"
+            }
+          ],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.177627+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [
+            {
+              "artifact_digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "artifact_id": "3cb60d39a0ad426884691e66ac8e52b6",
+              "assumptions": ["Synthetic evidence, not executed validation"],
+              "command": "SYNTHETIC FIXTURE \u2014 no command executed",
+              "created_at": "2026-10-31T13:04:25.184542+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "id": "b6131602184048e6abdf44ab6c13be7c",
+              "kind": "test",
+              "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "status": "passed",
+              "summary": "SYNTHETIC demonstration only; this is not an actual test result.",
+              "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+              "tool": "synthetic-fixture",
+              "tool_version": "1"
+            }
+          ],
+          "id": "cc4f9e2297944665a800c4b3c25458e5",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_progress",
+          "title": "Define contribution guide",
+          "updated_at": "2026-10-31T13:04:25.184553+00:00"
+        }
+      },
+      "previous_hash": "ac2ebae3440cf56929a860cfee943a459f5a093e7bffa8c93331ffa7a45a83a1",
+      "seq": 12,
+      "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+      "type": "evidence.add"
+    },
+    {
+      "actor_id": "2e29dac63e3d4b5d98ad42e54472e879",
+      "created_at": "2026-10-31T13:04:25.186266+00:00",
+      "hash": "c010cd503baacd48d624c725d3366e67982f2734be05445ccabac1b47343c273",
+      "id": "e3470bb3c30b4a618d8010cf70d739fb",
+      "payload": {
+        "entity": {
+          "artifacts": [
+            {
+              "created_at": "2026-10-31T13:04:25.183446+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "id": "3cb60d39a0ad426884691e66ac8e52b6",
+              "kind": "document",
+              "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "summary": "SYNTHETIC fixture; no external content fetched.",
+              "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+              "title": "Synthetic document fixture",
+              "uri": "https://example.invalid/synthetic/document"
+            }
+          ],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.177627+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [
+            {
+              "artifact_digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "artifact_id": "3cb60d39a0ad426884691e66ac8e52b6",
+              "assumptions": ["Synthetic evidence, not executed validation"],
+              "command": "SYNTHETIC FIXTURE \u2014 no command executed",
+              "created_at": "2026-10-31T13:04:25.184542+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "id": "b6131602184048e6abdf44ab6c13be7c",
+              "kind": "test",
+              "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "status": "passed",
+              "summary": "SYNTHETIC demonstration only; this is not an actual test result.",
+              "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+              "tool": "synthetic-fixture",
+              "tool_version": "1"
+            }
+          ],
+          "id": "cc4f9e2297944665a800c4b3c25458e5",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_review",
+          "title": "Define contribution guide",
+          "updated_at": "2026-10-31T13:04:25.186176+00:00"
+        },
+        "state_digest": "53e14b74bd7e42440ebe03d39b3e8777e4d16083e4aec8dc4c7e11a0ec84aed1",
+        "task": {
+          "artifacts": [
+            {
+              "created_at": "2026-10-31T13:04:25.183446+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "id": "3cb60d39a0ad426884691e66ac8e52b6",
+              "kind": "document",
+              "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "summary": "SYNTHETIC fixture; no external content fetched.",
+              "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+              "title": "Synthetic document fixture",
+              "uri": "https://example.invalid/synthetic/document"
+            }
+          ],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.177627+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [
+            {
+              "artifact_digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "artifact_id": "3cb60d39a0ad426884691e66ac8e52b6",
+              "assumptions": ["Synthetic evidence, not executed validation"],
+              "command": "SYNTHETIC FIXTURE \u2014 no command executed",
+              "created_at": "2026-10-31T13:04:25.184542+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "id": "b6131602184048e6abdf44ab6c13be7c",
+              "kind": "test",
+              "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "status": "passed",
+              "summary": "SYNTHETIC demonstration only; this is not an actual test result.",
+              "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+              "tool": "synthetic-fixture",
+              "tool_version": "1"
+            }
+          ],
+          "id": "cc4f9e2297944665a800c4b3c25458e5",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_review",
+          "title": "Define contribution guide",
+          "updated_at": "2026-10-31T13:04:25.186176+00:00"
+        }
+      },
+      "previous_hash": "9501563a2aaca0a3edeba8f09824e0e22e29991b2501f31a2b6c961d9f051d39",
+      "seq": 13,
+      "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+      "type": "task.transition"
+    },
+    {
+      "actor_id": "53bf9e0ebaaf470a8a12950387f59b0a",
+      "created_at": "2026-10-31T13:04:25.187702+00:00",
+      "hash": "65809d91723d229f9fc03c188b55e1db6efb4729f0a0c35d72efc31609c7f0a8",
+      "id": "1d3bd22d45b741239b89e8a417e0e310",
+      "payload": {
+        "entity": {
+          "artifact_id": "3cb60d39a0ad426884691e66ac8e52b6",
+          "comment": "Synthetic independent human review for demonstration.",
+          "created_at": "2026-10-31T13:04:25.187611+00:00",
+          "created_by": "53bf9e0ebaaf470a8a12950387f59b0a",
+          "decision": "approved",
+          "id": "3dd335f2163d484c96483ec147647f16",
+          "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+          "task_id": "cc4f9e2297944665a800c4b3c25458e5"
+        },
+        "state_digest": "8bc2fc000965bad8578f6639b019f51c936b119e6e27ca83428f03a046f24b38",
+        "task": {
+          "artifacts": [
+            {
+              "created_at": "2026-10-31T13:04:25.183446+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "id": "3cb60d39a0ad426884691e66ac8e52b6",
+              "kind": "document",
+              "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "summary": "SYNTHETIC fixture; no external content fetched.",
+              "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+              "title": "Synthetic document fixture",
+              "uri": "https://example.invalid/synthetic/document"
+            }
+          ],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.177627+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [
+            {
+              "artifact_digest": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "artifact_id": "3cb60d39a0ad426884691e66ac8e52b6",
+              "assumptions": ["Synthetic evidence, not executed validation"],
+              "command": "SYNTHETIC FIXTURE \u2014 no command executed",
+              "created_at": "2026-10-31T13:04:25.184542+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "id": "b6131602184048e6abdf44ab6c13be7c",
+              "kind": "test",
+              "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "status": "passed",
+              "summary": "SYNTHETIC demonstration only; this is not an actual test result.",
+              "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+              "tool": "synthetic-fixture",
+              "tool_version": "1"
+            }
+          ],
+          "id": "cc4f9e2297944665a800c4b3c25458e5",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [
+            {
+              "artifact_id": "3cb60d39a0ad426884691e66ac8e52b6",
+              "comment": "Synthetic independent human review for demonstration.",
+              "created_at": "2026-10-31T13:04:25.187611+00:00",
+              "created_by": "53bf9e0ebaaf470a8a12950387f59b0a",
+              "decision": "approved",
+              "id": "3dd335f2163d484c96483ec147647f16",
+              "revision": "0116b2d6f4a2f7ad187cb9ebcd3a631eb8507794c36ae22c6c02dbc8cb563932",
+              "task_id": "cc4f9e2297944665a800c4b3c25458e5"
+            }
+          ],
+          "scope": ["docs/"],
+          "status": "accepted",
+          "title": "Define contribution guide",
+          "updated_at": "2026-10-31T13:04:25.187623+00:00"
+        }
+      },
+      "previous_hash": "c010cd503baacd48d624c725d3366e67982f2734be05445ccabac1b47343c273",
+      "seq": 14,
+      "task_id": "cc4f9e2297944665a800c4b3c25458e5",
+      "type": "review.create"
+    },
+    {
+      "actor_id": "0b06883166e548dbb6e8c6515b280543",
+      "created_at": "2026-10-31T13:04:25.189406+00:00",
+      "hash": "8779285f5745942362f61e15246b42c2aee403ec954611a4b1dfe774c44534da",
+      "id": "0d0ca15a1ee8481c90440581206b5705",
+      "payload": {
+        "entity": {
+          "capabilities": ["claim", "work", "artifact", "evidence", "submit"],
+          "created_at": "2026-10-31T13:04:25.189308+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "id": "ca957a281e024632a3b52b0a834aa3c9",
+          "principal_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "revoked_at": null,
+          "task_id": "a6eae14d053f4a069fba401ee25b2523"
+        },
+        "state_digest": "25781609e8623f0cbbcc9ed24cae58dfd4fcfa2a623c7fa2673209c0c68715af"
+      },
+      "previous_hash": "65809d91723d229f9fc03c188b55e1db6efb4729f0a0c35d72efc31609c7f0a8",
+      "seq": 15,
+      "task_id": null,
+      "type": "grant.create"
+    },
+    {
+      "actor_id": "2e29dac63e3d4b5d98ad42e54472e879",
+      "created_at": "2026-10-31T13:04:25.190812+00:00",
+      "hash": "1f607369436e20f366f28b9cdbdc59dc0d0cacb2f0a5dae507916acb8c1ba240",
+      "id": "2994ae31d71049a39db763df509d733b",
+      "payload": {
+        "entity": {
+          "artifacts": [],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.178491+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "a6eae14d053f4a069fba401ee25b2523",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "claimed",
+          "title": "Build evidence intake",
+          "updated_at": "2026-10-31T13:04:25.190720+00:00"
+        },
+        "state_digest": "0a2fd798f72897130014f4bae0aadda00c8162bbc4d965dc436561902aede2ed",
+        "task": {
+          "artifacts": [],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.178491+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "a6eae14d053f4a069fba401ee25b2523",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "claimed",
+          "title": "Build evidence intake",
+          "updated_at": "2026-10-31T13:04:25.190720+00:00"
+        }
+      },
+      "previous_hash": "8779285f5745942362f61e15246b42c2aee403ec954611a4b1dfe774c44534da",
+      "seq": 16,
+      "task_id": "a6eae14d053f4a069fba401ee25b2523",
+      "type": "task.claim"
+    },
+    {
+      "actor_id": "2e29dac63e3d4b5d98ad42e54472e879",
+      "created_at": "2026-10-31T13:04:25.192358+00:00",
+      "hash": "0c9dfab9fd0fe24de748cb4962e07fb236b66898865f930ebebce62495e9ae80",
+      "id": "aa8e30ea6aad4ba8ae584ca74761abac",
+      "payload": {
+        "entity": {
+          "artifacts": [],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.178491+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "a6eae14d053f4a069fba401ee25b2523",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_progress",
+          "title": "Build evidence intake",
+          "updated_at": "2026-10-31T13:04:25.192262+00:00"
+        },
+        "state_digest": "f56330e35e4534208be1ce7ae1ab6e2a714b035ab2e59694e41e51f2866a932a",
+        "task": {
+          "artifacts": [],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.178491+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "a6eae14d053f4a069fba401ee25b2523",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_progress",
+          "title": "Build evidence intake",
+          "updated_at": "2026-10-31T13:04:25.192262+00:00"
+        }
+      },
+      "previous_hash": "1f607369436e20f366f28b9cdbdc59dc0d0cacb2f0a5dae507916acb8c1ba240",
+      "seq": 17,
+      "task_id": "a6eae14d053f4a069fba401ee25b2523",
+      "type": "task.transition"
+    },
+    {
+      "actor_id": "2e29dac63e3d4b5d98ad42e54472e879",
+      "created_at": "2026-10-31T13:04:25.193924+00:00",
+      "hash": "802fd8a6fdd5ba9f53b26b314821be9a8c416ffa6c41dad1d2b9a903e034d500",
+      "id": "262e536243914700bba75ff5f6c7d97c",
+      "payload": {
+        "entity": {
+          "created_at": "2026-10-31T13:04:25.193820+00:00",
+          "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+          "digest": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+          "id": "79f6cec9e563454aa3f70ad177ab58ac",
+          "kind": "document",
+          "revision": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+          "summary": "SYNTHETIC fixture; no external content fetched.",
+          "task_id": "a6eae14d053f4a069fba401ee25b2523",
+          "title": "Synthetic document fixture",
+          "uri": "https://example.invalid/synthetic/document"
+        },
+        "state_digest": "b87ea793a4612437a95345f74a2edefda577186f0b453276e18c3e00aa038df8",
+        "task": {
+          "artifacts": [
+            {
+              "created_at": "2026-10-31T13:04:25.193820+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "digest": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "id": "79f6cec9e563454aa3f70ad177ab58ac",
+              "kind": "document",
+              "revision": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "summary": "SYNTHETIC fixture; no external content fetched.",
+              "task_id": "a6eae14d053f4a069fba401ee25b2523",
+              "title": "Synthetic document fixture",
+              "uri": "https://example.invalid/synthetic/document"
+            }
+          ],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.178491+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [],
+          "id": "a6eae14d053f4a069fba401ee25b2523",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_progress",
+          "title": "Build evidence intake",
+          "updated_at": "2026-10-31T13:04:25.193831+00:00"
+        }
+      },
+      "previous_hash": "0c9dfab9fd0fe24de748cb4962e07fb236b66898865f930ebebce62495e9ae80",
+      "seq": 18,
+      "task_id": "a6eae14d053f4a069fba401ee25b2523",
+      "type": "artifact.add"
+    },
+    {
+      "actor_id": "2e29dac63e3d4b5d98ad42e54472e879",
+      "created_at": "2026-10-31T13:04:25.195451+00:00",
+      "hash": "b77c3324cb166a33058dba39f7a0b82407eb33f42b79f1f406b7a2b60056215d",
+      "id": "01649a9c43834b688c079aa7249d7de0",
+      "payload": {
+        "entity": {
+          "artifact_digest": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+          "artifact_id": "79f6cec9e563454aa3f70ad177ab58ac",
+          "assumptions": ["Synthetic evidence, not executed validation"],
+          "command": "SYNTHETIC FIXTURE \u2014 no command executed",
+          "created_at": "2026-10-31T13:04:25.195340+00:00",
+          "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+          "id": "099e7bb9d4d54cb2b4067dc84086ea9e",
+          "kind": "test",
+          "revision": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+          "status": "passed",
+          "summary": "SYNTHETIC demonstration only; this is not an actual test result.",
+          "task_id": "a6eae14d053f4a069fba401ee25b2523",
+          "tool": "synthetic-fixture",
+          "tool_version": "1"
+        },
+        "state_digest": "9ede1eccd5a81ac54230fe4f9055f8dbf617b75590468668f27074e9bb9a49c5",
+        "task": {
+          "artifacts": [
+            {
+              "created_at": "2026-10-31T13:04:25.193820+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "digest": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "id": "79f6cec9e563454aa3f70ad177ab58ac",
+              "kind": "document",
+              "revision": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "summary": "SYNTHETIC fixture; no external content fetched.",
+              "task_id": "a6eae14d053f4a069fba401ee25b2523",
+              "title": "Synthetic document fixture",
+              "uri": "https://example.invalid/synthetic/document"
+            }
+          ],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.178491+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [
+            {
+              "artifact_digest": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "artifact_id": "79f6cec9e563454aa3f70ad177ab58ac",
+              "assumptions": ["Synthetic evidence, not executed validation"],
+              "command": "SYNTHETIC FIXTURE \u2014 no command executed",
+              "created_at": "2026-10-31T13:04:25.195340+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "id": "099e7bb9d4d54cb2b4067dc84086ea9e",
+              "kind": "test",
+              "revision": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "status": "passed",
+              "summary": "SYNTHETIC demonstration only; this is not an actual test result.",
+              "task_id": "a6eae14d053f4a069fba401ee25b2523",
+              "tool": "synthetic-fixture",
+              "tool_version": "1"
+            }
+          ],
+          "id": "a6eae14d053f4a069fba401ee25b2523",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_progress",
+          "title": "Build evidence intake",
+          "updated_at": "2026-10-31T13:04:25.195351+00:00"
+        }
+      },
+      "previous_hash": "802fd8a6fdd5ba9f53b26b314821be9a8c416ffa6c41dad1d2b9a903e034d500",
+      "seq": 19,
+      "task_id": "a6eae14d053f4a069fba401ee25b2523",
+      "type": "evidence.add"
+    },
+    {
+      "actor_id": "2e29dac63e3d4b5d98ad42e54472e879",
+      "created_at": "2026-10-31T13:04:25.197177+00:00",
+      "hash": "b7f80b31eba437063c235e07740a86f678fde9494b25d72fcdf0fb456bb0c018",
+      "id": "a100bbe04feb41a6a1699371795a1568",
+      "payload": {
+        "entity": {
+          "artifacts": [
+            {
+              "created_at": "2026-10-31T13:04:25.193820+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "digest": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "id": "79f6cec9e563454aa3f70ad177ab58ac",
+              "kind": "document",
+              "revision": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "summary": "SYNTHETIC fixture; no external content fetched.",
+              "task_id": "a6eae14d053f4a069fba401ee25b2523",
+              "title": "Synthetic document fixture",
+              "uri": "https://example.invalid/synthetic/document"
+            }
+          ],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.178491+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [
+            {
+              "artifact_digest": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "artifact_id": "79f6cec9e563454aa3f70ad177ab58ac",
+              "assumptions": ["Synthetic evidence, not executed validation"],
+              "command": "SYNTHETIC FIXTURE \u2014 no command executed",
+              "created_at": "2026-10-31T13:04:25.195340+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "id": "099e7bb9d4d54cb2b4067dc84086ea9e",
+              "kind": "test",
+              "revision": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "status": "passed",
+              "summary": "SYNTHETIC demonstration only; this is not an actual test result.",
+              "task_id": "a6eae14d053f4a069fba401ee25b2523",
+              "tool": "synthetic-fixture",
+              "tool_version": "1"
+            }
+          ],
+          "id": "a6eae14d053f4a069fba401ee25b2523",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_review",
+          "title": "Build evidence intake",
+          "updated_at": "2026-10-31T13:04:25.197079+00:00"
+        },
+        "state_digest": "495d9ebaa69af4c2eb54a4c830376f23cfdad6e99280132177600b69e0b49cc1",
+        "task": {
+          "artifacts": [
+            {
+              "created_at": "2026-10-31T13:04:25.193820+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "digest": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "id": "79f6cec9e563454aa3f70ad177ab58ac",
+              "kind": "document",
+              "revision": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "summary": "SYNTHETIC fixture; no external content fetched.",
+              "task_id": "a6eae14d053f4a069fba401ee25b2523",
+              "title": "Synthetic document fixture",
+              "uri": "https://example.invalid/synthetic/document"
+            }
+          ],
+          "assignee_id": "2e29dac63e3d4b5d98ad42e54472e879",
+          "created_at": "2026-10-31T13:04:25.178491+00:00",
+          "created_by": "0b06883166e548dbb6e8c6515b280543",
+          "criteria": [
+            "Artifact has exact revision binding",
+            "Independent human reviews evidence"
+          ],
+          "dependencies": [],
+          "description": "Synthetic demonstration task",
+          "evidence": [
+            {
+              "artifact_digest": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "artifact_id": "79f6cec9e563454aa3f70ad177ab58ac",
+              "assumptions": ["Synthetic evidence, not executed validation"],
+              "command": "SYNTHETIC FIXTURE \u2014 no command executed",
+              "created_at": "2026-10-31T13:04:25.195340+00:00",
+              "created_by": "2e29dac63e3d4b5d98ad42e54472e879",
+              "id": "099e7bb9d4d54cb2b4067dc84086ea9e",
+              "kind": "test",
+              "revision": "3fa25d4d8be845cad0a3334d7e5b99c461afd25ea06eaa8b0a3ca9ea124e8882",
+              "status": "passed",
+              "summary": "SYNTHETIC demonstration only; this is not an actual test result.",
+              "task_id": "a6eae14d053f4a069fba401ee25b2523",
+              "tool": "synthetic-fixture",
+              "tool_version": "1"
+            }
+          ],
+          "id": "a6eae14d053f4a069fba401ee25b2523",
+          "priority": "normal",
+          "project_id": "5d333a838ace4d21b79271d0bfc90604",
+          "reviews": [],
+          "scope": ["docs/"],
+          "status": "in_review",
+          "title": "Build evidence intake",
+          "updated_at": "2026-10-31T13:04:25.197079+00:00"
+        }
+      },
+      "previous_hash": "b77c3324cb166a33058dba39f7a0b82407eb33f42b79f1f406b7a2b60056215d",
+      "seq": 20,
+      "task_id": "a6eae14d053f4a069fba401ee25b2523",
+      "type": "task.transition"
+    }
+  ]
+}

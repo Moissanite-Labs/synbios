@@ -30,6 +30,14 @@ def seed_demo(path):
             store.command(at, 'task.transition', {'task_id': tid, 'status': 'in_review'})
             if task == tasks[0]:
                 store.command(reviewer['token'], 'review.create', {'task_id': tid, 'artifact_id': artifact['id'], 'revision': digest, 'decision': 'approved', 'comment': 'Synthetic independent human review for demonstration.'})
-        return {'synthetic': True, 'token': token, 'principal': operator['principal'], 'reviewer_token': reviewer['token'], 'reviewer': reviewer['principal'], 'message': 'Synthetic fixture seeded. Store credentials securely; they are shown only here.'}
+        return {
+            'synthetic': True,
+            'token': token,
+            'principal': operator['principal'],
+            'reviewer_token': reviewer['token'],
+            'reviewer': reviewer['principal'],
+            'agent_token': agent['token'],
+            'message': 'Synthetic fixture seeded. Store credentials securely; they are shown only here.',
+        }
     finally:
         store.close()

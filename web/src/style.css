@@ -123,6 +123,12 @@ p {
   letter-spacing: -1.3px;
   padding: 0 12px;
 }
+.demo-sidebar-note {
+  margin: 0 0 18px;
+  font-size: 10px;
+  line-height: 1.45;
+  color: #6a735f;
+}
 .logo > span:first-child {
   display: grid;
   place-items: center;
@@ -1119,6 +1125,16 @@ legend {
   width: 100%;
   justify-content: space-between;
   margin-top: 5px;
+}
+.demo-credentials {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+.demo-credentials .secondary {
+  width: 100%;
+  justify-content: center;
 }
 .trust {
   display: flex;
