@@ -33,7 +33,6 @@ import "@fontsource/space-grotesk/latin-400.css";
 import "@fontsource/space-grotesk/latin-500.css";
 import "@fontsource/space-grotesk/latin-600.css";
 import "./style.css";
-import { demoRequest, demoTokens, DemoError } from "./demo/store";
 
 const demoMode = import.meta.env.VITE_DEMO_MODE === "true";
 type CommandPayload = Record<string, unknown>;
@@ -165,15 +164,25 @@ function App() {
   const [secret, setSecret] = useState("");
   const [notice, setNotice] = useState("");
   const [mobile, setMobile] = useState(false);
+  const [demoOperatorToken, setDemoOperatorToken] = useState("");
+  const [demoReviewerToken, setDemoReviewerToken] = useState("");
+  useEffect(() => {
+    if (!demoMode) return;
+    void import("./demo/store").then((mod) => {
+      setDemoOperatorToken(mod.demoTokens.operator);
+      setDemoReviewerToken(mod.demoTokens.reviewer);
+    });
+  }, []);
   async function api(path: string, method = "GET", body?: unknown) {
     const requestGeneration = generation.current;
     if (demoMode) {
+      const demo = await import("./demo/store");
       try {
-        return await demoRequest(path, method, token, body);
+        return await demo.demoRequest(path, method, token, body);
       } catch (e) {
         const message =
-          e instanceof DemoError ? e.message : (e as Error).message;
-        const status = e instanceof DemoError ? e.status : 500;
+          e instanceof demo.DemoError ? e.message : (e as Error).message;
+        const status = e instanceof demo.DemoError ? e.status : 500;
         if (status === 401 && requestGeneration === generation.current) {
           logout();
           setError(message);
@@ -499,14 +508,16 @@ function App() {
               <button
                 type="button"
                 className="secondary"
-                onClick={() => setToken(demoTokens.operator)}
+                onClick={() => setToken(demoOperatorToken)}
+                disabled={!demoOperatorToken}
               >
                 Use demo operator credential
               </button>
               <button
                 type="button"
                 className="text"
-                onClick={() => setToken(demoTokens.reviewer)}
+                onClick={() => setToken(demoReviewerToken)}
+                disabled={!demoReviewerToken}
               >
                 Switch to demo reviewer
               </button>
