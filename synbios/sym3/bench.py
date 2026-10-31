@@ -24,7 +24,7 @@ from .prior_art import (
 from .tokens import load_tokenizers, token_count
 
 # Quoted from the SYM-2P v2 dense pilot (PR #6, closed without merging). No
-# encoder in this repository reproduces them, so make bench cannot check them.
+# encoder in this repository reproduces them, so make bench cannot re-derive them.
 V2_SESSION_STEADY_TOKENS_11 = 1202
 V2_SESSION_HANDSHAKE_TOTAL_11 = 1415
 V2_HANDSHAKE_TOKENS_11 = V2_SESSION_HANDSHAKE_TOTAL_11 - V2_SESSION_STEADY_TOKENS_11
