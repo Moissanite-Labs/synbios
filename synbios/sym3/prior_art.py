@@ -41,8 +41,8 @@ def _toon_fallback(action: str, payload: dict) -> str:
     return "\n".join(lines)
 
 
-def encode_terse_english_line(action: str, payload: dict) -> str:
-    """Lossless terse English (Chain-of-Draft style): no filler, all fields."""
+def encode_key_value_line(action: str, payload: dict) -> str:
+    """Lossless key=value text: command words, then every canonical field as key=value."""
     p = canonical_payload(action, payload)
     parts = [action.replace(".", " ")]
     for key in sorted(p.keys()):

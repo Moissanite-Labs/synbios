@@ -18,7 +18,7 @@ from .prior_art import (
     AGORA_ARXIV,
     agora_setup_prefix,
     encode_agora_line,
-    encode_terse_english_line,
+    encode_key_value_line,
     encode_toon_line,
 )
 from .tokens import load_tokenizers, token_count
@@ -30,6 +30,7 @@ V2_SESSION_HANDSHAKE_TOTAL_11 = 1415
 V2_HANDSHAKE_TOKENS_11 = V2_SESSION_HANDSHAKE_TOTAL_11 - V2_SESSION_STEADY_TOKENS_11
 
 CACHE_ASSUMPTION = "Assumes one-time decoder prefix billed at 10% of min setup tokens (not API-measured)."
+KEY_VALUE_LABEL = "key=value text (lossless)"
 PRIMARY_NOTE = (
     "**Primary accounting** (used in break-even and verdict): total = setup (min, decode-sufficient) + messages."
 )
@@ -121,7 +122,7 @@ def run_bench_for_transcript(name: str, messages: list[tuple[str, dict]]) -> dic
     pretty_json_lines = [json.dumps(p, sort_keys=True, indent=2) for _, p in messages]
     english_lossy_lines = [render_english_lossy(a, p) for a, p in messages]
     english_lossless_lines = [render_english_lossless(a, p) for a, p in messages]
-    terse_lines = [encode_terse_english_line(a, p) for a, p in messages]
+    key_value_lines = [encode_key_value_line(a, p) for a, p in messages]
     toon_lines = [encode_toon_line(a, p) for a, p in messages]
     agora_lines = [encode_agora_line(a, p) for a, p in messages]
     agora_setup = agora_setup_prefix()
@@ -133,7 +134,7 @@ def run_bench_for_transcript(name: str, messages: list[tuple[str, dict]]) -> dic
     rows.append(_row_from_lines("pretty JSON", pretty_json_lines, specs, primary))
     rows.append(_row_from_lines("English (lossy summary)", english_lossy_lines, specs, primary))
     rows.append(_row_from_lines("English (lossless)", english_lossless_lines, specs, primary))
-    rows.append(_row_from_lines("English terse (lossless, CoD-style)", terse_lines, specs, primary))
+    rows.append(_row_from_lines(KEY_VALUE_LABEL, key_value_lines, specs, primary))
     rows.append(_row_from_lines("TOON (toon-format)", toon_lines, specs, primary))
     rows.append(
         _row_from_lines(
@@ -200,6 +201,59 @@ def run_bench_for_transcript(name: str, messages: list[tuple[str, dict]]) -> dic
     }
 
 
+def _verdict(results: list[dict], primary: str) -> str:
+    """Verdict prose computed from the lifecycle_11 rows, so it cannot drift from the tables."""
+    block = next(b for b in results if b["transcript"] == "lifecycle_11")
+    rows = {r["label"]: r for r in block["rows"]}
+
+    def total(label: str, key: str = "total_primary") -> int:
+        return rows[label][key][primary]
+
+    def versus(value: int, baseline: int) -> str:
+        return "below" if value < baseline else "above" if value > baseline else "equal to"
+
+    n = block["count"]
+    json_total = total("compact JSON")
+    english = total("English (lossless)")
+    refs, adaptive = total("SYM-3 refs"), total("SYM-3 adaptive")
+    agora = next(label for label in rows if label.startswith("Agora envelope"))
+    # One shared phrase only when both encoders have the same full setup and
+    # total; otherwise each gets its own setup and comparison with JSON.
+    full_rows = [
+        (name, rows[label]["setup_full"][primary], total(label, "total_full"))
+        for name, label in (("refs", "SYM-3 refs"), ("adaptive", "SYM-3 adaptive"))
+    ]
+    if full_rows[0][1:] == full_rows[1][1:]:
+        _, setup_full, value = full_rows[0]
+        full = (
+            f"Under **full** setup ({setup_full} + messages), refs/adaptive **{value}** — "
+            f"**{versus(value, json_total)}** compact JSON at {n} messages. "
+        )
+    else:
+        full = (
+            "Under **full** setup, "
+            + " and ".join(
+                f"{name} **{value}** ({setup_full} + messages, **{versus(value, json_total)}** compact JSON)"
+                for name, setup_full, value in full_rows
+            )
+            + f" at {n} messages. "
+        )
+    return (
+        f"Under **primary** totals (decode-sufficient setup min + messages), SYM-3 **refs** totals **{refs}** "
+        f"vs compact JSON **{json_total}** and lossless English **{english}** on lifecycle_{n} "
+        f"({'wins' if refs < min(json_total, english) else 'does not win'}). "
+        f"**Adaptive** is **{adaptive}** ({'also ' if refs < json_total and adaptive < json_total else ''}"
+        f"{versus(adaptive, json_total)} JSON). "
+        f"{full}"
+        f"Prior-art rows: TOON **{total('TOON (toon-format)')}**, {KEY_VALUE_LABEL.split(' (')[0]} "
+        f"**{total(KEY_VALUE_LABEL)}**, Agora envelope **{total(agora)}** "
+        "(messages-only baselines except Agora setup). "
+        "SYM-3 **refs** is closest to Agora-style content addressing ([arXiv:2410.11905](https://arxiv.org/abs/2410.11905)). "
+        "lifecycle_40/200 show larger wire savings; cached† totals use the 10% assumption only. "
+        "Do not compare against English (lossy summary) for information equivalence."
+    )
+
+
 def format_markdown(results: list[dict], primary: str) -> str:
     lines = [
         "# SYM-3 benchmark",
@@ -249,15 +303,7 @@ def format_markdown(results: list[dict], primary: str) -> str:
 
     lines.append("## Verdict (primary accounting, o200k_base)")
     lines.append("")
-    lines.append(
-        "Under **primary** totals (decode-sufficient setup min + messages), SYM-3 **refs** totals **491** vs compact JSON **682** "
-        "and lossless English **686** on lifecycle_11 (wins). **Adaptive** is **512** (also below JSON). "
-        "Under **full** setup (524 + messages), refs/adaptive **765** — **above** compact JSON at 11 messages. "
-        "Prior-art rows: TOON **805**, terse English **691**, Agora envelope **1027** (messages-only baselines except Agora setup). "
-        "SYM-3 **refs** is closest to Agora-style content addressing ([arXiv:2410.11905](https://arxiv.org/abs/2410.11905)). "
-        "lifecycle_40/200 show larger wire savings; cached† totals use the 10% assumption only. "
-        "Do not compare against English (lossy summary) for information equivalence."
-    )
+    lines.append(_verdict(results, primary))
     lines.append("")
     return "\n".join(lines) + "\n"
 
