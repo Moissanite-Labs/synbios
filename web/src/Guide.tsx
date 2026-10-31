@@ -15,6 +15,73 @@ function Ui({ children }: { children: React.ReactNode }) {
   return <strong className="guide-ui">{children}</strong>;
 }
 
+function WalkthroughSteps({ demoMode }: { demoMode: boolean }) {
+  return (
+    <ol className="guide-steps">
+      {demoMode ? (
+        <li>
+          On the login screen, click <Ui>Use demo operator credential</Ui>. The
+          demo signs you in immediately—no separate <Ui>Open workspace</Ui>{" "}
+          step.
+        </li>
+      ) : (
+        <>
+          <li>
+            On your machine, run <code>python -m synbios init</code> (empty
+            store) or <code>python -m synbios demo</code> (seeded sample
+            record), then <code>python -m synbios serve</code> and open the
+            printed URL.
+          </li>
+          <li>
+            Paste the operator credential from the CLI output and click{" "}
+            <Ui>Open workspace</Ui>.
+          </li>
+        </>
+      )}
+      <li>
+        Open <Ui>Projects</Ui> in the sidebar. Review the seeded project (for
+        example <Ui>Synthetic · Commons starter</Ui>) or click{" "}
+        <Ui>New project</Ui> to create one.
+      </li>
+      <li>
+        Go to <Ui>The forge</Ui>. Click the open task{" "}
+        <Ui>Review release readiness</Ui>, or use <Ui>Create task</Ui> on this
+        view to define scope, criteria, and dependencies.
+      </li>
+      <li>
+        In the task panel, click <Ui>Claim task</Ui>, then <Ui>Start work</Ui>.
+      </li>
+      <li>
+        Click <Ui>Add artifact</Ui> and bind a document or Git revision with its
+        SHA-256 digest. A new artifact becomes the current candidate; older
+        evidence is marked stale.
+      </li>
+      <li>
+        Click <Ui>Add evidence</Ui> and record test results tied to that exact
+        artifact revision.
+      </li>
+      <li>
+        When passing test evidence exists and dependencies are accepted, click{" "}
+        <Ui>Submit for review</Ui>.
+      </li>
+      <li>
+        Click <Ui>Sign out</Ui>, then sign in with{" "}
+        <Ui>Switch to demo reviewer</Ui> (demo) or paste the reviewer credential
+        (local). Open the same task and click <Ui>Review candidate</Ui>. Choose
+        approve or request changes, then <Ui>Save to record</Ui>.
+      </li>
+      <li>
+        With the operator again, open the accepted task and click{" "}
+        <Ui>Export</Ui> to download a portable bundle JSON.
+      </li>
+      <li>
+        Open <Ui>Access &amp; trust</Ui>, click <Ui>Verify a bundle</Ui>, paste
+        the export, and run verification.
+      </li>
+    </ol>
+  );
+}
+
 export function Guide({ open, onClose, demoMode }: GuideProps) {
   if (!open) return null;
 
@@ -54,77 +121,43 @@ export function Guide({ open, onClose, demoMode }: GuideProps) {
             </p>
           </section>
 
-          {demoMode && (
+          {demoMode ? (
             <section className="guide-callout">
               <h3>This Pages build</h3>
               <p>
                 You are viewing the <strong>in-browser demo</strong>. Rules
                 match the real store, but nothing is saved to disk—refresh the
-                tab and the record resets. For a persistent forge, run{" "}
-                <code>python -m synbios serve</code> locally (see the{" "}
+                tab and the record resets. For a persistent forge on your
+                machine, run <code>python -m synbios init</code> or{" "}
+                <code>python -m synbios demo</code>, then{" "}
+                <code>python -m synbios serve</code> (see the{" "}
                 <a href={REPO_URL} target="_blank" rel="noreferrer">
                   repository README
                 </a>
                 ).
               </p>
             </section>
+          ) : (
+            <section className="guide-callout">
+              <h3>Local forge</h3>
+              <p>
+                This build talks to the Python API on the same origin. Start a
+                store with <code>python -m synbios init</code> or seeded data
+                with <code>python -m synbios demo</code>, then run{" "}
+                <code>python -m synbios serve</code> and paste the operator
+                credential shown in the terminal.
+              </p>
+            </section>
           )}
 
           <section>
-            <h3>Try the demo flow</h3>
+            <h3>{demoMode ? "Try the demo flow" : "Walk through a task"}</h3>
             <p>
-              Use the synthetic credentials on the login screen, then follow the
-              same path a real operator would take:
+              {demoMode
+                ? "Use the synthetic credentials on the login screen, then follow the same path a real operator would take:"
+                : "After serve is running, work through a task end to end:"}
             </p>
-            <ol className="guide-steps">
-              <li>
-                On the login screen, click <Ui>Use demo operator credential</Ui>
-                , then <Ui>Open workspace</Ui>.
-              </li>
-              <li>
-                Open <Ui>Projects</Ui> in the sidebar. Review the seeded project
-                (for example <Ui>Synthetic · Commons starter</Ui>) or click{" "}
-                <Ui>New project</Ui> to create one.
-              </li>
-              <li>
-                Go to <Ui>The forge</Ui>. Click a task card (for example{" "}
-                <Ui>Define contribution guide</Ui>) or, from Projects, use{" "}
-                <Ui>Create task</Ui> to define scope, criteria, and
-                dependencies.
-              </li>
-              <li>
-                In the task panel, click <Ui>Claim task</Ui>, then{" "}
-                <Ui>Start work</Ui>.
-              </li>
-              <li>
-                Click <Ui>Add artifact</Ui> and bind a document or Git revision
-                with its SHA-256 digest. A new artifact becomes the current
-                candidate; older evidence is marked stale.
-              </li>
-              <li>
-                Click <Ui>Add evidence</Ui> and record test results tied to that
-                exact artifact revision.
-              </li>
-              <li>
-                When passing test evidence exists and dependencies are accepted,
-                click <Ui>Submit for review</Ui>.
-              </li>
-              <li>
-                Click <Ui>Sign out</Ui>, then sign in with{" "}
-                <Ui>Switch to demo reviewer</Ui> (or paste the reviewer
-                credential). Open the same task and click{" "}
-                <Ui>Review candidate</Ui>. Choose approve or request changes,
-                then <Ui>Save to record</Ui>.
-              </li>
-              <li>
-                With the operator again, open the accepted task and click{" "}
-                <Ui>Export</Ui> to download a portable bundle JSON.
-              </li>
-              <li>
-                Open <Ui>Access &amp; trust</Ui>, click <Ui>Verify a bundle</Ui>
-                , paste the export, and run verification.
-              </li>
-            </ol>
+            <WalkthroughSteps demoMode={demoMode} />
           </section>
 
           <section>
@@ -163,25 +196,29 @@ export function Guide({ open, onClose, demoMode }: GuideProps) {
           <section>
             <h3>How this differs from GitHub</h3>
             <p>
-              GitHub hosts repositories, pull requests, and checks. Synbios does
-              not replace that hosting—it records{" "}
+              GitHub hosts repositories, pull requests, and CI. Synbios does not
+              replace that hosting—it records{" "}
               <strong>accountable task workflow</strong> on your machine:
             </p>
             <ul>
               <li>
-                <strong>Explicit claims</strong>—an open task must be claimed
-                before work proceeds; grants scope what an agent may do per
-                task.
+                <strong>Evidence binding</strong>—GitHub ties checks to commit
+                SHAs on branches. Synbios ties reported test evidence to an
+                artifact revision digest; principals attest results—the forge
+                does not execute tests or merge code.
               </li>
               <li>
-                <strong>Artifact + evidence binding</strong>—submissions tie
-                test reports to an exact revision digest, not just a branch
-                name.
+                <strong>Human review on the candidate</strong>—GitHub blocks
+                self-approval on pull requests too. Synbios requires an
+                independent human reviewer bound to the exact artifact under
+                review, with acceptance recorded in the same transaction as that
+                decision.
               </li>
               <li>
-                <strong>Independent human review</strong>—the reviewer must be a
-                human principal other than the artifact author; approval seals
-                the task in the same transaction as the checks.
+                <strong>Claims vs. attachments</strong>—moving a task to{" "}
+                <Ui>in progress</Ui> or <Ui>in review</Ui> requires a claim (and
+                grants). On an open, unclaimed task, principals with grants may
+                still attach artifacts and evidence before anyone claims it.
               </li>
               <li>
                 <strong>Local audit chain</strong>—events hash together to
@@ -195,9 +232,10 @@ export function Guide({ open, onClose, demoMode }: GuideProps) {
               </li>
             </ul>
             <p className="guide-muted">
-              Not built in 0.1: remote federation, signed identity, running
-              tests inside the forge, Git-host enforcement, or sandboxing agent
-              tools—the roadmap describes planned directions.
+              Planned (not in 0.1): branch-aware diffs, file browsing in the UI,
+              merge queues, authenticated multi-user sign-in, remote federation,
+              signed identity, in-forge test execution, Git-host enforcement,
+              and sandboxing agent tools—the roadmap describes directions.
             </p>
           </section>
 

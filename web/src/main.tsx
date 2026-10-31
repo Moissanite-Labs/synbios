@@ -293,7 +293,7 @@ function App() {
     }
   }
   useEffect(() => {
-    if (!selected && !modal && !secret) return;
+    if (!selected && !modal && !secret && !guideOpen) return;
     const previous = document.activeElement as HTMLElement;
     const dialog = [
       ...document.querySelectorAll<HTMLElement>("[role=dialog]"),
@@ -310,6 +310,10 @@ function App() {
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (secret) return;
+        if (guideOpen) {
+          closeGuide();
+          return;
+        }
         if (modal) setModal("");
         else setSelected("");
       }
@@ -330,7 +334,7 @@ function App() {
       document.removeEventListener("keydown", key);
       previous?.focus();
     };
-  }, [selected, modal, secret]);
+  }, [selected, modal, secret, guideOpen]);
   const human = state?.actor.kind === "human";
   const task = state?.tasks.find((t) => t.id === selected);
   const current = task?.artifacts.at(-1);

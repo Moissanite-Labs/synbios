@@ -104,7 +104,13 @@ export async function login(
   const tokenInput = page.locator("[name=token]");
   await tokenInput.waitFor();
   await dismissGuideIfOpen(page);
-  await tokenInput.fill(
+  // Traces, screenshots and videos are disabled to protect ephemeral credentials.
+  await page.evaluate(
+    (token) => {
+      const input = document.querySelector<HTMLInputElement>("[name=token]");
+      if (!input) throw new Error("Credential input missing");
+      input.value = token;
+    },
     reviewer ? workspace.reviewer_token : workspace.token,
   );
   await page.getByRole("button", { name: "Open workspace" }).click();

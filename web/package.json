@@ -7,12 +7,12 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
     "build:pages": "VITE_BASE=/synbios/ VITE_DEMO_MODE=true npm run build",
-    "preview:pages": "npm run build:pages && npx vite preview --host 127.0.0.1 --base /synbios/",
+    "preview:pages": "npm run build:pages && npx vite preview --host 127.0.0.1 --port 4173 --strictPort --base /synbios/",
     "typecheck": "tsc --noEmit",
     "check": "npm run format:check && npm run typecheck && npm run build",
     "format": "prettier --write src vite.config.ts tsconfig.json index.html package.json",
     "format:check": "prettier --check src vite.config.ts tsconfig.json index.html package.json",
-    "test:e2e": "playwright test"
+    "test:e2e": "npm run build && playwright test && playwright test -c playwright.pages.config.ts demo-guide.spec.ts"
   },
   "dependencies": {
     "@fontsource/dm-sans": "5.3.0",

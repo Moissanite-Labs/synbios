@@ -1434,7 +1434,7 @@ legend {
 .guide {
   width: min(640px, 100%);
   max-height: min(90vh, 900px);
-  background: var(--paper);
+  background: #f5f3ed;
   border: 1px solid var(--line);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
   display: flex;
@@ -1493,7 +1493,7 @@ legend {
 }
 .guide-ui {
   font-weight: 600;
-  color: var(--ink);
+  color: #282e27;
 }
 .guide-dl {
   margin: 0;
@@ -1530,7 +1530,7 @@ legend {
   gap: 6px;
   border: 1px solid var(--line);
   background: #f7f8f3;
-  color: var(--ink);
+  color: #282e27;
   font-size: 12px;
   font-weight: 600;
   padding: 7px 11px;
