@@ -23,6 +23,8 @@ from .prior_art import (
 )
 from .tokens import load_tokenizers, token_count
 
+# Quoted from the SYM-2P v2 dense pilot (PR #6, closed without merging). No
+# encoder in this repository reproduces them, so make bench cannot re-derive them.
 V2_SESSION_STEADY_TOKENS_11 = 1202
 V2_SESSION_HANDSHAKE_TOTAL_11 = 1415
 V2_HANDSHAKE_TOKENS_11 = V2_SESSION_HANDSHAKE_TOTAL_11 - V2_SESSION_STEADY_TOKENS_11
@@ -148,7 +150,7 @@ def run_bench_for_transcript(name: str, messages: list[tuple[str, dict]]) -> dic
     if name == "lifecycle_11":
         rows.append(
             {
-                "label": "SYM-2P v2 session + handshake (PR #6)",
+                "label": "SYM-2P v2 session + handshake",
                 "setup_min": {primary: V2_HANDSHAKE_TOKENS_11},
                 "setup_full": {primary: V2_HANDSHAKE_TOKENS_11},
                 "setup_cached": {primary: cached_setup_cost(V2_HANDSHAKE_TOKENS_11)},
@@ -158,7 +160,7 @@ def run_bench_for_transcript(name: str, messages: list[tuple[str, dict]]) -> dic
                 "total_cached": {
                     primary: cached_setup_cost(V2_HANDSHAKE_TOKENS_11) + V2_SESSION_STEADY_TOKENS_11
                 },
-                "note": "PR #6 dense pilot numbers",
+                "note": "quoted from unmerged PR #6, not measured by this bench",
             }
         )
 
@@ -261,7 +263,7 @@ def format_markdown(results: list[dict], primary: str) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    from .reproduce import BENCH_MD, run_all_benches, verify_against_committed
+    from .reproduce import BENCH_MD, run_all_benches, verify_against_committed, write_bench_md
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -274,8 +276,7 @@ def main(argv: list[str] | None = None) -> int:
     _results, md, _primary = run_all_benches()
 
     if args.write_md:
-        normalized = md if md.endswith("\n") else md + "\n"
-        BENCH_MD.write_text(normalized, encoding="utf-8")
+        write_bench_md(md)
         print(md)
         print(f"Wrote {BENCH_MD}")
         return 0
