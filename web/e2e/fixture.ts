@@ -89,12 +89,21 @@ finally:
     }
   },
 });
+export async function dismissGuideIfOpen(page: Page) {
+  const dismiss = page.getByRole("button", { name: "Got it", exact: true });
+  if (await dismiss.isVisible().catch(() => false)) {
+    await dismiss.click();
+  }
+}
 export async function login(
   page: Page,
   workspace: Workspace,
   reviewer = false,
 ) {
   await page.goto(workspace.url);
+  const tokenInput = page.locator("[name=token]");
+  await tokenInput.waitFor();
+  await dismissGuideIfOpen(page);
   // Traces, screenshots and videos are disabled to protect ephemeral credentials.
   await page.evaluate(
     (token) => {

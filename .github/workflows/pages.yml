@@ -32,17 +32,14 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - name: Build static client
         working-directory: web
-        env:
-          VITE_BASE: /synbios/
-          VITE_DEMO_MODE: "true"
         run: |
           npm ci
-          npm run build
+          npm run build:pages
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
       - name: Package Pages artifact
         run: |
           tar --dereference --hard-dereference \
-            --directory web/dist \
+            --directory web/dist-pages \
             -cvf "$RUNNER_TEMP/artifact.tar" \
             --exclude=.git --exclude=.github .
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

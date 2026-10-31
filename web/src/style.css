@@ -1421,6 +1421,148 @@ legend {
     margin-top: 25px;
   }
 }
+.guide-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(22, 26, 18, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.guide {
+  width: min(640px, 100%);
+  max-height: min(90vh, 900px);
+  background: #f5f3ed;
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+}
+.guide > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 22px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.guide > header h2 {
+  margin: 6px 0 0;
+  font-size: 22px;
+}
+.guide > header button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+}
+.guide-body {
+  overflow: auto;
+  padding: 8px 22px 20px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.guide-body section {
+  margin-top: 20px;
+}
+.guide-body h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+.guide-body p,
+.guide-body li,
+.guide-body dd {
+  margin: 0 0 10px;
+  color: #3a4034;
+}
+.guide-callout {
+  padding: 12px 14px;
+  background: #f3f5ec;
+  border: 1px solid #dde2d0;
+}
+.guide-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+.guide-steps li {
+  margin-bottom: 10px;
+}
+.guide-ui {
+  font-weight: 600;
+  color: #282e27;
+}
+.guide-dl {
+  margin: 0;
+}
+.guide-dl dt {
+  font-weight: 600;
+  margin-top: 10px;
+}
+.guide-dl dt:first-child {
+  margin-top: 0;
+}
+.guide-dl dd {
+  margin-left: 0;
+}
+.guide-muted {
+  font-size: 12px;
+  color: var(--muted);
+}
+.guide-repo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.guide > footer {
+  padding: 14px 22px 18px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+}
+.guide-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: #f7f8f3;
+  color: #282e27;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 11px;
+  cursor: pointer;
+}
+.guide-trigger:hover {
+  background: #eef1e8;
+}
+.login-form-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.login-form-top .eyebrow {
+  margin: 0;
+}
+.top-actions .guide-trigger {
+  margin-right: 4px;
+}
+@media (max-width: 640px) {
+  .guide-backdrop {
+    padding: 0;
+    align-items: stretch;
+  }
+  .guide {
+    max-height: 100vh;
+    width: 100%;
+    border: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
