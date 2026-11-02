@@ -13,7 +13,7 @@ Minimal setup is **decode-sufficient**: all used cmd/status/kind wire mappings a
 | pretty JSON | 0 | 849 | 849 | 0 | 849 | 0.0 | 849.0 |
 | English (lossy summary) | 0 | 478 | 478 | 0 | 478 | 0.0 | 478.0 |
 | English (lossless) | 0 | 686 | 686 | 0 | 686 | 0.0 | 686.0 |
-| English terse (lossless, CoD-style) | 0 | 691 | 691 | 0 | 691 | 0.0 | 691.0 |
+| key=value text (lossless) | 0 | 691 | 691 | 0 | 691 | 0.0 | 691.0 |
 | TOON (toon-format) | 0 | 805 | 805 | 0 | 805 | 0.0 | 805.0 |
 | Agora envelope (arXiv:2410.11905) | 48 | 979 | 1027 | 48 | 1027 | 4.8 | 983.8 |
 | SYM-2P v1 | 0 | 2719 | 2719 | 0 | 2719 | 0.0 | 2719.0 |
@@ -44,7 +44,7 @@ Minimal setup is **decode-sufficient**: all used cmd/status/kind wire mappings a
 | pretty JSON | 0 | 6516 | 6516 | 0 | 6516 | 0.0 | 6516.0 |
 | English (lossy summary) | 0 | 2283 | 2283 | 0 | 2283 | 0.0 | 2283.0 |
 | English (lossless) | 0 | 5242 | 5242 | 0 | 5242 | 0.0 | 5242.0 |
-| English terse (lossless, CoD-style) | 0 | 5328 | 5328 | 0 | 5328 | 0.0 | 5328.0 |
+| key=value text (lossless) | 0 | 5328 | 5328 | 0 | 5328 | 0.0 | 5328.0 |
 | TOON (toon-format) | 0 | 6049 | 6049 | 0 | 6049 | 0.0 | 6049.0 |
 | Agora envelope (arXiv:2410.11905) | 48 | 6449 | 6497 | 48 | 6497 | 4.8 | 6453.8 |
 | SYM-2P v1 | 0 | 12925 | 12925 | 0 | 12925 | 0.0 | 12925.0 |
@@ -74,7 +74,7 @@ Minimal setup is **decode-sufficient**: all used cmd/status/kind wire mappings a
 | pretty JSON | 0 | 33120 | 33120 | 0 | 33120 | 0.0 | 33120.0 |
 | English (lossy summary) | 0 | 11439 | 11439 | 0 | 11439 | 0.0 | 11439.0 |
 | English (lossless) | 0 | 26754 | 26754 | 0 | 26754 | 0.0 | 26754.0 |
-| English terse (lossless, CoD-style) | 0 | 27180 | 27180 | 0 | 27180 | 0.0 | 27180.0 |
+| key=value text (lossless) | 0 | 27180 | 27180 | 0 | 27180 | 0.0 | 27180.0 |
 | TOON (toon-format) | 0 | 30785 | 30785 | 0 | 30785 | 0.0 | 30785.0 |
 | Agora envelope (arXiv:2410.11905) | 48 | 32897 | 32945 | 48 | 32945 | 4.8 | 32901.8 |
 | SYM-2P v1 | 0 | 65273 | 65273 | 0 | 65273 | 0.0 | 65273.0 |
@@ -98,5 +98,5 @@ Minimal setup is **decode-sufficient**: all used cmd/status/kind wire mappings a
 
 ## Verdict (primary accounting, o200k_base)
 
-Under **primary** totals (decode-sufficient setup min + messages), SYM-3 **refs** totals **491** vs compact JSON **682** and lossless English **686** on lifecycle_11 (wins). **Adaptive** is **512** (also below JSON). Under **full** setup (524 + messages), refs/adaptive **765** — **above** compact JSON at 11 messages. Prior-art rows: TOON **805**, terse English **691**, Agora envelope **1027** (messages-only baselines except Agora setup). SYM-3 **refs** is closest to Agora-style content addressing ([arXiv:2410.11905](https://arxiv.org/abs/2410.11905)). lifecycle_40/200 show larger wire savings; cached† totals use the 10% assumption only. Do not compare against English (lossy summary) for information equivalence.
+Under **primary** totals (decode-sufficient setup min + messages), SYM-3 **refs** totals **491** vs compact JSON **682** and lossless English **686** on lifecycle_11 (wins). **Adaptive** is **512** (also below JSON). Under **full** setup (524 + messages), refs/adaptive **765** — **above** compact JSON at 11 messages. Prior-art rows: TOON **805**, key=value text **691**, Agora envelope **1027** (messages-only baselines except Agora setup). SYM-3 **refs** is closest to Agora-style content addressing ([arXiv:2410.11905](https://arxiv.org/abs/2410.11905)). lifecycle_40/200 show larger wire savings; cached† totals use the 10% assumption only. Do not compare against English (lossy summary) for information equivalence.
 
