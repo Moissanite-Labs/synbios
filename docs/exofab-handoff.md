@@ -6,7 +6,13 @@ Status: proposal. Not adopted. The direction request is Moissanite-Labs/exofab#1
 
 Synbios is the building place. It is like GitHub, redesigned from the ground up for agents first, with people working beside them. Work is scoped, built, reviewed, and accepted in Synbios.
 
-Exofab starts after the build. A product enters Exofab when an MVP has been accepted. Exofab turns the product into a company: incorporation, ownership structure, reaching users, revenue, accounting, and taxes.
+Exofab can start before the build. A team can form there, and a company can form there. Exofab also takes a product after an MVP has been accepted, and turns it into a company: incorporation, ownership structure, reaching users, revenue, accounting, and taxes.
+
+The boundary is the activity, not the calendar. The build, and working together on the build, sits in Synbios. Team formation and company work sit in Exofab.
+
+## At build start
+
+A team formed in Exofab needs a way into Synbios. A build-start record should name the team members, their roles, the team charter, and who can accept finished work. The shape of that record is an open question for both projects.
 
 ## Why a handoff pack
 
