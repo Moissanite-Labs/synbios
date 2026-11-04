@@ -17,12 +17,12 @@ Date: Wed Nov 4, 2026 (America/Chicago, CST). Research only. Nothing has been ru
 ## 1. Verdict
 
 1. **zk_inference receipts are feasible for a model we run ourselves. They are not feasible for the other four model families' agents.** FlashProve can only prove a model whose weights the prover holds and has committed to. Claude, GPT and similar agents can't get zk receipts unless their vendor runs a prover.
-2. **The 4090 is a plausible prover after a real but bounded port. Treat this as unproven until it runs.** The code uses no Hopper-only instructions; its floor is sm_80-class tensor ops. But it assumes the H100 in several places: shared memory over 99 KB per block in at least six kernels, hard-coded 227 KB and 132-SM constants, and a pinned compiler. All of it was tested only on an H100.
+2. **The laptop RTX 4090 (ASUS Zenbook Pro Duo: 16 GB VRAM, about 32 GB system RAM to confirm on the machine, lower power than a desktop 4090) is a plausible prover after a real but bounded port. Treat this as unproven until it runs.** The code uses no Hopper-only instructions; its floor is sm_80-class tensor ops. But it assumes the H100 in several places: shared memory over 99 KB per block in at least six kernels, hard-coded 227 KB and 132-SM constants, and a pinned compiler. All of it was tested only on an H100.
 3. **The Titan XP can't run the prover.** It has no tensor cores, and CUDA 13 can't compile for Pascal. Use its host as a CPU verifier or a CI box.
 4. **No popular small open MoE fits FlashProve's model layout without changes.** Phase 1 should use synthetic weights at small shapes, plus a dense Llama-shaped model such as TinyLlama-1.1B, which fits the format. Phase 3 should train a model to FlashProve's exact layout.
 5. **A proof says which model computed an output. It does not say which agent sent it.** zk_inference therefore adds to `signature` receipts and never replaces them.
 
-Rough numbers for a 1 to 2B-active model on a 4090, after the port: **about 100 to 500 proved tok/s**, which is one 1,024-token request every 2 to 10 s at batch 24. **Proofs of about 6 to 15 MB. CPU verification in seconds.** All three are [inference]. Section 4 gives the basis.
+Rough numbers for a 1 to 2B-active model on that laptop, after the port: **about 40 to 150 proved tok/s [inference]** (one planning range used in sections 1 and 4), which is roughly one 1,024-token request every 7 to 25 s at batch 8 to 12. **Proofs of about 6 to 15 MB [inference]. CPU verification in seconds [inference].** Section 4 gives the basis.
 
 ---
 
@@ -34,11 +34,11 @@ Rough numbers for a 1 to 2B-active model on a 4090, after the port: **about 100 
 | Hopper-only instructions | **None** [code]. A grep of `prover/` finds no `wgmma`, TMA / `cp.async.bulk`, thread-block clusters, `setmaxnreg`, `mbarrier`, fp8 or tensor maps. | — |
 | Features actually used | `mma.sync.aligned.m16n8k32` int8/uint8, which needs sm_80+ (`engine/tiled.cuh:149`, `weights_blocks/row_pass_fused.cuh:111`, `hiding/forest_fused.cuh:79`, `hiding/forest_fused_folds.cuh:34`, `hiding/forest_fused_second.cuh:56`). `ldmatrix`, sm_75+ (`engine/tiled.cuh:157`). int8 `wmma`, sm_72+ (`weights_blocks/experts_in_one_launch.cuh:303-346`). `__pipeline_memcpy_async` (cp.async, sm_80) in 5 files. cuBLAS int8→int32 GEMMs (`prover/docs/build.md:86`, `:127`). | Generic |
 | H100-sized constants | Dynamic shared memory per block above Ada's 99 KB cap: `engine/tiled.cuh:93-103` (108 KB), `engine/fold.cuh:1401` (100 KB), `hash_commitment/hf_range_windows.cuh:513-515,701` (128 KiB), `hiding/count_keys16.cuh:70` (128 KiB), `hiding/forest_table.cuh:481` (128 KiB), `hiding/forest_keys.cuh:284` (powers + 128 KiB). `hiding/forest_keys.cuh:363` hard-codes `227*1024`. SM count hard-coded at `engine/fold.cuh:1412` (132) and `head/claims_lib.cuh:752` (264 = 2×132). I didn't size `forest_fused.cuh:69,330`, `forest_fused_second.cuh:31` or `experts_in_one_launch` `Tile4::SMEM`. | H100-specific |
-| GPU must be idle | Refuses to start if more than 2 GiB is already in use (`common/common.h:58`). | Generic. On a desktop card, run headless. |
+| GPU must be idle | Refuses to start if more than 2 GiB is already in use (`prover/common/common.h:55`). | Generic. On a shared laptop GPU, close other GPU clients. |
 | CUDA | Only 13.2 Update 2 (nvcc 13.2.86) is supported (`prover/docs/build.md:7`, `:96-102`). It's pinned because of an nvcc bug fixed in 13.2u2 and a silent miscompile in 13.0.88. Driver 580+ (`build.md:9`). | Generic |
 | CPU | x86-64 with SHA extensions (`README.md:64`). Uses 24 cores in the timed runs. | Generic |
-| Host RAM | Maverick: 270 to 300 GB (`guide/performance.md:25`). Small 8-layer kit: 10 GB (`README.md:59`). Weights are streamed from host RAM to the GPU (write-up), so host RAM scales with total weights. | Scales with the model |
-| VRAM | Maverick at batch 24 peaks at 73 GB. Batch 64 is unreliable at 80 GB (`guide/known-limits.md:100-103`). | Scales with batch × activations [inference] |
+| Host RAM | At batch 24 on Maverick, the serving container reached up to 269.7 GB on the public 4-bit files and up to 278.3 GB on synthetic weights, file cache not counted (`guide/performance.md:25`; row RES-24 in `docs/limits-all-rows.tsv`). Committing reached about 299.6 GB (`guide/performance.md:25`). Small 8-layer kit: 10 GB (`README.md:59`). From the code, each program can hold up to about 2× the on-disk weight size at start (row R27 in `docs/limits-all-rows.tsv`) [code]. | Scales with total weights |
+| GPU VRAM | At batch 64 on an 80 GB H100 with public weights, the GPU reached 80,629 of 81,559 MiB; batch 64 is not to be relied on (`guide/performance.md:29`, `guide/known-limits.md:100-103`). FlashProve does not publish a GPU peak for batch 24. | Scales with batch × activations [inference] |
 | Window | T ≤ 1,024 (see section 6) | Format-wide |
 
 **Which parts are Maverick-only and which are generic MoE.** The format is generic over shapes within fixed rules (`verifier/docs/parameter-file.md:102-111`):
@@ -56,30 +56,36 @@ The *architecture* is fixed to the Llama-4 pattern (`docs/model.md:51-77`, `:223
 - No biases.
 - Norm gains are folded into the matrices (`docs/model.md:82`).
 - Greedy argmax output (`docs/model.md:266-290`).
-- RoPE on or off per layer through `rp` in `KL.bin` (`docs/model.md:102`).
+- RoPE on or off per layer through `rp` in `KL.bin` (`docs/model.md:110`).
 
 **The Lean theorem covers one shape only.** Lean's soundness theorem holds "for one fixed proof format and model size": only the scale file and eight numbers may vary (`lean/THEOREM.md:300-302`). The Lean verifier accepts only full-size (Maverick-shaped) files (`tools/lean-verify/README.md:18`). So **for any other shape you get the C++ verifier, which is tested against the protocol but has no machine-checked proof** (`guide/known-limits.md:5-19`).
 
 ---
 
-## 3. Fit on the 4090 and the Titan XP
+## 3. Fit on the laptop RTX 4090, DGX Spark, and the Titan XP
 
-### RTX 4090 (Ada, sm_89, 24 GB): possible after a port [inference]
+### Laptop RTX 4090 (Ada, sm_89, 16 GB VRAM): possible after a port [inference]
+
+Machine: ASUS Zenbook Pro Duo with about 32 GB system RAM (confirm on the unit). This is not a 24 GB desktop card and runs at lower sustained power.
 
 What has to change:
 1. **Build.** Change `-arch=sm_90a` to `sm_89` in `prover/build.sh:617` and the test scripts. CUDA 13.2 supports Ada. The pinned toolkit can stay.
 2. **Shared memory.** Ada allows at most 99 KB of dynamic shared memory per block, versus 227 KB on the H100. Retile at least the six kernels listed in section 2, and the ones I haven't sized. Replace `227*1024` in `forest_keys.cuh:363` with a query of `cudaDevAttrMaxSharedMemoryPerBlockOptin`. Each change is local, but every retiled kernel has to be re-checked byte for byte against the existing tests.
-3. **SM count.** Read it at run time instead of using 132 / 264 (`fold.cuh:1412`, `claims_lib.cuh:752`). Ada has 128 SMs.
-4. **Memory.** Size the batch to fit 24 GB. A 1 to 2B-active model has about 15 to 25% of Maverick's per-request cells (section 4). At batch 24 the Maverick working set (~73 GB) scales to roughly 11 to 18 GB [inference]. Run headless because of the 2 GiB rule.
-5. **Re-validate.** Run `prover/tests/` (`unit.sh`, `engine_twins.sh`) and the small-kit end-to-end run (`README.md:59`) on the 4090. Any engine difference has to fail loudly.
+3. **SM count.** Read it at run time instead of using 132 / 264 (`engine/fold.cuh:1412`, `head/claims_lib.cuh:752`). The laptop 4090 has 76 SMs (Ada mobile), not 128.
+4. **Memory.** Size batch to fit 16 GB VRAM. FlashProve's published GPU peak is at batch 64 on an 80 GB H100 (80,629 MiB used; `guide/performance.md:29`). For a ~1 to 2B-active shape, cell counts are roughly 15 to 25% of Maverick's (section 4) [inference]. **Estimate:** if VRAM scaled linearly with those cells and batch size, Maverick at batch 64 on 80 GB implies about 12 GB at batch 8 and about 9 GB at batch 4 for the same shape ratio—but 16 GB leaves little headroom, so **start at batch 4 to 8** and measure. Host RAM on this machine (~32 GB) fits TinyLlama-scale totals (about 1.1B parameters) but is tight for multi‑tens‑of‑GB MoE totals unless weights stream with little duplication; row R27 allows up to ~2× on-disk weight bytes transiently at start [inference from R27 + kit sizes].
+5. **Re-validate.** Run `prover/tests/` (`unit.sh`, `engine_twins.sh`) and the small-kit end-to-end run (`README.md:59`) on the laptop. Any engine difference has to fail loudly.
 
-Speed relative to an H100 [inference, from NVIDIA spec figures, not measured here]:
-- About a third of the dense int8 tensor throughput (~660 vs ~1,979 TOPS).
-- About a third of the memory bandwidth (~1.0 vs 3.35 TB/s).
-- Similar or slightly higher int32 ALU rate, which matters for 64-bit Goldilocks field arithmetic and BLAKE2b hashing.
-- I use **0.3 to 0.6× H100** for the prover overall.
+Speed relative to an H100 [inference, from NVIDIA spec figures and mobile TDP, not measured here]:
+- Desktop Ada is about a third of H100 dense int8 tensor throughput and memory bandwidth; a mobile 4090 is lower still (power and thermal limits).
+- I use **about 0.15 to 0.35× H100** for end-to-end proving on this laptop, before batch limits.
 
-Unknown: how much host RAM and CPU the 4090 machine has. A 1 to 4B-total model needs roughly 10 to 30 GB of host RAM [inference, from the 10 GB small kit and the 290 GB for 400B].
+### NVIDIA DGX Spark (GB10, 128 GB unified memory): next funded hardware step [inference + open questions]
+
+Planned after Phase 3 on the laptop and before an H100-class cluster (seed funding). Unified memory may reduce host‑versus‑device staging pressure, but FlashProve was written around discrete H100 host RAM in the hundreds of gigabytes (`guide/performance.md:25`; row RES-24). **Open questions [inference]:**
+- Whether the prover builds and runs on Blackwell (GB10): same retiling for shared memory per block (99 KB on Ada; Blackwell limits differ), the hard-coded `227*1024` and 132‑SM assumptions, and `-arch=sm_90a` in `prover/build.sh:617`.
+- Whether unified 128 GB changes the practical host-RAM ceiling for commits and streaming weights, or merely moves the bottleneck.
+
+FlashProve at commit `9e2bdd8` does **not** mention DGX Spark in its tree (search finds no "Spark", "DGX", or "GB10"). Anthropic's Nov 2026 write-up may discuss other hardware; treat any DGX Spark / Maverick claim there as external unless FlashProve adds it.
 
 ### Titan XP (Pascal, sm_61, 12 GB): no as a prover [code + NVIDIA docs]
 
@@ -124,18 +130,18 @@ These are rough cell counts for one 1,024-token request on Maverick (my arithmet
 - **Fixed per-call cost** (start-up, tables, Merkle paths, proof-of-work rounds of 20/28 bits) dominates at tiny sizes.
 - **Proof size** grows slowly, roughly with the number of layer groups and the log of table sizes: 4.3 MB tiny, 18.8 MB full.
 
-**Estimates.** I scale the H100 batch-24 time by two ratios against Maverick. "Cells" (activations + attention + head) is the pessimistic case. "Active params" is the optimistic case. Then I apply 0.3 to 0.6× for the 4090. **All of this is [inference].**
+**Estimates.** I scale the H100 batch-24 rate (111.23 tok/s [measured]) by a cell or active-parameter ratio against Maverick, then by **0.15 to 0.35×** for the laptop 4090 and **smaller batches (about 4 to 12)** because of 16 GB VRAM. **All of this is [inference].**
 
-| Model (shape) | Active / total | Cells ratio | H100 tok/s (est.) | **4090 tok/s (est.)** | Proof size (est.) |
+| Model (shape) | Active / total | Cells ratio | H100 tok/s (est.) | **Laptop 4090 tok/s (est.)** | Proof size (est.) |
 |---|---|---|---|---|---|
-| TinyLlama-1.1B dense (L22 d2048 H32 G4 f5632 V32k), off the shelf | 1.03B / 1.10B | 0.20 | 540 to 1,700 | **160 to 1,000** | 6 to 12 MB |
-| Custom MoE "1B" (L16 d2048 H16 G4 NE16 fe4096 V32k) | 1.04B / 4.1B | 0.15 | 740 to 1,700 | **220 to 1,000** | 6 to 12 MB |
-| Custom MoE "2B" (L24 d2560 H20 G4 NE32 fe4096 V64k) | 2.06B / 13.9B | 0.25 | 440 to 870 | **130 to 520** | 8 to 14 MB |
-| Same "1B" at T = 2,048 (needs format work, section 6) | 1.04B / 4.1B | 0.35 | 630 to 3,400* | **190 to 2,000*** | +~1 MB |
+| TinyLlama-1.1B dense (L22 d2048 H32 G4 f5632 V32k), off the shelf | 1.03B / 1.10B | 0.20 | 540 to 1,700 | **30 to 120** | 6 to 12 MB |
+| Custom MoE "1B" (L16 d2048 H16 G4 NE16 fe4096 V32k) | 1.04B / 4.1B | 0.15 | 740 to 1,700 | **40 to 140** | 6 to 12 MB |
+| Custom MoE "2B" (L24 d2560 H20 G4 NE32 fe4096 V64k) | 2.06B / 13.9B | 0.25 | 440 to 870 | **25 to 95** | 8 to 14 MB |
+| Same "1B" at T = 2,048 (needs format work, section 6) | 1.04B / 4.1B | 0.35 | 630 to 3,400* | **35 to 180*** | +~1 MB |
 
 \* Per token. A 2,048 window holds twice the tokens, so the time per request goes up even when tok/s doesn't fall.
 
-**For planning, assume about 100 to 400 tok/s on a 4090,** which is one 1,024-token request every 2.5 to 10 s at batch 24. Anything above that is upside. Committing should take minutes, not 39 min, because it is one pass over far fewer weights [inference].
+**For planning, use the same range as section 1: about 40 to 150 tok/s on the laptop 4090 [inference],** at batch 8 to 12 for a ~1B-active model—one 1,024-token request roughly every 7 to 25 s. Anything above that is upside. Committing should take minutes, not 39 min, because it is one pass over far fewer weights [inference].
 
 Other scaling notes:
 - **Experts:** with top-1 routing, active parameters don't change as NE grows. But per-request weight work and host RAM grow with total weights. Few experts with a wide shared expert is the cheap direction.
@@ -144,7 +150,7 @@ Other scaling notes:
 
 **Exact numbers without a GPU.** `cp_verify -plan accounting <folder> 128` prints exact proof, key and entry sizes from a parameter file with no GPU (`prover/examples/TARGET-KITS.md:56-58`). Writing valid parameter files for these shapes is the first Phase 1 task. It hasn't been run yet.
 
-**Serving cost.** Exact match means serving the integer model itself. Of 96 replies from each of two stock engines, none matched (`guide/known-limits.md:45-48`; paper §7.4). The vLLM plug-in for the integer model ran at 0.58 to 0.63 s per token on Maverick. That is slow, but a 1B model should be much faster [inference].
+**Serving cost.** Exact match means serving the integer model itself. Of 96 replies from each of two stock engines, none matched (`guide/known-limits.md:45-48`; paper §7.4). Through vLLM with a plug-in for the integer model, FlashProve reports **0.58 to 1.46 seconds per token†** over 48 short replies on Maverick (`guide/performance.md:35`). Figures marked † in that guide are from runs not in the repository and do not carry over to other hardware (`guide/performance.md:31`). That serving rate is slow at full size; a 1B model should be much faster [inference].
 
 ---
 
@@ -176,7 +182,7 @@ Other scaling notes:
 
 **Two more caveats for receipt wording**
 - A YES doesn't say whose weights they are. The commitment ID has to come from a trusted registry, never from the prover's files (`guide/known-limits.md:29-35`; `AGENTS.md`).
-- Proofs are about the integer model. In one measurement its top token differed from the float model's at 6.81% of positions (`known-limits.md:58-63`). Our receipts should name the integer model's commitment, not "model X."
+- Proofs are about the integer model. In one measurement its top token differed from the float model's at 6.81% of positions (`guide/known-limits.md:58-63`). Our receipts should name the integer model's commitment, not "model X."
 
 ---
 
@@ -189,9 +195,9 @@ Other scaling notes:
 - **Other components:** SiLU-gated FFN, no biases, RMSNorm (gains folded), RoPE with theta0 10k or 500k and no RoPE scaling, rp per layer.
 - **Vocabulary:** V ≤ 2^20. Any tokenizer is fine, since the proof sees token IDs only. A smaller V makes the head cheaper.
 - **Window:** T ≤ 1,024 today.
-- **Integer inference:** activations clamped to 12 bits and weights in −4,096..4,095 (`docs/model.md:96-98`), with lookup tables for SiLU, sigmoid, exp and rotary. Train with **quantization-aware training** toward those ranges, then check with the package's range checks. FlashProve's own check passed 544 of 544 windows on public 4-bit weights (`known-limits.md:60-63`).
+- **Integer inference:** activations clamped to 12 bits and weights in −4,096..4,095 (`docs/model.md:96-98`), with lookup tables for SiLU, sigmoid, exp and rotary. Train with **quantization-aware training** toward those ranges, then check with the package's range checks. FlashProve's own check passed 544 of 544 windows on public 4-bit weights (`guide/known-limits.md:60-63`).
 - **Decoding:** greedy only for exact match. Serve the integer model itself, not a float engine.
-- **Lean coverage:** only if we train at Maverick's exact shape (Phase 4).
+- **Lean coverage:** only if we train at Maverick's exact shape (Phase 5).
 
 **Open models that fit without training**
 - **None of the usual small MoEs:**
@@ -225,19 +231,19 @@ Other scaling notes:
 - **Exit:** every agent action in Synbios carries a verified signature receipt, and the hub rejects a signature that doesn't match.
 - **Risk:** a signature proves key possession, not which model ran. A key holder can still pose as another model family.
 
-### Phase 1: reproduce FlashProve on the 4090 (synthetic first, then TinyLlama)
+### Phase 1: reproduce FlashProve on the laptop RTX 4090 (synthetic first, then TinyLlama)
 1. On a CPU, with no GPU: build `cp_verify`, check the stored proofs (Route 1), and run `-plan accounting` on parameter files for our candidate shapes to get exact proof sizes.
 2. Port the prover to sm_89 (section 3). Run `prover/tests/` and the small kit (`target_small_f2_roomy`) end to end. Log every change.
-3. Scale the synthetic config up to ~1B active, then TinyLlama, still at T = 1,024. Measure tok/s, VRAM, host RAM, commit time and proof size against section 4.
+3. Scale the synthetic config up to ~1B active, then TinyLlama, still at T = 1,024. Use batch 4 to 8 first on 16 GB VRAM. Measure tok/s, VRAM, host RAM, commit time and proof size against section 4.
 
-- **Exit:** the 4090 produces proofs that an unmodified `cp_verify` on another CPU machine accepts, for a ~1B model, at ≥ 100 tok/s at batch 24, with all unit tests passing. Altered proofs and altered requests are rejected.
+- **Exit:** the laptop produces proofs that an unmodified `cp_verify` on another CPU machine accepts, for a ~1B model, at **≥ 40 tok/s** at the largest stable batch that fits 16 GB, with all unit tests passing. Altered proofs and altered requests are rejected.
 - **Risks:**
   - Retiling for 99 KB shared memory takes longer than expected or hurts speed.
   - Hidden H100 assumptions turn up.
   - The pinned-compiler issue shows up again on sm_89.
-  - Host RAM on the 4090 machine is unknown.
+  - About 32 GB host RAM limits MoE totals and startup duplication (row R27).
   - Dense NE = 0 may have untested paths.
-  - FlashProve is fast-moving prototype code, written mostly by AI with no independent audit (`known-limits.md:131-133`).
+  - FlashProve is fast-moving prototype code, written mostly by AI with no independent audit (`guide/known-limits.md:131-133`).
 
 ### Phase 2: zk_inference receipts in Synbios
 - The agent's runtime serves the integer model with greedy decoding (exact match). It writes the window and later asks the prover. Proving is post-hoc, so receipts can be **proved on a sample or on dispute**, not inline.
@@ -251,8 +257,8 @@ Other scaling notes:
 - **Risks:**
   - Integer serving speed.
   - 1,024-token windows cut long agent outputs.
-  - The commitment runs out (leaf-table batch budget, `known-limits.md:93-98`; the small kit has only 1,235 batches) and there's no linkage between commitments.
-  - Proofs can be altered byte for byte and still verify (`known-limits.md:176-184`), so key the receipt on the claim, not on the proof file's bytes.
+  - The commitment runs out (leaf-table batch budget, `guide/known-limits.md:93-98`; the small kit has only 1,235 batches) and there's no linkage between commitments.
+  - Proofs can be altered byte for byte and still verify (`guide/known-limits.md:176-184`), so key the receipt on the claim, not on the proof file's bytes.
 
 ### Phase 3: train our own efficient provable model (linked to scry's training track)
 - Train a Llama-4-pattern MoE at ~1 to 2B active, for example L16 to 24, d 2048 to 2560, NE 16 to 32, top-1 plus shared, V 32k to 64k, no biases, theta 10k. Use quantization-aware training to 12-bit activations and 13-bit weights. Use the scry track for data and recipe.
@@ -261,27 +267,34 @@ Other scaling notes:
   - The integer model passes range checks on held-out windows.
   - Quality is good enough for the agent role it serves (set the bar before training).
   - The integer model's top token matches the float model's at ≥ 95% of positions.
-  - It proves on the 4090 at the Phase 1 rate or better.
+  - It proves on the laptop at the Phase 1 rate or better.
 - **Risks:** top-1 routing and 12-bit activations cost quality, training compute and data, and the tokenizer and vocabulary trade quality against head cost. There is still no Lean coverage at this shape.
 
-### Phase 4: a larger provable model on bigger hardware (gated on funding, e.g. a seed round)
+### Phase 4: DGX Spark pilot (GB10, 128 GB unified; gated on seed funding)
+
+Port and measure FlashProve on NVIDIA DGX Spark after Phase 3. Goals: validate Blackwell build flags and shared-memory retiling on GB10, find stable batch sizes within 128 GB unified memory, and prove the Phase 3 model at higher throughput than the laptop.
+
+- **Exit:** end-to-end commit, prove and `cp_verify` on the trained ~1 to 2B model; measured tok/s and memory documented; open questions in section 3 answered or narrowed.
+- **Risks:** FlashProve never tested on Blackwell; unified memory may not remove host-RAM rules in the code; funding and supply timing.
+
+### Phase 5: a larger provable model on H100-class hardware (gated on further funding)
 Everything in this phase is an **estimate**.
 
-**What it unlocks over the 4090 phases**
-- **Model size:** 10 to 100B+ total weights. An H100 proves a 400B-total, 16B-active model at 111 tok/s, so a 30 to 100B-total model with 3 to 8B active should run at a few hundred tok/s per H100 (estimate).
+**What it unlocks over the laptop and Spark phases**
+- **Model size:** 10 to 100B+ total weights. An H100 proves a 400B-total, 16B-active model at 111 tok/s [measured], so a 30 to 100B-total model with 3 to 8B active should run at a few hundred tok/s per H100 (estimate).
 - **Lean-verified receipts:** a model at Maverick's exact shape (Maverick itself, or ours trained to that shape) falls inside the Lean theorem and `lean-verify` as shipped. This is the only route to machine-checked soundness without new Lean work.
-- **Context:** room for the T = 2,048 format work, which is quadratic attention cost. 80 GB fits it where 24 GB may not (estimate).
-- **Throughput and coverage:** per-GPU rates add up because each GPU runs its own prover. One commitment per GPU is a stated FlashProve duty, `docs/operators-duties.md` "a new commitment". That moves from **proving a sample of receipts or only disputed ones (4090)** to **proving every response (cluster)**.
+- **Context:** room for the T = 2,048 format work, which is quadratic attention cost. 80 GB discrete VRAM fits it where 16 GB laptop VRAM may not (estimate).
+- **Throughput and coverage:** per-GPU rates add up because each GPU runs its own prover. One commitment per GPU is a stated FlashProve duty, `docs/operators-duties.md` "a new commitment". That moves from **proving a sample of receipts or only disputed ones (laptop)** to **proving every response (cluster)**.
 
   Rough sizing: proving all output at N tok/s needs about N / (per-GPU prover rate) GPUs. For example, 1,000 tok/s of agent output on a 2B-active model at ~600 tok/s per H100 needs ~2 H100s (estimate).
 
 **Hardware class**
 - 1 to 8× H100/H200 80 GB+ (sm_90a, the tested target, so no port).
-- Each GPU host needs host RAM about 0.7× total weights in bytes. The Maverick host used ~290 GB for 232 GB of 4-bit weights (`performance.md:25`).
+- Host RAM scales with weight file size: Maverick runs used about 270 to 300 GB in the container while serving 232 GB of 4-bit weight files (`guide/performance.md:25`; row RES-24). The code allows up to about 2× the on-disk weight bytes at start (row R27) [code].
 - 24+ CPU cores per GPU with SHA extensions.
 
 **What drives the cost**
-- GPU-hours. Proving is 70 to 95× the cost of plain prefill (`performance.md:27`).
+- GPU-hours. Proving is 71.4 to 93.0× the cost of plain prefill per GPU at batch 24 (`guide/performance.md:27`).
 - Large host-RAM servers.
 - The fraction of responses we choose to prove.
 - Re-commitment as leaf tables run out.
@@ -296,12 +309,14 @@ Everything in this phase is an **estimate**.
 
 ## 9. Open questions
 
-1. Host RAM, CPU (SHA extensions?) and driver on the 4090 machine.
+1. Confirm system RAM and CPU (SHA extensions?) and driver on the Zenbook RTX 4090.
 2. Does the prover run NE = 0 (dense) end to end on the GPU today? It has to be tried.
 3. Shared-memory sizes of the kernels I didn't size, and the speed cost of retiling to ≤ 99 KB.
-4. Real 4090 vs H100 speed for this code: the 0.3 to 0.6× factor is a guess.
+4. Real laptop 4090 vs H100 speed for this code: the 0.15 to 0.35× factor is a guess.
 5. Exact proof sizes for our shapes, from `cp_verify -plan accounting` on CPU.
 6. How many batches a commitment allows at our table size, and whether `-public-weights` (we may publish our own weights) changes that limit.
 7. If weights are public and small, deterministic re-execution of the integer model on a CPU is a simpler competitor to zk for receipts. zk wins only when weights stay private or re-running is too costly. Decide which property Synbios actually needs.
 8. Where the Synbios `attestation` schema lives. It isn't on the public `main` yet.
-9. Whether to fund re-instantiating Lean at our own shape, or accept C++-verifier-only receipts until Phase 4.
+9. Whether to fund re-instantiating Lean at our own shape, or accept C++-verifier-only receipts until Phase 5.
+10. DGX Spark / GB10: sm target, shared-memory limits, and whether 128 GB unified memory changes FlashProve's host-RAM behavior (section 3).
+11. Whether Anthropic's external write-up claims VerInf or others ran Maverick on DGX Spark—that claim is not in FlashProve at `9e2bdd8`.

@@ -30,10 +30,11 @@ Evidence receipts gain an `attestation` field typed by kind: `signature` now (a 
 | Phase | Concrete result | Acceptance gate |
 | --- | --- | --- |
 | 0. Signature receipts | `attestation` field in the receipt schema with `signature` implemented and the zk fields reserved | A forged or replayed receipt is rejected. Adding `zk_inference` later needs no migration |
-| 1. Reproduce on a 4090 | Anthropic's open-source FlashProve ported from H100 to an RTX 4090, proving synthetic weights and then a small model such as TinyLlama-1.1B | Proofs from the 4090 pass the unchanged CPU verifier, and the measured throughput and proof size are recorded |
+| 1. Reproduce on laptop RTX 4090 | FlashProve ported from H100 to the Zenbook's 16 GB RTX 4090, proving synthetic weights then a small model such as TinyLlama-1.1B at modest batch | Proofs pass the unchanged CPU verifier; throughput, batch size, VRAM and proof size are recorded |
 | 2. zk receipts in Synbios | Receipts carry after-the-fact proofs, proved on a sample or on dispute and checked on CPU | Tampered output or swapped weights fail verification. Receipts state their 1,024-token window limit |
-| 3. Our own provable model | An efficient model of about 1 to 2B active parameters, trained to FlashProve's layout with integer-aware training, shared with the scry training track | It serves real agent work on the 4090 with every sampled receipt verifying |
-| 4. Larger model, funded | Larger models on H100-class hardware once funding such as a seed round lands. This unlocks bigger models, longer windows, Lean-verified receipts and proving every response | Cost per proved response and verification time meet targets set at that point |
+| 3. Our own provable model | About 1 to 2B active parameters, trained to FlashProve's layout with integer-aware training (scry track), served on the laptop | Sampled receipts on real agent work verify on CPU |
+| 4. DGX Spark pilot | GB10, 128 GB unified memory; seed-funded port and measurement after Phase 3 | End-to-end prove and verify on the Phase 3 model; Blackwell and unified-memory questions answered or narrowed |
+| 5. Larger model, H100-class | Bigger models on H100/H200 once further funding lands: Lean-verified receipts at Maverick shape, longer windows, prove every response | Cost per proved response and verification time meet targets set at that point |
 
 ## Current engineering limits
 
