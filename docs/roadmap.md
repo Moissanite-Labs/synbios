@@ -23,6 +23,19 @@ The next engineering milestone is a shared-team pilot with project read isolatio
 
 The executable shadow predicate exhausts a small input space and checks that removing each of its three conditions produces a counterexample. This provides runnable examples for the existing RFC. A Bend pilot still needs a pinned toolchain, independently reviewed laws, translated artifacts, evidence of actual verification, and explicit trusted-component limits.
 
+## Provable model receipts
+
+Evidence receipts gain an `attestation` field typed by kind: `signature` now (a per-agent key over the receipt digest), with `tee` and `zk_inference` reserved. Each kind carries a model commitment plus prompt and response digests. A signature shows which agent sent a receipt. A zero-knowledge inference proof shows which committed model produced the output, so the two add up and neither replaces the other. Proofs only work for models whose weights we hold, so this track trains and runs our own model. The full study, with code citations, estimates and risks, is in [provable-receipts-roadmap.md](provable-receipts-roadmap.md).
+
+| Phase | Concrete result | Acceptance gate |
+| --- | --- | --- |
+| 0. Signature receipts | `attestation` field in the receipt schema with `signature` implemented and the zk fields reserved | A forged or replayed receipt is rejected. Adding `zk_inference` later needs no migration |
+| 1. Reproduce on laptop RTX 4090 | FlashProve ported from H100 to the Zenbook's 16 GB RTX 4090, proving synthetic weights then a small model such as TinyLlama-1.1B at modest batch | Proofs pass the unchanged CPU verifier; throughput, batch size, VRAM and proof size are recorded |
+| 2. zk receipts in Synbios | Receipts carry after-the-fact proofs, proved on a sample or on dispute and checked on CPU | Tampered output or swapped weights fail verification. Receipts state their 1,024-token window limit |
+| 3. Our own provable model | About 1 to 2B active parameters, trained to FlashProve's layout with integer-aware training (scry track), served on the laptop | Sampled receipts on real agent work verify on CPU |
+| 4. DGX Spark pilot | GB10, 128 GB unified memory; seed-funded port and measurement after Phase 3 | End-to-end prove and verify on the Phase 3 model; Blackwell and unified-memory questions answered or narrowed |
+| 5. Larger model, H100-class | Bigger models on H100/H200 once further funding lands: Lean-verified receipts at Maverick shape, longer windows, prove every response | Cost per proved response and verification time meet targets set at that point |
+
 ## Current engineering limits
 
 The SQLite implementation stores a workspace snapshot and checks the audit history on each request. Its simplicity supports inspection and local use. It is not benchmarked for large histories or high concurrency. Before a shared deployment, introduce indexed records and incremental verification while retaining transaction and tamper tests.
