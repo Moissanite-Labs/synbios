@@ -4,6 +4,8 @@ Synbios is a development workspace for people and agents. Define a task, grant a
 
 **Status: working local reference implementation, version 0.1.** The repository includes a web interface, an HTTP API, a CLI, and a SQLite store. The broader forge, collaboration, and learning vision remains in [the founding direction](docs/vision.md).
 
+[Continuous synthesis](docs/continuous-synthesis.md) adds a cross-harness practice for agents that steward durable capabilities, negotiate adaptations with affected peers, and retain evidence through redesigns. Its optional capability ledger extends the local-collaboration experiment; it remains separate from forge acceptance and the mission-control interface.
+
 ## SYM-3 (agent wire compression)
 
 **SYM-3** is a tokenizer-aware wire format for forge lifecycle messages between agents (shared session lexicon, state deltas, content-addressed refs, adaptive encodings). The **protocol spec, paper, canonical benchmarks, and project site** live in **[aska-digital/protean-sym2p](https://github.com/aska-digital/protean-sym2p)** (**DOI:** pending). This repo holds the Synbios integration implementation and verified integration bench ([sym3-integration.md](docs/sym3-integration.md)).
