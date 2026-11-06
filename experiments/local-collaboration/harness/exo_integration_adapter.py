@@ -35,7 +35,7 @@ def host_grants_payload(workspace_root, write_roots):
 
     Validators on exo #1189 expect host-relative roots; we anchor them under the workspace root string.
     """
-    root = str(workspace_root).rstrip("/")
+    root = str(Path(workspace_root).expanduser().resolve())
     return {
         "integration_surface": INTEGRATION_SURFACE["name"],
         "integration_surface_version": INTEGRATION_SURFACE["version"],

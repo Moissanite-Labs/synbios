@@ -50,7 +50,7 @@ The server imports the Coordinator for every state operation and has no duplicat
 | `POST /api/intentions/finish` | `{id, status: "completed" or "abandoned"}` → updated intention. |
 | `POST /api/alternatives` | `{intent_id, label, location?: absolute dir outside workspace, OR materialize_mode: "copy"\|"git_worktree"\|"directory", materialize_parent, materialize_source?, status?, candidate_digest?}` → candidate bound to a real directory. |
 | `POST /api/alternatives/compare` | `{id}` → read-only compare; updates `compare_evidence` on the alternative. |
-| `POST /api/alternatives/status` | `{id, status}` → status update; `accepted` requires `compare_evidence.allow_accept`. |
+| `POST /api/alternatives/status` | `{id, status}` → status update; `accepted` requires stored `compare_evidence` from a prior compare (not identical-trees-only). |
 
 Send `X-Lattice-Token: TOKEN` for status and mutations. Every POST requires the exact `Origin: http://127.0.0.1:PORT`, `Content-Type: application/json`, and one valid Content-Length of 1–65536 bytes. Paths are arrays of at most 128 strings. Actor identities remain caller-asserted even with the session capability. The bootstrap capability is held only in page memory and never put in URLs, console logs, or browser storage.
 

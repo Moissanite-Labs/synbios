@@ -211,6 +211,22 @@ def verify_isolated_path(workspace_root, path):
     return resolved
 
 
+def verify_materialize_parent(workspace_root, parent, source):
+    """Parent must be outside the workspace, exist, and not lie on or under the source tree (copy safety)."""
+    parent_res = verify_isolated_path(workspace_root, parent)
+    try:
+        source_res = Path(source).expanduser().resolve(strict=True)
+    except (OSError, ValueError, RuntimeError) as error:
+        raise ValueError("Materialize source must be an existing directory") from error
+    if not source_res.is_dir():
+        raise ValueError("Materialize source must be an existing directory")
+    if parent_res == source_res:
+        raise ValueError("materialize_parent must not be the same directory as materialize_source")
+    if within(parent_res, source_res):
+        raise ValueError("materialize_parent must not be inside the materialize source tree")
+    return parent_res, source_res
+
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS workspace (singleton INTEGER PRIMARY KEY CHECK(singleton=1), data TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS intentions (id TEXT PRIMARY KEY, data TEXT NOT NULL);
@@ -481,6 +497,8 @@ class Coordinator:
     def alternative(self, identity, label, location, status="proposed", candidate_digest=None, materialize_mode=None, materialize_parent=None, materialize_source=None):
         if status not in ALTERNATIVE_STATES or not label.strip():
             raise ValueError("Alternative requires a non-empty label and valid status")
+        if status == "accepted":
+            raise ValueError("Cannot register an alternative as accepted before compare evidence exists")
         if candidate_digest is not None and (len(candidate_digest) != 64 or any(c not in "0123456789abcdef" for c in candidate_digest)):
             raise ValueError("Candidate digest must be lowercase SHA-256 hex")
         self.connection.execute("BEGIN IMMEDIATE")
@@ -494,11 +512,10 @@ class Coordinator:
                 parent = materialize_parent
                 if parent is None:
                     raise ValueError("materialize_parent is required when materialize_mode is set")
-                parent_path = Path(parent).expanduser().resolve(strict=True)
                 source = materialize_source if materialize_source is not None else self.root
-                source_path = Path(source).expanduser().resolve(strict=True)
+                parent_path, source_path = verify_materialize_parent(self.root, parent, source)
                 dest, meta = materialize_isolated_tree(materialize_mode, source_path, parent_path, label)
-                resolved_path = dest.resolve()
+                resolved_path = verify_isolated_path(self.root, dest)
                 isolation = {
                     "kind": meta["kind"],
                     "mode": meta["mode"],
@@ -543,8 +560,8 @@ class Coordinator:
             previous = item["status"]
             if status == "accepted":
                 evidence = item.get("compare_evidence")
-                if not evidence or not evidence.get("allow_accept"):
-                    raise ValueError("accepted requires prior successful compare_alternative with identical tree digest evidence (allow_accept)")
+                if not evidence or "baseline_tree_digest" not in evidence:
+                    raise ValueError("accepted requires prior successful compare_alternative (stored compare evidence)")
             item["status"] = status
             self.save("alternatives", item)
             self.event("alternative.status", {"id": identity, "previous": previous, "status": status})

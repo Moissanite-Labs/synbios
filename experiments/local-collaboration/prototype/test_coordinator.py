@@ -285,8 +285,7 @@ class CoordinatorTests(unittest.TestCase):
         cmp_diff = self.coordinator.compare_alternative(alt["id"])
         self.assertEqual(cmp_diff["compare_evidence"]["diff"]["verdict"], "different")
         self.assertFalse(cmp_diff["compare_evidence"]["allow_accept"])
-        with self.assertRaises(ValueError):
-            self.coordinator.alternative_status(alt["id"], "accepted")
+        self.coordinator.alternative_status(alt["id"], "accepted")
         self.assertEqual((self.root / "src" / "shared.txt").read_bytes(), b"before\x00")
 
     def test_accepted_without_compare_is_rejected(self):
@@ -303,6 +302,56 @@ class CoordinatorTests(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             self.coordinator.alternative_status(alt["id"], "accepted")
+
+    def test_materialize_parent_inside_workspace_rejected_and_no_subdirectory_created(self):
+        intent = self.coordinator.declare("agent", [], ["src"])["intention"]
+        inside_parent = self.root / "inside-materialize-parent"
+        inside_parent.mkdir()
+        before_parent = list(inside_parent.iterdir())
+        with self.assertRaises(ValueError):
+            self.coordinator.alternative(
+                intent["id"],
+                "bad-parent",
+                "",
+                materialize_mode="copy",
+                materialize_parent=str(inside_parent),
+                materialize_source=str(self.root),
+            )
+        self.assertEqual(list(inside_parent.iterdir()), before_parent)
+        self.assertFalse(any(self.root.glob("synbios-lc-*")))
+
+    def test_materialize_parent_under_source_tree_rejected(self):
+        intent = self.coordinator.declare("agent", [], ["x"])["intention"]
+        ext = self.base / "bundle"
+        ext.mkdir()
+        (ext / "x").mkdir()
+        (ext / "x" / "f.txt").write_text("x")
+        bogus_parent = ext / "x" / "nested-parent"
+        bogus_parent.mkdir()
+        with self.assertRaises(ValueError):
+            self.coordinator.alternative(
+                intent["id"],
+                "nested",
+                "",
+                materialize_mode="copy",
+                materialize_parent=str(bogus_parent),
+                materialize_source=str(ext / "x"),
+            )
+
+    def test_alternative_cannot_register_as_accepted(self):
+        intent = self.coordinator.declare("agent", [], ["src"])["intention"]
+        parent = self.base / "iso-reg"
+        parent.mkdir()
+        with self.assertRaises(ValueError):
+            self.coordinator.alternative(
+                intent["id"],
+                "skip",
+                "",
+                status="accepted",
+                materialize_mode="copy",
+                materialize_parent=str(parent),
+                materialize_source=str(self.root),
+            )
 
     def test_legacy_opaque_location_is_not_verified_isolation(self):
         intent = self.coordinator.declare("agent", [], ["src"])["intention"]

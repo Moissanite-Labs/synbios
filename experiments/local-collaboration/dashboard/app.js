@@ -75,14 +75,14 @@ function render(s) {
     const ev = a.compare_evidence;
     if (ev) {
       const verdict = ev.diff?.verdict || '?';
-      const allow = ev.allow_accept ? 'compare allows accept' : 'compare blocks accept';
+      const allow = ev.allow_accept ? 'scoped trees identical to baseline (allow_accept)' : 'scoped trees differ from baseline (allow_accept off)';
       card.append(el('p', `Compare: ${verdict} · ${allow}`, 'muted'));
       card.append(el('p', `Evidence v${ev.integration_surface_version || '?'}`));
     } else card.append(el('p', 'No compare evidence yet.', 'muted'));
     const actions = el('div', undefined, 'actions');
     actions.append(button('Run compare (read-only)', () => mutate('/api/alternatives/compare', {id:a.id}, `Compared ${short(a.id)} against intention baseline; original workspace unchanged.`)));
     for (const status of ['proposed','testing','accepted','rejected']) {
-      const b = button(status === 'accepted' ? 'Set accepted (requires passing compare)' : `Set ${status}`, () => mutate('/api/alternatives/status', {id:a.id,status}, `Candidate ${short(a.id)} recorded as ${status}. No source apply ran.`));
+      const b = button(status === 'accepted' ? 'Set accepted (requires prior compare evidence)' : `Set ${status}`, () => mutate('/api/alternatives/status', {id:a.id,status}, `Candidate ${short(a.id)} recorded as ${status}. No source apply ran.`));
       b.setAttribute('aria-pressed', String(status === a.status)); actions.append(b);
     }
     card.append(actions); $('alternatives').append(card);
