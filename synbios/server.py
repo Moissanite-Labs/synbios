@@ -100,6 +100,12 @@ def create_server(db, host='127.0.0.1', port=8765, static_dir=None):
                     return self.send(200, store.snapshot(token))
                 if self.command == 'GET' and path == '/api/events':
                     return self.send(200, store.snapshot(token)['events'])
+                if self.command == 'GET' and path.startswith('/api/tasks/') and path.endswith('/prompt'):
+                    task_id = unquote(path[len('/api/tasks/'):-len('/prompt')])
+                    return self.send(200, store.task_prompt(token, task_id, base_url='http://' + self.headers['Host']))
+                if self.command == 'GET' and path.startswith('/api/projects/') and path.endswith('/coordinator-prompt'):
+                    project_id = unquote(path[len('/api/projects/'):-len('/coordinator-prompt')])
+                    return self.send(200, store.coordinator_prompt(token, project_id, base_url='http://' + self.headers['Host']))
                 if self.command == 'GET' and path.startswith('/api/tasks/') and path.endswith('/export'):
                     task_id = unquote(path[len('/api/tasks/'):-len('/export')])
                     return self.send(200, store.export(token, task_id))
@@ -146,7 +152,11 @@ def create_server(db, host='127.0.0.1', port=8765, static_dir=None):
         class IPv6Server(LocalServer):
             address_family = socket.AF_INET6
         server_class = IPv6Server
-    server = server_class((host, port), Handler)
+    try:
+        server = server_class((host, port), Handler)
+    except Exception:
+        store.close()
+        raise
     server.daemon_threads = True
     return server
 

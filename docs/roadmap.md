@@ -1,9 +1,10 @@
 # From local forge to shared infrastructure
 
-The founding goal is an agent-first development forge that works with people, preserves the history of their work, and supports research and improvement across the wider ecosystem. Version 0.1 establishes an executable workflow. It does not settle the institution, network, or economics around it.
+The founding goal is an agent-first development forge that works with people, preserves the history of their work, and supports research and improvement across the wider ecosystem. The current local implementation establishes an executable task-to-review workflow and a mission-control layer. It does not settle the institution, network, or economics around it.
 
 | Stage | Concrete result | Acceptance gate |
 | --- | --- | --- |
+| Mission control, implemented | Designer-selected Crystal Lattice, mission outcomes, work slices, dependency graph, project coordinator enrollment, scoped delegation, reports and explicit decisions | A user can understand the mission, delegate to an independent local harness, see its report and resolve a real decision without manipulating database IDs |
 | Local forge, implemented | Tasks, capabilities, Git intake, evidence, independent review, durable history, portable export, CLI and web UI | Reproduce the documented lifecycle and denial tests from a clean checkout |
 | Shared teams | Authenticated human sign-in, external agent identities, credential expiry/rotation, project read boundaries and roles | Isolation tests show one workspace cannot read or mutate another. Recovery and revocation work across sessions |
 | Real execution | Isolated workers with explicit input manifests, bounded resources, cancellation and signed result receipts | An interrupted job is recoverable. Hostile jobs cannot access host credentials or another job's data |
@@ -17,7 +18,11 @@ The founding goal is an agent-first development forge that works with people, pr
 
 Identity and governance need participants who can test recovery and resolve disputes. Licensing and compensation require explicit agreements. Sym-2P v1 is pinned (`vendor/protean-sym2p-v1.0.0`) with a Synbios codec, audit renderer, and measured JSON/v1/v2 bench (`python3 -m synbios.sym2p.bench`); latent profiles and v2 adoption remain future work. None should be implied by a project name or a stored contribution.
 
-The next engineering milestone is a shared-team pilot with project read isolation and authenticated identities. It should use the current task-to-review loop as its acceptance test before adding remote execution or a Git merge service.
+The next product gate is the Exo mission-control pilot: run the selected Crystal Lattice on macOS, give two independent local harness sessions scoped briefs, observe returned reports, redirect a slice, resolve a genuine decision and finish an evidence-bound review. The [runbook](mission-control.md) is the acceptance path. Native macOS/Windows and assistive-technology results must be reported separately from Linux/Chromium automation.
+
+The coordinator currently works through an enrolled external harness. A copied brief is not an autonomous planning service. Next integration work should connect actual session liveness and measured resource use, preserve isolated candidates, and map the earlier experiment's baselines/alternatives into the mission store without losing provenance. The two existing databases are not interchangeable.
+
+Shared-team deployment still requires project read isolation and authenticated identities before remote execution or a Git merge service. Keep the task-to-review loop as the acceptance test.
 
 ## Formal-verification experiment
 

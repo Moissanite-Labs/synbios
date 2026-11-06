@@ -1,10 +1,38 @@
-# Forge foundation contract
+# Forge foundation and mission contract
 
 This local-first reference implementation turns Synbios's task → artifact → evidence → human review → portable record workflow into running software. It does not grant remote execution, Git merge, economic rights, or training-data consent.
 
+## Mission-control extension
+
+[Local mission control](mission-control.md) is the user-facing workflow; [the pinned Crystal Lattice design](design/crystal-lattice.md) defines its visual composition. The same authenticated store now supports mission outcomes, stages, plans, assignments, reports and decisions. Existing main-store records remain available; missing mission fields are defaulted in the read model. The separate local-collaboration experiment database is not imported.
+
+New commands are enumerated in the authenticated `/api/schema`:
+
+| Command | Authority and behavior |
+| --- | --- |
+| `project.update` | Human; `project_id`, `expected_revision`, optional `name` and `description`. Workspace location remains fixed. |
+| `coordinator.enroll` | Human; `project_id`, `name`. Returns a new agent's one-time token and a project coordinator grant. |
+| `coordinator.revoke` | Human; `grant_id`. Ends coordination authority; independently issued worker grants remain. |
+| `plan.create` | Human or project coordinator; `project_id`, `tasks`. Each slice has a unique local `key`, task fields and dependencies on local keys or existing same-project task IDs. Atomic, bounded to 100 slices, acyclic. |
+| `task.assign` | Human or project coordinator; `task_id`, `principal_id`, `expected_revision`. Revokes outgoing owner's task grants and grants/assigns incoming owner. |
+| `task.delegate` | Human or project coordinator; `task_id`, `name`, `expected_revision`. Creates and assigns a worker; returns its one-time credential. |
+| `task.update` | Human or project coordinator; `task_id`, `expected_revision`, changed task fields. Changes to scope/criteria/description/dependencies invalidate acceptance against the previous contract. |
+| `task.report` | Human or task worker; `task_id`, `expected_revision`, `summary`, optional integer `progress` (0–100) and `blocker`. Attributed report only. |
+| `decision.create` | Human or task worker; `task_id`, `expected_revision`, `title`, `question`, 2–8 distinct `options`. Creates a real pending question. |
+| `decision.resolve` | Human; `task_id`, `decision_id`, `expected_revision`, recorded `choice`, optional `note`. Records the choice; does not approve an artifact. |
+| `decision.withdraw` | Requester with work authority or human; task/decision IDs, `expected_revision`, optional `note`. Withdraws an open question. |
+
+Projects add `workspace` and `revision`. Tasks add `stage` (`idea`, `shape`, `prototype`, `build`, `ship`), `candidate_path`, `revision`, `contract_revision`, `assignment_revision`, `reports` and `decisions`. Candidate paths are metadata, not created or isolated folders. Derived snapshot fields include blockers, conservative `scope_overlaps` and resource allocation. Runtime usage/cost/compute are explicitly unavailable. New task mutations use compare-and-swap revision checks and return 409 for stale input. Accepted task immutability still applies.
+
+`GET /api/tasks/{id}/prompt` and `GET /api/projects/{id}/coordinator-prompt` return portable, credential-free brief text. Scoped credentials are issued separately. CLI equivalents are `prompt TASK_ID` and `coordinator-prompt PROJECT_ID`. `command ACTION --data-file payload.json` supports portable JSON input without shell quoting.
+
+`start --workspace PATH [--db PATH] [--name NAME] [--port PORT]` validates the built client, creates or reconnects to the local mission, and serves it. It stores a private operator credential outside the workspace for restart; unlike the hashed SQLite credential record, this local launcher cache contains the secret. Existing databases without a cache need a current human `SYNBIOS_TOKEN`. See [state locations and restart behavior](mission-control.md#start-on-your-machine).
+
+The foundation contract below remains the authority for artifact evidence, independent review, export and the existing CLI. Where it lists only the original fields, the mission additions above extend them.
+
 ## Runtime
 
-Python 3.11+ standard library, SQLite persistence, React/TypeScript web client. One local server binds loopback by default. Bearer credentials identify principals on every API request; role and scope are never taken from request body. Fresh stores bootstrap via CLI only. No network bootstrap endpoint. Tokens are shown once and stored hashed. A local operator is a trusted administrator, not a simulated remote identity provider.
+Python 3.11+ standard library, SQLite persistence, React/TypeScript web client. One local server binds loopback by default. Bearer credentials identify principals on every API request; role and scope are never taken from request body. Fresh stores bootstrap via CLI only. No network bootstrap endpoint. Enrollment tokens are shown once and stored hashed in SQLite; the opt-in local `start` launcher also keeps its operator credential in a private restart cache. A local operator is a trusted administrator, not a simulated remote identity provider.
 
 ## Shared wire format
 
@@ -31,7 +59,7 @@ Commands POST /api/commands/{action} JSON:
 - `principal.revoke`: principal_id (human; revokes credential/read access and actions, refuses self or last active human)
 - `grant.create`: principal_id, task_id, capabilities (human); supported `claim`, `work`, `artifact`, `evidence`, `submit`
 - `grant.revoke`: grant_id (human)
-- `task.create`: project_id,title,description,criteria (nonempty),scope (nonempty),priority ('low'|'normal'|'high'),dependencies (human)
+- `task.create`: project_id,title,description,criteria (nonempty),scope (nonempty),priority ('low'|'normal'|'high'),dependencies,stage,candidate_path (human; project coordinators use `plan.create`)
 - `task.claim`: task_id (human or task-scoped claim)
 - `task.transition`: task_id,status (`in_progress`,`in_review`,`cancelled`,`open`); agent must hold work or submit as appropriate. Submission needs current artifact, passing current test evidence, no current failed test evidence, and all dependencies accepted. Human can cancel/reopen; accepted tasks immutable.
 - `artifact.add`: task_id,title,kind,revision,digest,uri,summary (human or artifact grant). Adding new artifact invalidates old approval/evidence for current candidate; cannot modify accepted task.

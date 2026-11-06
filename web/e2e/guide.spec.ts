@@ -10,7 +10,7 @@ test("orientation guide opens on first visit and can be reopened", async ({
   await page.addInitScript((key) => {
     localStorage.removeItem(key);
   }, GUIDE_STORAGE_KEY);
-  await page.goto(workspace.url);
+  await page.goto(workspace.url + "/?advanced=1");
   await page.locator("[name=token]").waitFor();
   const dialog = page.getByRole("dialog", { name: /how to use the forge/i });
   await expect(dialog).toBeVisible();
@@ -21,10 +21,7 @@ test("orientation guide opens on first visit and can be reopened", async ({
   await page.getByRole("button", { name: "Got it", exact: true }).click();
   await expect(dialog).toHaveCount(0);
   expect(
-    await page.evaluate(
-      (key) => localStorage.getItem(key),
-      GUIDE_STORAGE_KEY,
-    ),
+    await page.evaluate((key) => localStorage.getItem(key), GUIDE_STORAGE_KEY),
   ).toBe("1");
   await page.getByRole("button", { name: "Open guide", exact: true }).click();
   await expect(dialog).toBeVisible();
@@ -36,7 +33,7 @@ test("escape closes the orientation guide", async ({ page, workspace }) => {
   await page.addInitScript((key) => {
     localStorage.removeItem(key);
   }, GUIDE_STORAGE_KEY);
-  await page.goto(workspace.url);
+  await page.goto(workspace.url + "/?advanced=1");
   await page.locator("[name=token]").waitFor();
   const dialog = page.getByRole("dialog", { name: /how to use the forge/i });
   await expect(dialog).toBeVisible();
@@ -52,7 +49,7 @@ test("got it stays visible on a phone-sized viewport", async ({
   await page.addInitScript((key) => {
     localStorage.removeItem(key);
   }, GUIDE_STORAGE_KEY);
-  await page.goto(workspace.url);
+  await page.goto(workspace.url + "/?advanced=1");
   await page.locator("[name=token]").waitFor();
   const gotIt = page.getByRole("button", { name: "Got it", exact: true });
   await expect(gotIt).toBeVisible();
