@@ -35,7 +35,15 @@ def digest(value):
 
 
 def within(path, parent):
-    return path == parent or parent in path.parents
+    """True if ``path`` is ``parent`` or a descendant directory of ``parent``.
+
+    Canonicalizes with ``expanduser().resolve()`` (non-strict) on both sides so
+    platform path aliases (e.g. macOS ``/var`` → ``/private/var``) and ``..``
+    segments match membership checks used by the coordinator and tests.
+    """
+    p = Path(path).expanduser().resolve()
+    q = Path(parent).expanduser().resolve()
+    return p == q or q in p.parents
 
 
 def canonical_workspace_root(candidate):

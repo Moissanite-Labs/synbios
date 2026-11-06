@@ -122,6 +122,15 @@ class CoordinatorTests(unittest.TestCase):
         self.assertTrue(overlaps("caf\u00e9", "cafe\u0301/file"))
         self.assertFalse(overlaps("src", "src2/file"))
 
+    def test_within_canonicalizes_for_membership(self):
+        real_parent = self.base / "real-parent"
+        real_parent.mkdir()
+        child = real_parent / "nested"
+        child.mkdir()
+        alias_parent = real_parent / "extra-segment" / ".."
+        self.assertTrue(within(child, alias_parent))
+        self.assertTrue(within(child, real_parent))
+
     def test_supersession_is_atomic_and_preserves_history(self):
         first = self.coordinator.declare("agent", [], ["src"])["intention"]
         before_events = len(self.coordinator.status()["events"])
