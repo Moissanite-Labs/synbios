@@ -150,6 +150,9 @@ class Handler(BaseHTTPRequestHandler):
             elif path == '/api/intentions/finish':
                 operation = lambda c: c.finish(string(data, 'id'), string(data, 'status'))
             elif path == '/api/alternatives':
+                intent_ref = data.get('intent_id')
+                if intent_ref is None or (isinstance(intent_ref, str) and not intent_ref.strip()):
+                    raise ValueError('intent_id is required')
                 candidate_digest = data.get('candidate_digest')
                 if candidate_digest is not None:
                     candidate_digest = string(data, 'candidate_digest')
