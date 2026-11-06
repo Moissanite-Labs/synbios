@@ -26,8 +26,11 @@ The rehearsal creates a disposable folder and prints a loopback dashboard URL. I
 python3 -m unittest discover -s prototype -v
 python3 prototype/demo.py
 python3 -m unittest discover -s dashboard -p 'test_*.py' -v
+python3 -m unittest harness.test_harness_cli -v
+python3 handoff/bootstrap_exo.py   # opt-in: installs pinned Exo for exo-core harness tests
+python3 -m unittest harness.test_harness_exo_core -v
 ```
 
-The coordinator suite includes six synchronized processes, durable registration, all pairwise overlaps, directory membership changes, byte-level staleness and rollback. HTTP tests exercise actual SQLite mutations and compare them with a separate CLI process. A Linux Chromium smoke check exercised real dashboard forms, conflicts, stale observations, selection persistence, CLI parity and layout widths of 390 and 1440 pixels without JavaScript errors. macOS, Windows, screen-reader and complete keyboard acceptance remain unrun. These checks do not establish real harness integration or formal verification.
+The coordinator suite includes six synchronized processes, durable registration, all pairwise overlaps, directory membership changes, byte-level staleness and rollback. HTTP tests exercise actual SQLite mutations and compare them with a separate CLI process. A Linux Chromium smoke check exercised real dashboard forms, conflicts, stale observations, selection persistence, CLI parity and layout widths of 390 and 1440 pixels without JavaScript errors. The harness suites exercise two adapter kinds (Exo core via `exo serve` with the echo engine and a distinct CLI subprocess worker) with process evidence under disposable temp directories: reconnect, stop, crash ambiguity classification on the adapters (process gone, process hung, coordinator metadata still active while the worker is dead), and scope checks from observed file paths (CLI worker publishes absolute paths; exo-core uses a separate writer subprocess—not in-process fakery). Exo is not installed by `handoff/run_checks.py`; without it the script skips `harness_exo_core` and still passes the portable suites—run `handoff/bootstrap_exo.py` before exo-core coverage. macOS, Windows, screen-reader and complete keyboard acceptance remain unrun. These checks do not establish formal verification.
 
 The handoff writes reports locally under macos-results; do not commit these reports, databases, credentials, personal paths or local exports. No third-party dependencies or model calls are required. The experiment is not included in the Synbios wheel or production server.

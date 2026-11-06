@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def run(args, cwd=ROOT):
     try:
-        result = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=180)
+        result = subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=600)
         return {"command": args, "exit_code": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
     except (OSError, subprocess.TimeoutExpired) as error:
         return {"command": args, "exit_code": None, "error": str(error)}
@@ -38,7 +38,6 @@ def inventory(path):
                     if not record:
                         continue
                     changes.append(record)
-                    # With -z, rename/copy records carry a second raw pathname.
                     if b"R" in record[:2] or b"C" in record[:2]:
                         position += 1
                 result["dirty_entries"] = len(changes)
@@ -61,12 +60,30 @@ def main():
               "macos_version": platform.mac_ver()[0], "machine": platform.machine(), "python": platform.python_version(),
               "scope": "Automated local acceptance only; browser rendering and actual harness integration require separate observations.",
               "checks": [], "checkouts": {}}
-    suites = [("coordinator", ROOT / "prototype" / "test_coordinator.py", [sys.executable, "-m", "unittest", "discover", "-s", "prototype", "-v"]),
-              ("demo", ROOT / "prototype" / "demo.py", [sys.executable, "prototype/demo.py"]),
-              ("dashboard", ROOT / "dashboard", [sys.executable, "-m", "unittest", "discover", "-s", "dashboard", "-p", "test*.py", "-v"])]
+    try:
+        import exo  # noqa: F401
+        exo_available = True
+    except ImportError:
+        exo_available = False
+
+    suites = [
+        ("coordinator", ROOT / "prototype" / "test_coordinator.py", [sys.executable, "-m", "unittest", "discover", "-s", "prototype", "-v"]),
+        ("demo", ROOT / "prototype" / "demo.py", [sys.executable, "prototype/demo.py"]),
+        ("dashboard", ROOT / "dashboard", [sys.executable, "-m", "unittest", "discover", "-s", "dashboard", "-p", "test*.py", "-v"]),
+        ("harness_cli", ROOT / "harness" / "test_harness_cli.py",
+         [sys.executable, "-m", "unittest", "harness.test_harness_cli", "-v"]),
+        ("harness_exo_core", ROOT / "harness" / "test_harness_exo_core.py",
+         [sys.executable, "-m", "unittest", "harness.test_harness_exo_core", "-v"]),
+    ]
     for name, required, command in suites:
         if not required.exists() or (name == "dashboard" and not list(required.glob("test*.py"))):
             observed = {"name": name, "state": "unavailable", "reason": "Required files missing"}
+        elif name == "harness_exo_core" and not exo_available:
+            observed = {
+                "name": name,
+                "state": "skipped",
+                "reason": "exo package not installed; run handoff/bootstrap_exo.py to exercise exo-core adapter tests",
+            }
         else:
             observed = dict(run(command), name=name)
             observed["state"] = "passed" if observed.get("exit_code") == 0 else "failed"
@@ -77,7 +94,9 @@ def main():
     (output / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print("Local report: " + str(output / "report.json"))
     print("Review before sharing. Do not share dashboard access tokens.")
-    return 0 if all(c["state"] == "passed" for c in report["checks"]) else 1
+    print("Install Exo before exo-core harness tests: python3 handoff/bootstrap_exo.py (opt-in; not run from this script).", flush=True)
+    terminal = ("passed", "skipped")
+    return 0 if all(c["state"] in terminal for c in report["checks"]) else 1
 
 if __name__ == "__main__":
     raise SystemExit(main())

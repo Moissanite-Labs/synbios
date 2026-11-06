@@ -10,6 +10,8 @@ The versioned weave.local.v1 contract records workspace identity, caller-asserte
 
 The loopback backend and dashboard reuse the coordinator's actual database. They do not establish authenticated harness or human identities. Baselines are sequential observations and can race unmanaged edits. Changes after observation invalidate assumptions; the experiment has no source-apply operation that could enforce a final compare-and-swap. Full histories and folder scans are unbounded in this prototype.
 
+Two external harness adapters live under `harness/`: **exo-core** (pinned Exo from `main`, `exo serve` with the echo engine and an isolated `EXO_HOME`) and **cli-subprocess** (a cooperative Python worker in a second OS process under `.lc-cli-work/` inside the workspace). They coordinate with the same coordinator and implement `classify_crash_ambiguity` from process/socket observations (including stopped / `T` state from `/proc` or `ps` after SIGSTOP), and optional coordinator row status; scope checks compare declared write scopes to filesystem paths observed from subprocess writes (not in-process stubs). `handoff/run_checks.py` does not install Exo; when `import exo` fails it skips `harness_exo_core` while still passing the portable suites (CLI harness tests always run). Opt-in `handoff/bootstrap_exo.py` is used before exo-core tests (for example in CI). They wrap execution surfaces; they do not port Exo swarm plan validators or executors from open PRs.
+
 ## Repository ownership
 
 - Synbios is the proposed home for the build-collaboration feature and its task/artifact/evidence integration. Its current human acceptance and permission rules remain unchanged.
