@@ -155,6 +155,15 @@ class CoordinatorTests(unittest.TestCase):
         self.assertEqual(after["intentions"], before["intentions"])
         self.assertEqual(after["events"], before["events"])
 
+    def test_alternative_requires_intent_id(self):
+        item = self.coordinator.declare("agent", [], ["src"])["intention"]
+        ext = self.base / "ext-empty-intent"
+        ext.mkdir()
+        for bad in ("", "   ", None):
+            with self.subTest(intent_id=bad):
+                with self.assertRaises(ValueError):
+                    self.coordinator.alternative(bad, "x", str(ext))
+
     def test_alternative_metadata_and_transition_history(self):
         item = self.coordinator.declare("agent", [], ["src"])["intention"]
         ext_a = self.base / "ext-a"

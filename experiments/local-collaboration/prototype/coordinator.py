@@ -509,6 +509,9 @@ class Coordinator:
             raise ValueError("Cannot register an alternative as accepted before compare evidence exists")
         if candidate_digest is not None and (len(candidate_digest) != 64 or any(c not in "0123456789abcdef" for c in candidate_digest)):
             raise ValueError("Candidate digest must be lowercase SHA-256 hex")
+        if identity is None or not str(identity).strip():
+            raise ValueError("intent_id is required")
+        identity = str(identity).strip()
         self.connection.execute("BEGIN IMMEDIATE")
         try:
             self.get("intentions", identity)

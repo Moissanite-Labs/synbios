@@ -156,6 +156,18 @@ class DashboardHTTPTests(unittest.TestCase):
             self.assertEqual(code,expected)
         self.assertEqual(self.cli_status()['events'],before)
 
+    def test_alternative_requires_intent_id(self):
+        first = self.post('/api/intentions', {'actor': 'a', 'reads': [], 'writes': ['source.py']})['intention']
+        before = self.cli_status()['events']
+        code, payload, _ = self.request('POST', '/api/alternatives', {
+            'label': 'orphan',
+            'location': str(self.iso_parent / 'noop'),
+        })
+        self.assertEqual(code, 400)
+        self.assertFalse(payload.get('ok'))
+        self.assertIn('intent_id', payload.get('error', '').lower())
+        self.assertEqual(before, self.cli_status()['events'])
+
     def test_static_assets_and_path_allowlist(self):
         for path in ['/','/app.js','/style.css']:
             code,body,headers=self.request('GET',path,authorized=False)

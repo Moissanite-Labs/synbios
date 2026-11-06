@@ -37,6 +37,8 @@ python3 prototype/coordinator.py --db /absolute/path/outside-target/weave.sqlite
 
 The human decision circle is an interface legend; diamonds represent recorded intentions and do not imply live agents. Rings express no stage, progress, or dependency. The lattice shows the newest 48 intentions, with an explicit shown/total caption; the work list includes all records. The trace renders the latest 40 events; the underlying API and CLI retain all events.
 
+At the top of the page, **Status at a glance** summarizes who is named, how active scopes divide the folder, and what is blocking progress (overlaps, stale baselines, risky “accepted” labels, candidates awaiting compare). A short **First time here?** strip orients new operators without replacing the rest of the UI.
+
 ## HTTP API
 
 The server imports the Coordinator for every state operation and has no duplicate schema or merge/apply implementation. Each HTTP request uses its own SQLite connection. Replies use `{ "ok": true, "protocol": "weave.local.v1", "result": ... }`, except the session bootstrap described below. Errors use `{ "ok": false, "error": ... }`.
