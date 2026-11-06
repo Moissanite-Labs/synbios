@@ -22,8 +22,28 @@ def main():
         run("init", str(root))
         first = run("declare", "--actor", "codex-session", "--read", "src", "--write", "src/example.txt")
         second = run("declare", "--actor", "independent-cli", "--write", "src")
-        a = run("alternative", first["intention"]["id"], "--label", "minimal edit", "--location", "external-candidate-A")
-        run("alternative", first["intention"]["id"], "--label", "redesign", "--location", "external-candidate-B")
+        iso_parent = base / "isolated-candidates"
+        iso_parent.mkdir()
+        a = run(
+            "alternative",
+            first["intention"]["id"],
+            "--label",
+            "minimal edit",
+            "--materialize",
+            "copy",
+            "--materialize-parent",
+            str(iso_parent),
+        )
+        run(
+            "alternative",
+            first["intention"]["id"],
+            "--label",
+            "redesign",
+            "--materialize",
+            "copy",
+            "--materialize-parent",
+            str(iso_parent),
+        )
         run("alternative-status", a["id"], "--status", "testing")
         current = run("check", first["intention"]["id"])
         # The demo is an external editor; the coordinator never writes source.

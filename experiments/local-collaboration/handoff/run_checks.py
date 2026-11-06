@@ -70,6 +70,8 @@ def main():
         ("coordinator", ROOT / "prototype" / "test_coordinator.py", [sys.executable, "-m", "unittest", "discover", "-s", "prototype", "-v"]),
         ("demo", ROOT / "prototype" / "demo.py", [sys.executable, "prototype/demo.py"]),
         ("dashboard", ROOT / "dashboard", [sys.executable, "-m", "unittest", "discover", "-s", "dashboard", "-p", "test*.py", "-v"]),
+        ("exo_integration_adapter", ROOT / "harness" / "test_exo_integration_adapter.py",
+         [sys.executable, "-m", "unittest", "harness.test_exo_integration_adapter", "-v"]),
         ("harness_cli", ROOT / "harness" / "test_harness_cli.py",
          [sys.executable, "-m", "unittest", "harness.test_harness_cli", "-v"]),
         ("harness_exo_core", ROOT / "harness" / "test_harness_exo_core.py",

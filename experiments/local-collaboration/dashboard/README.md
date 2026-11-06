@@ -27,7 +27,7 @@ The database may also be updated by the prototype CLI while the dashboard runs. 
 3. Declare a second actor's read intention for `example.txt`. The dashboard shows the actual `write/read` overlap and a dashed lattice connection.
 4. Edit `example.txt` yourself in an editor and click **Refresh observations**. Both active records become **stale**, with the changed path listed. This external edit is the only target source mutation in this walkthrough.
 5. Declare a replacement using the same actor name and **Replaces an active intention**. The new revision gets a fresh current baseline and the former record becomes superseded.
-6. Preserve two named alternatives, associating each with an intention and an external location. Optional SHA-256 values are recorded as caller assertions. Select **accepted (advisory)** for one candidate. Reload the page; the selection persists.
+6. Preserve two named alternatives: either an **absolute path outside the workspace** or **Materialize → copy** with a parent directory outside the target. Use **Run compare** so the coordinator records tree-digest evidence without touching the original tree. Select **accepted** only after a passing compare. Reload the page; the selection persists.
 7. Close an active intention as completed or abandoned. Its scopes no longer contribute conflicts. Completed is a declared lifecycle state, not evidence that tests passed.
 8. Confirm the exact database records from a separate process:
 
@@ -48,8 +48,9 @@ The server imports the Coordinator for every state operation and has no duplicat
 | `POST /api/actors` | `{name}` → registered actor. |
 | `POST /api/intentions` | `{actor, reads: [], writes: [], supersedes?: id}` → intention and overlaps. |
 | `POST /api/intentions/finish` | `{id, status: "completed" or "abandoned"}` → updated intention. |
-| `POST /api/alternatives` | `{intent_id, label, location, status?: "proposed", candidate_digest?: lowercase SHA-256}` → candidate. |
-| `POST /api/alternatives/status` | `{id, status: "proposed", "testing", "accepted", or "rejected"}` → candidate selection. |
+| `POST /api/alternatives` | `{intent_id, label, location?: absolute dir outside workspace, OR materialize_mode: "copy"\|"git_worktree"\|"directory", materialize_parent, materialize_source?, status?, candidate_digest?}` → candidate bound to a real directory. |
+| `POST /api/alternatives/compare` | `{id}` → read-only compare; updates `compare_evidence` on the alternative. |
+| `POST /api/alternatives/status` | `{id, status}` → status update; `accepted` requires `compare_evidence.allow_accept`. |
 
 Send `X-Lattice-Token: TOKEN` for status and mutations. Every POST requires the exact `Origin: http://127.0.0.1:PORT`, `Content-Type: application/json`, and one valid Content-Length of 1–65536 bytes. Paths are arrays of at most 128 strings. Actor identities remain caller-asserted even with the session capability. The bootstrap capability is held only in page memory and never put in URLs, console logs, or browser storage.
 

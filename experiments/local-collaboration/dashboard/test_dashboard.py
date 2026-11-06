@@ -24,6 +24,8 @@ class DashboardHTTPTests(unittest.TestCase):
         self.root = Path(self.temp.name) / 'target'
         self.root.mkdir()
         (self.root / 'source.py').write_text('original source\n')
+        self.iso_parent = Path(self.temp.name) / 'iso-candidates'
+        self.iso_parent.mkdir()
         self.db = Path(self.temp.name) / 'state.sqlite'
         self.server = DashboardServer(self.db, 0, self.root)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
@@ -77,14 +79,23 @@ class DashboardHTTPTests(unittest.TestCase):
         first = self.post('/api/intentions', {'actor':'reviewer', 'reads':[], 'writes':['source.py']})['intention']
         second = self.post('/api/intentions', {'actor':'second', 'reads':['source.py'], 'writes':[]})
         self.assertEqual(len(second['conflicts']), 1)
-        alternative = self.post('/api/alternatives', {'intent_id':first['id'], 'label':'Candidate A', 'location':'external-reference', 'candidate_digest':'a'*64})
-        self.post('/api/alternatives/status', {'id':alternative['id'], 'status':'accepted'})
+        alternative = self.post('/api/alternatives', {
+            'intent_id': first['id'],
+            'label': 'Candidate A',
+            'materialize_mode': 'copy',
+            'materialize_parent': str(self.iso_parent),
+            'materialize_source': str(self.root),
+            'candidate_digest': 'a' * 64,
+        })
+        self.post('/api/alternatives/compare', {'id': alternative['id']})
+        self.post('/api/alternatives/status', {'id': alternative['id'], 'status': 'accepted'})
         self.post('/api/intentions/finish', {'id':second['intention']['id'], 'status':'completed'})
         state = self.status()
         cli = self.cli_status()
         for key in ('actors','intentions','alternatives','events','conflicts'):
             self.assertEqual(state[key], cli[key])
         self.assertEqual(state['alternatives'][0]['status'], 'accepted')
+        self.assertEqual(state['workspace']['integration_surface']['name'], 'synbios.local_collab.exo_harness')
         self.assertEqual(state['observations'][0]['state'], 'current')
         self.assertEqual(state['conflicts'], [])
         self.assertEqual((self.root / 'source.py').read_text(), 'original source\n')

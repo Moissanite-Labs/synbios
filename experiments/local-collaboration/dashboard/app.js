@@ -66,8 +66,26 @@ function render(s) {
   if (!s.intentions.length) $('intentions').append(el('p', 'No intentions yet. Declare read and write scopes to start the shared record.', 'empty'));
   $('alternatives').replaceChildren();
   for (const a of [...s.alternatives].reverse()) {
-    const card = el('article', undefined, 'record'); const heading = el('div', undefined, 'record-header'); heading.append(el('strong', a.label), state(a.status)); card.append(heading, el('code', a.id), el('p', `Intention ${a.intent_id}`), el('p', `Location: ${a.location}`), el('p', a.candidate_digest ? `Caller-asserted SHA-256: ${a.candidate_digest}` : 'Candidate digest: not supplied'));
-    const actions = el('div', undefined, 'actions'); for (const status of ['proposed','testing','accepted','rejected']) { const b = button(status === 'accepted' ? 'Select accepted (advisory)' : `Set ${status}`, () => mutate('/api/alternatives/status', {id:a.id,status}, `Candidate ${short(a.id)} recorded as ${status}. Source files were not changed.`)); b.setAttribute('aria-pressed', String(status === a.status)); actions.append(b); } card.append(actions); $('alternatives').append(card);
+    const card = el('article', undefined, 'record'); const heading = el('div', undefined, 'record-header'); heading.append(el('strong', a.label), state(a.status)); card.append(heading, el('code', a.id), el('p', `Intention ${a.intent_id}`));
+    const iso = a.isolation || {};
+    card.append(el('p', iso.verified ? `Isolated tree: ${iso.path}` : `Isolation: unverified (${iso.kind || 'unknown'})`));
+    if (iso.mode) card.append(el('p', `Materialize mode: ${iso.mode}`, 'muted'));
+    card.append(el('p', `Recorded location: ${a.location}`, 'muted'));
+    card.append(el('p', a.candidate_digest ? `Caller-asserted SHA-256: ${a.candidate_digest}` : 'Candidate digest: not supplied'));
+    const ev = a.compare_evidence;
+    if (ev) {
+      const verdict = ev.diff?.verdict || '?';
+      const allow = ev.allow_accept ? 'compare allows accept' : 'compare blocks accept';
+      card.append(el('p', `Compare: ${verdict} · ${allow}`, 'muted'));
+      card.append(el('p', `Evidence v${ev.integration_surface_version || '?'}`));
+    } else card.append(el('p', 'No compare evidence yet.', 'muted'));
+    const actions = el('div', undefined, 'actions');
+    actions.append(button('Run compare (read-only)', () => mutate('/api/alternatives/compare', {id:a.id}, `Compared ${short(a.id)} against intention baseline; original workspace unchanged.`)));
+    for (const status of ['proposed','testing','accepted','rejected']) {
+      const b = button(status === 'accepted' ? 'Set accepted (requires passing compare)' : `Set ${status}`, () => mutate('/api/alternatives/status', {id:a.id,status}, `Candidate ${short(a.id)} recorded as ${status}. No source apply ran.`));
+      b.setAttribute('aria-pressed', String(status === a.status)); actions.append(b);
+    }
+    card.append(actions); $('alternatives').append(card);
   }
   if (!s.alternatives.length) $('alternatives').append(el('p', 'No alternatives recorded. Preserve a candidate location and label to compare directions.', 'empty'));
   $('events').replaceChildren();
@@ -90,7 +108,7 @@ function lattice(s, observations) {
 }
 $('actor-form').addEventListener('submit', event => { event.preventDefault(); const data = Object.fromEntries(new FormData(event.target)); mutate('/api/actors', data, `Actor name “${data.name}” registered as caller-asserted.`, event.target); });
 $('intent-form').addEventListener('submit', event => { event.preventDefault(); const data = Object.fromEntries(new FormData(event.target)); data.reads = data.reads.split('\n').map(x => x.trim()).filter(Boolean); data.writes = data.writes.split('\n').map(x => x.trim()).filter(Boolean); if (!data.supersedes) delete data.supersedes; mutate('/api/intentions', data, 'Intention recorded with a baseline of the current scoped files.', event.target); });
-$('alternative-form').addEventListener('submit', event => { event.preventDefault(); const data = Object.fromEntries(new FormData(event.target)); if (!data.candidate_digest) delete data.candidate_digest; mutate('/api/alternatives', data, 'Alternative preserved as proposed. No candidate content was fetched or applied.', event.target); });
+$('alternative-form').addEventListener('submit', event => { event.preventDefault(); const data = Object.fromEntries(new FormData(event.target)); if (!data.candidate_digest) delete data.candidate_digest; if (!data.location || !String(data.location).trim()) delete data.location; if (!data.materialize_mode) { delete data.materialize_mode; delete data.materialize_parent; delete data.materialize_source; } else { if (!data.materialize_parent || !String(data.materialize_parent).trim()) { announce('Materialize parent directory is required when materializing.', true); return; } if (!data.materialize_source || !String(data.materialize_source).trim()) delete data.materialize_source; } if (!data.location && !data.materialize_mode) { announce('Provide either an external directory path or a materialize mode.', true); return; } mutate('/api/alternatives', data, 'Alternative bound to an isolated directory. No apply to the workspace.', event.target); });
 $('refresh').addEventListener('click', async () => { try { await refresh(); announce('Current database and file observations refreshed.'); } catch(error) { announce(error.message,true); } });
 async function start() { try { const response = await fetch('/api/session',{headers:{'X-Lattice-Bootstrap':'1'},cache:'no-store'}); const session = await response.json(); if (!response.ok || !session.ok) throw new Error(session.error || 'Bootstrap failed'); token = session.token; await refresh(); } catch(error) { $('connection').textContent = '△ Disconnected'; announce(error.message,true); } }
 setInterval(async () => { if (!token || busy || document.hidden || document.activeElement.matches('input,textarea,select,button,summary')) return; try { await refresh(); } catch(error) { $('connection').textContent = '△ Disconnected'; $('updated').textContent = 'Last rendered state may be outdated. Reload to reconnect.'; } },5000);
