@@ -38,6 +38,15 @@ def canonical_workspace_root(candidate):
     return str(Path(candidate).expanduser().resolve(strict=True))
 
 
+def canonical_database_path(candidate):
+    """Absolute database path as assigned in :meth:`Coordinator.__init__`.
+
+    Uses ``expanduser`` then ``resolve`` without ``strict`` so the sqlite file
+    path is canonical even before the file exists (new database).
+    """
+    return Path(candidate).expanduser().resolve()
+
+
 def scope(value):
     if not value or "\\" in value or ":" in value:
         raise ValueError("Scopes must be relative POSIX paths, with no backslash or colon")
@@ -104,9 +113,9 @@ CREATE TABLE IF NOT EXISTS events (sequence INTEGER PRIMARY KEY AUTOINCREMENT, t
 
 class Coordinator:
     def __init__(self, database, root=None):
-        self.database = Path(database).expanduser().resolve()
+        self.database = canonical_database_path(database)
         if root is not None:
-            root = Path(root).expanduser().resolve(strict=True)
+            root = Path(canonical_workspace_root(root))
             if not root.is_dir():
                 raise ValueError("Workspace must be an existing directory")
             if within(self.database, root):

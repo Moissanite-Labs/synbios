@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from server import DashboardServer, MAX_BODY
-from coordinator import canonical_workspace_root
+from coordinator import canonical_database_path, canonical_workspace_root
 
 BASE = Path(__file__).resolve().parents[1]
 
@@ -160,22 +160,23 @@ class DashboardHTTPTests(unittest.TestCase):
     def test_home_relative_database_reopens_for_http_requests(self):
         with patch.dict(os.environ, {'HOME': self.temp.name, 'USERPROFILE': self.temp.name}):
             server = DashboardServer('~/tilde-state.sqlite', 0, self.root)
-        thread = threading.Thread(target=server.serve_forever, daemon=True)
-        thread.start()
-        connection = http.client.HTTPConnection('127.0.0.1', server.server_port, timeout=5)
-        try:
-            connection.request('GET', '/api/status', headers={'X-Lattice-Token': server.capability})
-            response = connection.getresponse()
-            payload = json.loads(response.read())
-            self.assertEqual(response.status, 200, payload)
-            expected_root = canonical_workspace_root(self.root)
-            self.assertEqual(payload['result']['workspace']['root'], expected_root)
-            self.assertEqual(Path(server.database), Path(self.temp.name) / 'tilde-state.sqlite')
-        finally:
-            connection.close()
-            server.shutdown()
-            server.server_close()
-            thread.join(timeout=5)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            connection = http.client.HTTPConnection('127.0.0.1', server.server_port, timeout=5)
+            try:
+                connection.request('GET', '/api/status', headers={'X-Lattice-Token': server.capability})
+                response = connection.getresponse()
+                payload = json.loads(response.read())
+                self.assertEqual(response.status, 200, payload)
+                expected_root = canonical_workspace_root(self.root)
+                self.assertEqual(payload['result']['workspace']['root'], expected_root)
+                expected_db = canonical_database_path('~/tilde-state.sqlite')
+                self.assertEqual(Path(server.database), expected_db)
+            finally:
+                connection.close()
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
 
 
 if __name__ == '__main__':
