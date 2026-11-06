@@ -19,6 +19,8 @@ MAX_BODY = 65536
 
 def string(data, key, default=None):
     value = data.get(key, default)
+    if value is None and default is not None:
+        return default
     if not isinstance(value, str) or len(value) > 8192:
         raise ValueError(key + ' must be a string of at most 8192 characters')
     return value
@@ -151,7 +153,32 @@ class Handler(BaseHTTPRequestHandler):
                 candidate_digest = data.get('candidate_digest')
                 if candidate_digest is not None:
                     candidate_digest = string(data, 'candidate_digest')
-                operation = lambda c: c.alternative(string(data, 'intent_id'), string(data, 'label'), string(data, 'location'), string(data, 'status', 'proposed'), candidate_digest)
+                mode = data.get('materialize_mode') or data.get('materialize')
+                if mode is not None and mode != '':
+                    mode = string(data, 'materialize_mode') if 'materialize_mode' in data else string(data, 'materialize')
+                    parent = string(data, 'materialize_parent')
+                    src = data.get('materialize_source')
+                    src = string(data, 'materialize_source') if src is not None else None
+                    operation = lambda c, m=mode, p=parent, s=src: c.alternative(
+                        string(data, 'intent_id'),
+                        string(data, 'label'),
+                        string(data, 'location', ''),
+                        string(data, 'status', 'proposed'),
+                        candidate_digest,
+                        materialize_mode=m,
+                        materialize_parent=p,
+                        materialize_source=s,
+                    )
+                else:
+                    operation = lambda c: c.alternative(
+                        string(data, 'intent_id'),
+                        string(data, 'label'),
+                        string(data, 'location'),
+                        string(data, 'status', 'proposed'),
+                        candidate_digest,
+                    )
+            elif path == '/api/alternatives/compare':
+                operation = lambda c: c.compare_alternative(string(data, 'id'))
             elif path == '/api/alternatives/status':
                 operation = lambda c: c.alternative_status(string(data, 'id'), string(data, 'status'))
             elif path == '/api/actors':

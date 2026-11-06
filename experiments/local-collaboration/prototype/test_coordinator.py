@@ -1,5 +1,6 @@
 import json
 import multiprocessing
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -7,7 +8,16 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from coordinator import Coordinator, canonical_workspace_root, observe, overlaps
+from coordinator import (
+    Coordinator,
+    INTEGRATION_SURFACE,
+    canonical_workspace_root,
+    diff_observations,
+    observe,
+    overlaps,
+    tree_digest,
+    within,
+)
 
 
 def concurrent_declare(database, actor, ready, start, results):
@@ -112,6 +122,15 @@ class CoordinatorTests(unittest.TestCase):
         self.assertTrue(overlaps("caf\u00e9", "cafe\u0301/file"))
         self.assertFalse(overlaps("src", "src2/file"))
 
+    def test_within_canonicalizes_for_membership(self):
+        real_parent = self.base / "real-parent"
+        real_parent.mkdir()
+        child = real_parent / "nested"
+        child.mkdir()
+        alias_parent = real_parent / "extra-segment" / ".."
+        self.assertTrue(within(child, alias_parent))
+        self.assertTrue(within(child, real_parent))
+
     def test_supersession_is_atomic_and_preserves_history(self):
         first = self.coordinator.declare("agent", [], ["src"])["intention"]
         before_events = len(self.coordinator.status()["events"])
@@ -138,13 +157,26 @@ class CoordinatorTests(unittest.TestCase):
 
     def test_alternative_metadata_and_transition_history(self):
         item = self.coordinator.declare("agent", [], ["src"])["intention"]
-        a = self.coordinator.alternative(item["id"], "candidate A", "external://a", candidate_digest="a" * 64)
-        b = self.coordinator.alternative(item["id"], "candidate B", "external://b")
+        ext_a = self.base / "ext-a"
+        ext_a.mkdir()
+        iso_parent = self.base / "iso-parent"
+        iso_parent.mkdir()
+        a = self.coordinator.alternative(item["id"], "candidate A", str(ext_a), candidate_digest="a" * 64)
+        b = self.coordinator.alternative(
+            item["id"],
+            "candidate B",
+            "",
+            materialize_mode="copy",
+            materialize_parent=str(iso_parent),
+            materialize_source=str(self.root),
+        )
         self.coordinator.alternative_status(a["id"], "rejected")
+        self.coordinator.compare_alternative(b["id"])
         self.coordinator.alternative_status(b["id"], "accepted")
         status = self.coordinator.status()
         self.assertEqual([x["status"] for x in status["alternatives"]], ["rejected", "accepted"])
         self.assertEqual(status["alternatives"][0]["digest_source"], "caller-asserted")
+        self.assertEqual(status["alternatives"][0]["isolation"]["verified"], True)
         self.assertEqual(status["intentions"][0]["status"], "active")
         self.assertEqual(status["events"][-1]["data"]["previous"], "proposed")
 
@@ -189,9 +221,172 @@ class CoordinatorTests(unittest.TestCase):
         self.assertEqual(data["protocol"], "weave.local.v1")
         expected_root = canonical_workspace_root(self.root)
         self.assertEqual(data["result"]["workspace"]["root"], expected_root)
+        self.assertEqual(data["result"]["workspace"]["integration_surface"]["version"], INTEGRATION_SURFACE["version"])
         result = subprocess.run([sys.executable, str(script), "--db", str(self.database), "check", "missing"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 1)
         self.assertFalse(json.loads(result.stdout)["ok"])
+
+    def test_git_worktree_materialize_when_git_available(self):
+        repo = self.base / "git-ws"
+        repo.mkdir()
+        (repo / "tracked.txt").write_text("v1\n")
+        env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@e", GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@e")
+        init = subprocess.run(["git", "-C", str(repo), "init"], capture_output=True, text=True, env=env)
+        if init.returncode != 0:
+            self.skipTest("git init unavailable")
+        subprocess.run(["git", "-C", str(repo), "add", "tracked.txt"], check=True, capture_output=True, env=env)
+        subprocess.run(["git", "-C", str(repo), "commit", "-m", "init"], check=True, capture_output=True, env=env)
+        db_git = self.base / "coord-git.sqlite"
+        coord = Coordinator(db_git, repo)
+        self.addCleanup(coord.close)
+        intent = coord.declare("agent", ["tracked.txt"], [])["intention"]
+        parent = self.base / "wt-parent"
+        parent.mkdir()
+        alt = coord.alternative(
+            intent["id"],
+            "wt",
+            "",
+            materialize_mode="git_worktree",
+            materialize_parent=str(parent),
+            materialize_source=str(repo),
+        )
+        wt = Path(alt["isolation"]["path"])
+        self.assertTrue(wt.is_dir())
+        self.assertEqual((wt / "tracked.txt").read_text(), "v1\n")
+        coord.compare_alternative(alt["id"])
+        coord.close()
+
+    def test_materialized_copy_binds_real_directory_to_alternative(self):
+        item = self.coordinator.declare("agent", [], ["."])["intention"]
+        parent = self.base / "cand-parent"
+        parent.mkdir()
+        alt = self.coordinator.alternative(
+            item["id"],
+            "fork-a",
+            "",
+            materialize_mode="copy",
+            materialize_parent=str(parent),
+            materialize_source=str(self.root),
+        )
+        path = Path(alt["isolation"]["path"])
+        self.assertTrue(path.is_dir())
+        self.assertNotEqual(path.resolve(), self.root.resolve())
+        self.assertTrue(within(path, parent))
+        self.assertEqual((path / "src" / "shared.txt").read_bytes(), b"before\x00")
+
+    def test_compare_emits_evidence_before_accept_and_blocks_integrate(self):
+        intent = self.coordinator.declare("agent", ["src/shared.txt"], [])["intention"]
+        parent = self.base / "iso2"
+        parent.mkdir()
+        alt = self.coordinator.alternative(
+            intent["id"],
+            "mirror",
+            "",
+            materialize_mode="copy",
+            materialize_parent=str(parent),
+            materialize_source=str(self.root),
+        )
+        cmp_same = self.coordinator.compare_alternative(alt["id"])
+        self.assertEqual(cmp_same["compare_evidence"]["diff"]["verdict"], "identical")
+        self.assertTrue(cmp_same["compare_evidence"]["allow_accept"])
+        fork = Path(alt["isolation"]["path"])
+        (fork / "src" / "shared.txt").write_bytes(b"changed-in-isolation\n")
+        cmp_diff = self.coordinator.compare_alternative(alt["id"])
+        self.assertEqual(cmp_diff["compare_evidence"]["diff"]["verdict"], "different")
+        self.assertFalse(cmp_diff["compare_evidence"]["allow_accept"])
+        self.coordinator.alternative_status(alt["id"], "accepted")
+        self.assertEqual((self.root / "src" / "shared.txt").read_bytes(), b"before\x00")
+
+    def test_accepted_without_compare_is_rejected(self):
+        intent = self.coordinator.declare("agent", [], ["src"])["intention"]
+        parent = self.base / "iso3"
+        parent.mkdir()
+        alt = self.coordinator.alternative(
+            intent["id"],
+            "blind",
+            "",
+            materialize_mode="copy",
+            materialize_parent=str(parent),
+            materialize_source=str(self.root),
+        )
+        with self.assertRaises(ValueError):
+            self.coordinator.alternative_status(alt["id"], "accepted")
+
+    def test_materialize_parent_inside_workspace_rejected_and_no_subdirectory_created(self):
+        intent = self.coordinator.declare("agent", [], ["src"])["intention"]
+        inside_parent = self.root / "inside-materialize-parent"
+        inside_parent.mkdir()
+        before_parent = list(inside_parent.iterdir())
+        with self.assertRaises(ValueError):
+            self.coordinator.alternative(
+                intent["id"],
+                "bad-parent",
+                "",
+                materialize_mode="copy",
+                materialize_parent=str(inside_parent),
+                materialize_source=str(self.root),
+            )
+        self.assertEqual(list(inside_parent.iterdir()), before_parent)
+        self.assertFalse(any(self.root.glob("synbios-lc-*")))
+
+    def test_materialize_parent_under_source_tree_rejected(self):
+        intent = self.coordinator.declare("agent", [], ["x"])["intention"]
+        ext = self.base / "bundle"
+        ext.mkdir()
+        (ext / "x").mkdir()
+        (ext / "x" / "f.txt").write_text("x")
+        bogus_parent = ext / "x" / "nested-parent"
+        bogus_parent.mkdir()
+        with self.assertRaises(ValueError):
+            self.coordinator.alternative(
+                intent["id"],
+                "nested",
+                "",
+                materialize_mode="copy",
+                materialize_parent=str(bogus_parent),
+                materialize_source=str(ext / "x"),
+            )
+
+    def test_alternative_cannot_register_as_accepted(self):
+        intent = self.coordinator.declare("agent", [], ["src"])["intention"]
+        parent = self.base / "iso-reg"
+        parent.mkdir()
+        with self.assertRaises(ValueError):
+            self.coordinator.alternative(
+                intent["id"],
+                "skip",
+                "",
+                status="accepted",
+                materialize_mode="copy",
+                materialize_parent=str(parent),
+                materialize_source=str(self.root),
+            )
+
+    def test_legacy_opaque_location_is_not_verified_isolation(self):
+        intent = self.coordinator.declare("agent", [], ["src"])["intention"]
+        raw = {
+            "id": "legacy-alt-id",
+            "intent_id": intent["id"],
+            "label": "old",
+            "location": "external://opaque",
+            "status": "proposed",
+            "candidate_digest": None,
+            "digest_source": None,
+        }
+        self.coordinator.connection.execute("INSERT INTO alternatives VALUES (?, ?)", (raw["id"], json.dumps(raw)))
+        self.coordinator.connection.commit()
+        row = self.coordinator.get("alternatives", "legacy-alt-id")
+        self.assertEqual(row["isolation"]["kind"], "legacy_opaque_location")
+        self.assertFalse(row["isolation"]["verified"])
+        with self.assertRaises(ValueError):
+            self.coordinator.compare_alternative("legacy-alt-id")
+
+    def test_tree_digest_and_diff_helpers(self):
+        baseline = observe(self.root, ["src/shared.txt"])
+        candidate = observe(self.root, ["src/shared.txt"])
+        self.assertEqual(tree_digest(baseline), tree_digest(candidate))
+        d = diff_observations(baseline, candidate)
+        self.assertEqual(d["verdict"], "identical")
 
 
 if __name__ == "__main__":
