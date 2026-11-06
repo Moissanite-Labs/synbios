@@ -4,7 +4,7 @@ test("a rejected credential is reported on sign-in", async ({
   page,
   workspace,
 }) => {
-  await page.goto(workspace.url);
+  await page.goto(workspace.url + "/?advanced=1");
   await page.locator("[name=token]").waitFor();
   await dismissGuideIfOpen(page);
   await page.locator("[name=token]").fill("not-a-valid-credential");

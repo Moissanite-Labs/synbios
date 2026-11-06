@@ -126,7 +126,9 @@ def verify_bundle(bundle):
             tests = [e for e in task['evidence'] if e['artifact_id'] == artifact['id'] and e['kind'] == 'test']
             reviewers = {p['id']: p for p in bundle['principals']}
             review = task['reviews'][-1]
-            if (not any(e['status'] == 'passed' for e in tests) or any(e['status'] == 'failed' for e in tests)
+            if (artifact.get('contract_revision', 1) != task.get('contract_revision', 1)
+                    or any(d['status'] == 'open' for d in task.get('decisions', []))
+                    or not any(e['status'] == 'passed' for e in tests) or any(e['status'] == 'failed' for e in tests)
                     or review['decision'] != 'approved' or review['artifact_id'] != artifact['id']
                     or reviewers[review['created_by']]['kind'] != 'human'):
                 raise ValueError('Invalid accepted-task evidence or human review')
@@ -231,6 +233,7 @@ class Store:
         event['hash'] = digest(event)
         self.db.execute('UPDATE state SET data=? WHERE id=1', (canonical(state),))
         self.db.execute('INSERT INTO events VALUES (?,?)', (event['seq'], canonical(event)))
+        return event
 
     def bootstrap(self, name='Maintainer'):
         with self._lock:
@@ -257,12 +260,15 @@ class Store:
                 state, events = self._load()
                 actor = self._auth(state, token)
                 result = {k: copy.deepcopy(state[k]) for k in ('projects', 'tasks', 'principals', 'grants')}
+                result['coordinator_grants'] = copy.deepcopy(state.get('coordinator_grants', []))
                 for task in result['tasks']:
                     current = task['artifacts'][-1] if task['artifacts'] else None
                     for evidence in task['evidence']:
-                        evidence['stale'] = not current or evidence['artifact_id'] != current['id']
+                        evidence['stale'] = (not current or evidence['artifact_id'] != current['id']
+                                             or current.get('contract_revision', 1) != task.get('contract_revision', 1))
                 result.update(version=1, actor=actor, events=events, integrity={'valid': True, 'event_count': len(events)}, metrics={'tasks': len(state['tasks']), 'accepted': sum(t['status'] == 'accepted' for t in state['tasks'])})
-                return result
+                from .mission import enrich_snapshot
+                return enrich_snapshot(result)
             finally:
                 self.db.rollback()
 
@@ -289,9 +295,13 @@ class Store:
         return item
 
     def _ready(self, state, task):
+        if any(d['status'] == 'open' for d in task.get('decisions', [])):
+            raise DomainError('Resolve or withdraw the open human decision first', 409)
         if not task['artifacts']:
             raise DomainError('Current artifact required', 409)
         current = task['artifacts'][-1]
+        if current.get('contract_revision', 1) != task.get('contract_revision', 1):
+            raise DomainError('Requirements changed. Record a new candidate and evidence for the current work contract.', 409)
         tests = [e for e in task['evidence'] if e['artifact_id'] == current['id'] and e['kind'] == 'test']
         if not any(e['status'] == 'passed' for e in tests) or any(e['status'] == 'failed' for e in tests):
             raise DomainError('Passing current test evidence without failures required', 409)
@@ -321,6 +331,11 @@ class Store:
                 if sym2p_packet_key and any(e['payload'].get('sym2p_packet_key') == sym2p_packet_key for e in events):
                     raise DomainError('Duplicate SYM-2P packet', 409)
                 result, task = self._command(state, actor, action, payload)
+                if task:
+                    task['revision'] = task.get('revision', 1) + 1
+                if action == 'plan.create':
+                    for created in result['tasks']:
+                        events.append(self._save(state, events, actor, 'plan.task.created', created, created))
                 entity = result.get('principal', result) if isinstance(result, dict) else result
                 self._save(
                     state, events, actor, action, entity, task,
@@ -335,11 +350,17 @@ class Store:
                 raise
 
     def _command(self, s, actor, action, p):
+        from . import mission
+        if action in mission.COMMAND_FIELDS:
+            return mission.command(self, s, actor, action, p)
         human = actor['kind'] == 'human'
         if action not in COMMAND_FIELDS:
             raise DomainError('Unknown command', 404)
-        if set(p) - COMMAND_FIELDS[action]:
-            raise DomainError('Unknown command fields: ' + ', '.join(sorted(set(p) - COMMAND_FIELDS[action])))
+        # Preserve the existing SYM-2P/SYM-3 version-1 wire field registry.
+        # Mission additions are available through JSON commands and discovery.
+        fields = COMMAND_FIELDS[action] | mission.EXTRA_FIELDS.get(action, set())
+        if set(p) - fields:
+            raise DomainError('Unknown command fields: ' + ', '.join(sorted(set(p) - fields)))
         task = None
         def human_only():
             if not human:
@@ -354,7 +375,7 @@ class Store:
         if action in {'project.create', 'principal.create', 'principal.revoke', 'grant.create', 'grant.revoke', 'task.create'}:
             human_only()
         if action == 'project.create':
-            result = dict(id=uid(), name=text('name'), description=text('description', ''), repository=text('repository', ''), created_at=now())
+            result = dict(id=uid(), name=text('name'), description=text('description', ''), repository=text('repository', ''), workspace=text('workspace', ''), created_at=now(), created_by=actor['id'], revision=1)
             s['projects'].append(result)
         elif action == 'principal.create':
             result = self._principal(s, p.get('name'), choice('kind', {'human', 'agent'}))
@@ -382,12 +403,9 @@ class Store:
                 raise DomainError('Grant already revoked', 409)
             result['revoked_at'] = now()
         elif action == 'task.create':
-            self._find(s['projects'], p.get('project_id'), 'Project')
-            deps = self._strings(p.get('dependencies', []), 'dependencies')
-            for dep in deps:
-                self._find(s['tasks'], dep, 'Dependency')
-            result = dict(id=uid(), project_id=p['project_id'], title=text('title'), description=text('description', ''), criteria=self._strings(p.get('criteria'), 'criteria', True), scope=self._strings(p.get('scope'), 'scope', True), status='open', priority=choice('priority', {'low', 'normal', 'high'}, 'normal'), assignee_id=None, dependencies=list(dict.fromkeys(deps)), created_by=actor['id'], created_at=now(), updated_at=now(), artifacts=[], evidence=[], reviews=[])
-            s['tasks'].append(result)
+            result = mission.new_task(self, s, actor, p.get('project_id'), p)
+            result['revision'] = 0  # Store.command stamps the first committed revision.
+            mission.validate_graph(self, s)
             task = result
         elif action in {'task.claim', 'task.transition', 'artifact.add', 'evidence.add', 'review.create'}:
             task = self._find(s['tasks'], p.get('task_id'), 'Task')
@@ -412,6 +430,11 @@ class Store:
                     self._ready(s, task)
                 task['status'] = status
                 if status == 'open':
+                    outgoing = task['assignee_id']
+                    for grant in s['grants']:
+                        if grant['task_id'] == task['id'] and grant['principal_id'] == outgoing and not grant['revoked_at']:
+                            grant['revoked_at'] = now()
+                    task['assignment_revision'] = task.get('assignment_revision', 0) + 1
                     task['assignee_id'] = None
                 result = task
             elif action == 'artifact.add':
@@ -421,7 +444,7 @@ class Store:
                 revision, sha = text('revision'), text('digest')
                 if not re.fullmatch(r'[0-9a-fA-F]{64}', sha) or not re.fullmatch(r'[0-9a-fA-F]{40}|[0-9a-fA-F]{64}' if kind == 'git_commit' else r'[0-9a-fA-F]{64}', revision):
                     raise DomainError('Invalid revision or SHA-256 digest')
-                result = dict(id=uid(), task_id=task['id'], title=text('title'), kind=kind, revision=revision.lower(), digest=sha.lower(), uri=text('uri', ''), summary=text('summary', ''), created_by=actor['id'], created_at=now())
+                result = dict(id=uid(), task_id=task['id'], title=text('title'), kind=kind, revision=revision.lower(), digest=sha.lower(), uri=text('uri', ''), summary=text('summary', ''), created_by=actor['id'], created_at=now(), contract_revision=task.get('contract_revision', 1))
                 task['artifacts'].append(result)
                 if task['status'] == 'in_review':
                     task['status'] = 'in_progress'
@@ -453,12 +476,31 @@ class Store:
             raise DomainError('Unknown command', 404)
         return result, task
 
+    def task_prompt(self, token, task_id, base_url='http://127.0.0.1:8765'):
+        from .mission import task_prompt
+        return task_prompt(self.snapshot(token), task_id, base_url)
+
+    def coordinator_prompt(self, token, project_id, base_url='http://127.0.0.1:8765'):
+        from .mission import coordinator_prompt
+        return coordinator_prompt(self.snapshot(token), project_id, base_url)
+
     def export(self, token, task_id):
         snapshot = self.snapshot(token)
         task = copy.deepcopy(self._find(snapshot['tasks'], task_id, 'Task'))
+        # Snapshot-only UI defaults and derived blockers are not part of the
+        # persisted task commitment, especially when opening older databases.
+        recorded = [e['payload']['task'] for e in snapshot['events']
+                    if e['task_id'] == task_id and 'task' in e['payload']]
+        if recorded:
+            task = {k: v for k, v in task.items() if k in recorded[-1]}
         for evidence in task['evidence']:
             evidence.pop('stale', None)
         involved = {task['created_by'], task['assignee_id']} | {x['created_by'] for key in ('artifacts', 'evidence', 'reviews') for x in task[key]}
+        involved.update(report['created_by'] for report in task.get('reports', []))
+        for decision in task.get('decisions', []):
+            involved.add(decision['created_by'])
+            if decision.get('resolved_by'):
+                involved.add(decision['resolved_by'])
         bundle = {'version': 1, 'format': 'synbios-task', 'exported_at': now(), 'task': task, 'project': self._find(snapshot['projects'], task['project_id'], 'Project'), 'principals': [p for p in snapshot['principals'] if p['id'] in involved], 'events': [e for e in snapshot['events'] if e['task_id'] == task_id], 'audit_chain': [{k: e[k] for k in ('seq', 'hash', 'previous_hash')} for e in snapshot['events']], 'limitations': ['Local tamper detection only; not signed identity or proof of completeness. Unrelated event payloads are omitted; their commitments are not independently verifiable.', 'Evidence is reported by principals; proof is shadow evidence, not platform-verified truth.']}
         bundle['bundle_digest'] = digest(bundle)
         return bundle

@@ -100,7 +100,7 @@ export async function login(
   workspace: Workspace,
   reviewer = false,
 ) {
-  await page.goto(workspace.url);
+  await page.goto(workspace.url + "/?advanced=1");
   const tokenInput = page.locator("[name=token]");
   await tokenInput.waitFor();
   await dismissGuideIfOpen(page);
