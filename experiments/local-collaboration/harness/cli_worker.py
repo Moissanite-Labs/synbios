@@ -16,17 +16,16 @@ import time
 import uuid
 from pathlib import Path
 
-from .model import DeclaredScopes, HarnessLifecycle, HarnessSessionState, ReconnectHandle, ScopeCheckResult, SessionIdentity
-
-
-def _pid_is_running(pid: int) -> bool:
-    try:
-        stat = Path(f"/proc/{pid}/stat").read_text()
-    except OSError:
-        return False
-    state = stat.rsplit(")", 1)[1].split()[0]
-    return state != "Z"
-
+from .model import (
+    CrashAmbiguityClass,
+    DeclaredScopes,
+    HarnessLifecycle,
+    HarnessSessionState,
+    ReconnectHandle,
+    ScopeCheckResult,
+    SessionIdentity,
+)
+from .pidutil import pid_is_running
 
 WORKER_MAIN = r"""
 import json, os, pathlib, time
@@ -40,7 +39,7 @@ if viol == "1":
     target = pathlib.Path(os.environ["EXO_LC_OUTSIDE"])
 target.parent.mkdir(parents=True, exist_ok=True)
 target.write_text("cli-worker\n", encoding="utf-8")
-info = {"pid": os.getpid(), "wrote": str(target)}
+info = {"pid": os.getpid(), "wrote": str(target.resolve())}
 control.write_text(json.dumps(info), encoding="utf-8")
 while not stop.exists():
     time.sleep(0.05)
@@ -77,9 +76,15 @@ class CliSubprocessHarness:
     def work_dir(self) -> Path:
         return self._work
 
+    @property
+    def outside_violation_path(self) -> Path:
+        """Temp path used when ``violate_scope`` directs the worker outside the workspace."""
+        return self._outside_violation
+
     def start(self, violate_scope: bool = False) -> HarnessSessionState:
         self._stop_flag.unlink(missing_ok=True)
         self._control.unlink(missing_ok=True)
+        self._outside_violation.unlink(missing_ok=True)
         env = {
             **os.environ,
             "EXO_LC_WORK_DIR": str(self._work),
@@ -122,7 +127,7 @@ class CliSubprocessHarness:
             self._proc = None
 
     def observe_pid_alive(self, pid: int) -> bool:
-        return _pid_is_running(pid)
+        return pid_is_running(pid)
 
     def kill_worker(self, pid: int) -> None:
         try:
@@ -131,7 +136,7 @@ class CliSubprocessHarness:
             pass
         t0 = time.monotonic()
         while time.monotonic() - t0 < 5.0:
-            if not _pid_is_running(pid):
+            if not pid_is_running(pid):
                 break
             time.sleep(0.05)
         if self._proc:
@@ -154,28 +159,65 @@ class CliSubprocessHarness:
             worker_control_path=str(self._control),
         )
 
-    def check_scopes(self, declared: DeclaredScopes, violate: bool) -> list[ScopeCheckResult]:
-        rel_name = "cli_allowed.txt"
-        if violate:
-            allowed = False
-            reason = "write targeted path outside workspace_root (violation probe)"
-            return [ScopeCheckResult(path=str(self._outside_violation), allowed=allowed, reason=reason)]
+    def classify_crash_ambiguity(
+        self,
+        pid: int | None,
+        *,
+        hung_induced: bool = False,
+        coordinator_intention_status: str | None = None,
+    ) -> CrashAmbiguityClass:
+        from .crash_classify import classify_cli_subprocess
 
-        inside = self._work / rel_name
+        return classify_cli_subprocess(
+            self.observe_pid_alive,
+            pid,
+            hung_induced=hung_induced,
+            coordinator_intention_status=coordinator_intention_status,
+        )
+
+    def check_scopes(self, declared: DeclaredScopes) -> list[ScopeCheckResult]:
+        """Inspect ``control.json`` ``wrote`` path: filesystem evidence vs workspace root and declared writes."""
+        if not self._control.is_file():
+            return [ScopeCheckResult(path="", allowed=False, reason="control.json missing; no observed write")]
         try:
-            rel = str(inside.relative_to(self.workspace_root))
+            data = json.loads(self._control.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            return [ScopeCheckResult(path="", allowed=False, reason=f"control unreadable: {exc}")]
+
+        wrote = data.get("wrote")
+        if not wrote:
+            return [ScopeCheckResult(path="", allowed=False, reason="control has no wrote path")]
+
+        path = Path(wrote).resolve()
+        if not path.is_file():
+            return [ScopeCheckResult(path=str(path), allowed=False, reason="wrote path is not a file")]
+
+        try:
+            rel = str(path.relative_to(self.workspace_root))
         except ValueError:
-            rel = str(inside)
-        ok = False
-        for w in declared.writes:
-            wn = w.strip().rstrip("/")
-            if wn in ("", ".") or rel == wn or rel.startswith(wn + "/"):
-                ok = True
-                break
+            return [
+                ScopeCheckResult(
+                    path=str(path),
+                    allowed=False,
+                    reason="file written outside workspace_root (not covered by collaboration root)",
+                )
+            ]
+
+        covered = any(self._is_within(rel, w) for w in declared.writes)
         return [
             ScopeCheckResult(
                 path=rel,
-                allowed=ok and inside.is_file(),
-                reason="write under declared scope" if ok else "write path not covered by declared scopes",
+                allowed=covered,
+                reason="observed path is under declared write scopes"
+                if covered
+                else "observed path is inside workspace but not covered by declared write scopes",
             )
         ]
+
+    @staticmethod
+    def _is_within(rel_path: str, scope: str) -> bool:
+        scope_n = scope.strip().rstrip("/")
+        path_n = rel_path.strip()
+        if scope_n in ("", "."):
+            return True
+        return path_n == scope_n or path_n.startswith(scope_n + "/")

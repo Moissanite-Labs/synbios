@@ -24,7 +24,9 @@ jobs:
       - run: python -m unittest discover -s tests -v
       - name: Local collaboration experiment
         working-directory: experiments/local-collaboration
-        run: python handoff/run_checks.py
+        run: |
+          python handoff/bootstrap_exo.py
+          python handoff/run_checks.py
       - name: Tests leave tracked files unchanged
         run: git diff --exit-code
       - run: python -m synbios.shadow

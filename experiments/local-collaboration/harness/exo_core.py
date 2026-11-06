@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import IO
 
 from .model import (
+    CrashAmbiguityClass,
     DeclaredScopes,
     HarnessLifecycle,
     HarnessSessionState,
@@ -26,8 +27,20 @@ from .model import (
     ScopeCheckResult,
     SessionIdentity,
 )
+from .pidutil import pid_is_running as _pid_portable_running
 
 EXO_CLI = [sys.executable, "-m", "exo.cli"]
+
+# Worker subprocess writes under workspace (separate from this process); proves observed paths.
+EXO_SCOPE_WRITER = r"""
+import os, pathlib, sys
+root = pathlib.Path(sys.argv[1]).resolve()
+rel = sys.argv[2]
+path = root / rel.replace("/", os.sep)
+path.parent.mkdir(parents=True, exist_ok=True)
+path.write_text("exo-scope-worker\n", encoding="utf-8")
+print(path.resolve().relative_to(root).as_posix())
+"""
 
 
 def _exod_sock(exo_home: Path) -> Path:
@@ -56,16 +69,6 @@ def _read_pid(path: Path) -> int | None:
     except OSError:
         return None
     return int(text) if text.isdigit() else None
-
-
-def _pid_is_running(pid: int) -> bool:
-    """True only if the task exists and is not a zombie (``kill -0`` stays true for zombies on Linux)."""
-    try:
-        stat = Path(f"/proc/{pid}/stat").read_text()
-    except OSError:
-        return False
-    state = stat.rsplit(")", 1)[1].split()[0]
-    return state != "Z"
 
 
 class ExoCoreHarness:
@@ -184,7 +187,7 @@ class ExoCoreHarness:
         return _probe_unix(_exod_sock(self.exo_home))
 
     def observe_pid_alive(self, pid: int) -> bool:
-        return _pid_is_running(pid)
+        return _pid_portable_running(pid)
 
     def kill_exod_pid(self, pid: int) -> None:
         try:
@@ -193,7 +196,7 @@ class ExoCoreHarness:
             pass
         t0 = time.monotonic()
         while time.monotonic() - t0 < 5.0:
-            if not _pid_is_running(pid):
+            if not _pid_portable_running(pid):
                 break
             time.sleep(0.05)
         if self._serve_proc:
@@ -228,30 +231,93 @@ class ExoCoreHarness:
             return False
         return _probe_unix(Path(handle.socket_path or _exod_sock(home)))
 
-    def check_scopes(self, declared: DeclaredScopes, evidence_dir: Path) -> list[ScopeCheckResult]:
-        """Exo does not export plan-scope enforcement on main; record declared vs workspace evidence."""
+    def classify_crash_ambiguity(
+        self,
+        pid: int | None,
+        *,
+        hung_induced: bool = False,
+        coordinator_intention_status: str | None = None,
+    ) -> CrashAmbiguityClass:
+        """Classify from socket + PID + optional durable coordinator row (``active`` / ``running``)."""
+        from .crash_classify import classify_exo_core
+
+        return classify_exo_core(self, pid, hung_induced=hung_induced, coordinator_intention_status=coordinator_intention_status)
+
+    def check_scopes(self, declared: DeclaredScopes, evidence_dir: Path, *, worker_relative_path: str | None = None) -> list[ScopeCheckResult]:
+        """Observe paths written by a *separate* OS process against declared writes (honest when exo cannot sandbox)."""
+
         evidence_dir.mkdir(parents=True, exist_ok=True)
-        allowed_root = self.workspace_root / "allowed"
-        allowed_root.mkdir(parents=True, exist_ok=True)
-        sample = allowed_root / "exo-scope-smoke.txt"
-        sample.write_text("scope-check\n", encoding="utf-8")
-        rel = str(sample.relative_to(self.workspace_root))
-        allowed_write = bool(declared.writes) and any(self._is_within(rel, w) for w in declared.writes)
+        if not declared.writes:
+            return [
+                ScopeCheckResult(
+                    path="",
+                    allowed=False,
+                    reason="no write scopes declared; cannot observe a scoped write",
+                )
+            ]
+        if worker_relative_path is None:
+            target_scope = sorted(declared.writes)[0]
+            rel_target = f"{target_scope.strip().rstrip('/')}/exo_scope_worker_observed.txt"
+        else:
+            rel_target = worker_relative_path
+
+        proc = subprocess.run(
+            [sys.executable, "-c", EXO_SCOPE_WRITER, str(self.workspace_root), rel_target],
+            cwd=str(self.workspace_root),
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        observed_rel = (proc.stdout or "").strip().splitlines()[-1] if proc.returncode == 0 else ""
         payload = {
             "declared_writes": sorted(declared.writes),
             "declared_reads": sorted(declared.reads),
-            "sample_path": rel,
-            "adapter_note": "exo-core adapter records declared scopes; enforcement is Exo-side when swarm APIs land",
+            "worker_stdout_tail": (proc.stdout or "").strip(),
+            "worker_stderr": (proc.stderr or "").strip(),
+            "worker_exit_code": proc.returncode,
+            "observed_relative_path": observed_rel,
+            "worker_relative_path": rel_target,
+            "note": "Path written by worker subprocess; compared to declared writes (exo main has no plan-scope sandbox to call).",
         }
         (evidence_dir / "exo_core_scope_evidence.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        results = [
+
+        if proc.returncode != 0 or not observed_rel:
+            return [
+                ScopeCheckResult(
+                    path=rel_target,
+                    allowed=False,
+                    reason=f"worker failed to write (exit {proc.returncode})",
+                )
+            ]
+
+        abs_path = (self.workspace_root / observed_rel).resolve()
+        try:
+            abs_path.relative_to(self.workspace_root)
+        except ValueError:
+            return [
+                ScopeCheckResult(
+                    path=observed_rel,
+                    allowed=False,
+                    reason="written path escapes workspace root",
+                )
+            ]
+        if not abs_path.is_file():
+            return [
+                ScopeCheckResult(
+                    path=observed_rel,
+                    allowed=False,
+                    reason="expected file missing after worker run",
+                )
+            ]
+
+        covered = any(self._is_within(observed_rel, w) for w in declared.writes)
+        return [
             ScopeCheckResult(
-                path=rel,
-                allowed=allowed_write,
-                reason="written under declared write scope" if allowed_write else "no declared write covered sample path",
+                path=observed_rel,
+                allowed=covered,
+                reason="observed file path is under declared write scope" if covered else "observed path not covered by declared write scopes",
             )
         ]
-        return results
 
     @staticmethod
     def _is_within(rel_path: str, scope: str) -> bool:
