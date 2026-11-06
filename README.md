@@ -102,6 +102,12 @@ This experiment is not a formal proof. Bend verification, authenticated attestat
 
 ## Development
 
+The separate [local collaboration experiment](experiments/local-collaboration/README.md)
+explores cooperative intentions, stale baselines and a local Crystal Lattice dashboard
+over existing folders. It does not change Synbios acceptance or run agents, apply
+source edits, or establish a formal proof. Its own commands and platform limits are
+documented alongside the experiment.
+
 ```sh
 python -m unittest discover -s tests -v
 npm --prefix web run check
