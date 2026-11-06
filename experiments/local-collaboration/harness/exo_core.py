@@ -28,6 +28,7 @@ from .model import (
     SessionIdentity,
 )
 from .pidutil import pid_is_running as _pid_portable_running
+from .pidutil import pid_is_stopped as _pid_portable_stopped
 
 EXO_CLI = [sys.executable, "-m", "exo.cli"]
 
@@ -189,6 +190,10 @@ class ExoCoreHarness:
     def observe_pid_alive(self, pid: int) -> bool:
         return _pid_portable_running(pid)
 
+    def observe_pid_stopped(self, pid: int) -> bool:
+        """True when kernel reports stopped job state (e.g. after SIGSTOP)."""
+        return _pid_portable_stopped(pid)
+
     def kill_exod_pid(self, pid: int) -> None:
         try:
             os.kill(pid, signal.SIGKILL)
@@ -235,13 +240,12 @@ class ExoCoreHarness:
         self,
         pid: int | None,
         *,
-        hung_induced: bool = False,
         coordinator_intention_status: str | None = None,
     ) -> CrashAmbiguityClass:
         """Classify from socket + PID + optional durable coordinator row (``active`` / ``running``)."""
         from .crash_classify import classify_exo_core
 
-        return classify_exo_core(self, pid, hung_induced=hung_induced, coordinator_intention_status=coordinator_intention_status)
+        return classify_exo_core(self, pid, coordinator_intention_status=coordinator_intention_status)
 
     def check_scopes(self, declared: DeclaredScopes, evidence_dir: Path, *, worker_relative_path: str | None = None) -> list[ScopeCheckResult]:
         """Observe paths written by a *separate* OS process against declared writes (honest when exo cannot sandbox)."""

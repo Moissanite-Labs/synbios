@@ -64,13 +64,21 @@ class CliHarnessTests(unittest.TestCase):
         assert pid is not None
         h.pause_worker(pid)
         try:
-            self.assertEqual(
-                h.classify_crash_ambiguity(pid, hung_induced=True),
-                CrashAmbiguityClass.process_hung,
-            )
+            self.assertTrue(h.observe_pid_stopped(pid))
+            self.assertEqual(h.classify_crash_ambiguity(pid), CrashAmbiguityClass.process_hung)
         finally:
             h.resume_worker(pid)
             h.stop()
+
+    def test_running_process_not_hung(self):
+        h = CliSubprocessHarness(self.workspace)
+        st = h.start()
+        pid = st.pid
+        assert pid is not None
+        self.assertTrue(h.observe_pid_alive(pid))
+        self.assertFalse(h.observe_pid_stopped(pid))
+        self.assertEqual(h.classify_crash_ambiguity(pid), CrashAmbiguityClass.none)
+        h.stop()
 
     def test_crash_ambiguity_metadata_claims_running(self):
         scoped = self.workspace / "scoped"

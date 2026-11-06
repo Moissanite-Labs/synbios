@@ -83,13 +83,23 @@ class ExoCoreAdapterTests(unittest.TestCase):
         assert pid is not None
         h.pause_exod_pid(pid)
         try:
-            self.assertEqual(
-                h.classify_crash_ambiguity(pid, hung_induced=True),
-                CrashAmbiguityClass.process_hung,
-            )
+            self.assertTrue(h.observe_pid_stopped(pid))
+            self.assertEqual(h.classify_crash_ambiguity(pid), CrashAmbiguityClass.process_hung)
         finally:
             h.resume_exod_pid(pid)
             h.stop_gracefully()
+
+    def test_running_process_not_hung(self):
+        h = ExoCoreHarness(self.workspace, self.exo_home)
+        h.prepare_store()
+        st = h.start()
+        pid = st.pid
+        assert pid is not None
+        self.assertTrue(h.observe_pid_alive(pid))
+        self.assertFalse(h.observe_pid_stopped(pid))
+        self.assertTrue(h.observe_socket())
+        self.assertEqual(h.classify_crash_ambiguity(pid), CrashAmbiguityClass.none)
+        h.stop_gracefully()
 
     def test_scoped_write_respect_observed(self):
         h = ExoCoreHarness(self.workspace, self.exo_home)

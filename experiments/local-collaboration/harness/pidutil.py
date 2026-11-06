@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import time
 from pathlib import Path
 
 
@@ -52,6 +53,50 @@ def pid_is_zombie(pid: int) -> bool:
     # First column is state: Z or Z+ on some systems.
     st = line[0].strip()
     return len(st) >= 1 and st[0] == "Z"
+
+
+def _proc_state_char(pid: int) -> str | None:
+    proc = Path(f"/proc/{pid}/stat")
+    if proc.is_file():
+        try:
+            rest = proc.read_text().rsplit(")", 1)[1]
+            return rest.split()[0]
+        except (OSError, IndexError):
+            return None
+    try:
+        completed = subprocess.run(
+            ["ps", "-p", str(pid), "-o", "state="],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if completed.returncode != 0:
+        return None
+    line = (completed.stdout or "").strip().splitlines()
+    if not line:
+        return None
+    return line[0].strip()[:1] or None
+
+
+def pid_is_stopped(pid: int) -> bool:
+    """True if the task is in the stopped state (e.g. SIGSTOP), not zombie.
+
+    Linux ``/proc`` and BSD ``ps`` use ``T`` (and sometimes ``t``) for stopped jobs.
+    Poll briefly: the kernel may not publish ``T`` on the first read after SIGSTOP.
+    """
+    if not pid_exists(pid):
+        return False
+    deadline = time.monotonic() + 0.75
+    while time.monotonic() < deadline:
+        ch = _proc_state_char(pid)
+        if ch is not None and ch.upper() == "T":
+            return True
+        if ch == "Z":
+            return False
+        time.sleep(0.01)
+    return False
 
 
 def pid_is_running(pid: int) -> bool:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from .model import CrashAmbiguityClass
 
@@ -14,17 +14,16 @@ def classify_exo_core(
     h: ExoCoreHarness,
     pid: int | None,
     *,
-    hung_induced: bool = False,
     coordinator_intention_status: str | None = None,
 ) -> CrashAmbiguityClass:
-    """Use socket + PID observations plus optional coordinator row status."""
+    """Socket + PID state + optional durable coordinator row (``active`` / ``running``)."""
     row = (coordinator_intention_status or "").strip().lower()
     meta_active = row in ("active", "running")
 
     if meta_active and (pid is None or not h.observe_pid_alive(pid)):
         return CrashAmbiguityClass.metadata_claims_running
 
-    if hung_induced and pid is not None and h.observe_pid_alive(pid):
+    if pid is not None and h.observe_pid_stopped(pid):
         return CrashAmbiguityClass.process_hung
 
     if pid is None or not h.observe_pid_alive(pid):
@@ -36,20 +35,20 @@ def classify_exo_core(
 
 
 def classify_cli_subprocess(
-    observe_pid_alive,
+    observe_pid_alive: Callable[[int], bool],
+    observe_pid_stopped: Callable[[int], bool],
     pid: int | None,
     *,
-    hung_induced: bool = False,
     coordinator_intention_status: str | None = None,
 ) -> CrashAmbiguityClass:
-    """CLI harness: no socket; PID + optional coordinator metadata."""
+    """CLI harness: PID state + optional coordinator metadata."""
     row = (coordinator_intention_status or "").strip().lower()
     meta_active = row in ("active", "running")
 
     if meta_active and (pid is None or not observe_pid_alive(pid)):
         return CrashAmbiguityClass.metadata_claims_running
 
-    if hung_induced and pid is not None and observe_pid_alive(pid):
+    if pid is not None and observe_pid_stopped(pid):
         return CrashAmbiguityClass.process_hung
 
     if pid is None or not observe_pid_alive(pid):
