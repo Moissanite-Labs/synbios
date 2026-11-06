@@ -29,6 +29,15 @@ def within(path, parent):
     return path == parent or parent in path.parents
 
 
+def canonical_workspace_root(candidate):
+    """Absolute workspace root string as stored after init (expanduser + resolve).
+
+    Matches :meth:`Coordinator.__init__` registration of a new root: an initial
+    path alias is resolved to a real directory (e.g. macOS ``/var`` → ``/private/var``).
+    """
+    return str(Path(candidate).expanduser().resolve(strict=True))
+
+
 def scope(value):
     if not value or "\\" in value or ":" in value:
         raise ValueError("Scopes must be relative POSIX paths, with no backslash or colon")

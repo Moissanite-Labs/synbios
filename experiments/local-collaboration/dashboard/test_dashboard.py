@@ -12,6 +12,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from server import DashboardServer, MAX_BODY
+from coordinator import canonical_workspace_root
 
 BASE = Path(__file__).resolve().parents[1]
 
@@ -167,7 +168,8 @@ class DashboardHTTPTests(unittest.TestCase):
             response = connection.getresponse()
             payload = json.loads(response.read())
             self.assertEqual(response.status, 200, payload)
-            self.assertEqual(payload['result']['workspace']['root'], str(self.root))
+            expected_root = canonical_workspace_root(self.root)
+            self.assertEqual(payload['result']['workspace']['root'], expected_root)
             self.assertEqual(Path(server.database), Path(self.temp.name) / 'tilde-state.sqlite')
         finally:
             connection.close()

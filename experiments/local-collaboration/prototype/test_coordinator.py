@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from coordinator import Coordinator, observe, overlaps
+from coordinator import Coordinator, canonical_workspace_root, observe, overlaps
 
 
 def concurrent_declare(database, actor, ready, start, results):
@@ -187,7 +187,8 @@ class CoordinatorTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         data = json.loads(result.stdout)
         self.assertEqual(data["protocol"], "weave.local.v1")
-        self.assertEqual(data["result"]["workspace"]["root"], str(self.root))
+        expected_root = canonical_workspace_root(self.root)
+        self.assertEqual(data["result"]["workspace"]["root"], expected_root)
         result = subprocess.run([sys.executable, str(script), "--db", str(self.database), "check", "missing"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 1)
         self.assertFalse(json.loads(result.stdout)["ok"])
