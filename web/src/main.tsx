@@ -568,7 +568,7 @@ function App() {
           <Logo />
           {demoMode && (
             <p className="demo-sidebar-note">
-              Pages demo — in-browser mock only.
+              Pages demo: in-browser mock only.
             </p>
           )}
           <p className="nav-label">WORKSPACE</p>
