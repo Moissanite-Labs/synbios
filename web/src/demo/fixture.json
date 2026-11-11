@@ -45,9 +45,7 @@
           {
             "artifact_digest": "a09d01d6fedce10030df7a15a2d952a3c72ac4d7c5a38cb61c6bbaf33edd9714",
             "artifact_id": "263c3fbcc73745b0a948479e3837b567",
-            "assumptions": [
-              "Synthetic evidence, not executed validation"
-            ],
+            "assumptions": ["Synthetic evidence, not executed validation"],
             "command": "SYNTHETIC FIXTURE. No command executed.",
             "created_at": "2026-11-11T18:08:53.833111+00:00",
             "created_by": "0f0d204ef3734c97a1bc2702490e59a0",
@@ -76,9 +74,7 @@
             "task_id": "f4a70ebda6094b90a001d58ba14ee364"
           }
         ],
-        "scope": [
-          "docs/"
-        ],
+        "scope": ["docs/"],
         "status": "accepted",
         "title": "Define contribution guide",
         "updated_at": "2026-11-11T18:08:53.835054+00:00"
@@ -111,9 +107,7 @@
           {
             "artifact_digest": "27239a7a6d3d7753ea4aea7cd4153a99050146879cce04e52b4a110c276c829a",
             "artifact_id": "761bb0bc51684c239304097992c306cd",
-            "assumptions": [
-              "Synthetic evidence, not executed validation"
-            ],
+            "assumptions": ["Synthetic evidence, not executed validation"],
             "command": "SYNTHETIC FIXTURE. No command executed.",
             "created_at": "2026-11-11T18:08:53.841360+00:00",
             "created_by": "0f0d204ef3734c97a1bc2702490e59a0",
@@ -131,9 +125,7 @@
         "priority": "normal",
         "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
         "reviews": [],
-        "scope": [
-          "docs/"
-        ],
+        "scope": ["docs/"],
         "status": "in_review",
         "title": "Build evidence intake",
         "updated_at": "2026-11-11T18:08:53.842526+00:00"
@@ -154,9 +146,7 @@
         "priority": "normal",
         "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
         "reviews": [],
-        "scope": [
-          "docs/"
-        ],
+        "scope": ["docs/"],
         "status": "open",
         "title": "Review release readiness",
         "updated_at": "2026-11-11T18:08:53.829303+00:00"
@@ -187,13 +177,7 @@
     ],
     "grants": [
       {
-        "capabilities": [
-          "claim",
-          "work",
-          "artifact",
-          "evidence",
-          "submit"
-        ],
+        "capabilities": ["claim", "work", "artifact", "evidence", "submit"],
         "created_at": "2026-11-11T18:08:53.829948+00:00",
         "created_by": "49b4f343661945d49fc948b5b3366f71",
         "id": "b4174a220a724b43891e7177758e9442",
@@ -202,13 +186,7 @@
         "task_id": "f4a70ebda6094b90a001d58ba14ee364"
       },
       {
-        "capabilities": [
-          "claim",
-          "work",
-          "artifact",
-          "evidence",
-          "submit"
-        ],
+        "capabilities": ["claim", "work", "artifact", "evidence", "submit"],
         "created_at": "2026-11-11T18:08:53.836028+00:00",
         "created_by": "49b4f343661945d49fc948b5b3366f71",
         "id": "9e8814fbd5b74e0fb033ca7ef1c20ada",
@@ -326,9 +304,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "open",
           "title": "Define contribution guide",
           "updated_at": "2026-11-11T18:08:53.827905+00:00"
@@ -350,9 +326,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "open",
           "title": "Define contribution guide",
           "updated_at": "2026-11-11T18:08:53.827905+00:00"
@@ -385,9 +359,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "open",
           "title": "Build evidence intake",
           "updated_at": "2026-11-11T18:08:53.828751+00:00"
@@ -409,9 +381,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "open",
           "title": "Build evidence intake",
           "updated_at": "2026-11-11T18:08:53.828751+00:00"
@@ -444,9 +414,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "open",
           "title": "Review release readiness",
           "updated_at": "2026-11-11T18:08:53.829303+00:00"
@@ -468,9 +436,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "open",
           "title": "Review release readiness",
           "updated_at": "2026-11-11T18:08:53.829303+00:00"
@@ -488,13 +454,7 @@
       "id": "6afb3892eab249e5bb705bd920c817cf",
       "payload": {
         "entity": {
-          "capabilities": [
-            "claim",
-            "work",
-            "artifact",
-            "evidence",
-            "submit"
-          ],
+          "capabilities": ["claim", "work", "artifact", "evidence", "submit"],
           "created_at": "2026-11-11T18:08:53.829948+00:00",
           "created_by": "49b4f343661945d49fc948b5b3366f71",
           "id": "b4174a220a724b43891e7177758e9442",
@@ -531,9 +491,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "claimed",
           "title": "Define contribution guide",
           "updated_at": "2026-11-11T18:08:53.830555+00:00"
@@ -555,9 +513,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "claimed",
           "title": "Define contribution guide",
           "updated_at": "2026-11-11T18:08:53.830555+00:00"
@@ -590,9 +546,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_progress",
           "title": "Define contribution guide",
           "updated_at": "2026-11-11T18:08:53.831231+00:00"
@@ -614,9 +568,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_progress",
           "title": "Define contribution guide",
           "updated_at": "2026-11-11T18:08:53.831231+00:00"
@@ -675,9 +627,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_progress",
           "title": "Define contribution guide",
           "updated_at": "2026-11-11T18:08:53.832380+00:00"
@@ -697,9 +647,7 @@
         "entity": {
           "artifact_digest": "a09d01d6fedce10030df7a15a2d952a3c72ac4d7c5a38cb61c6bbaf33edd9714",
           "artifact_id": "263c3fbcc73745b0a948479e3837b567",
-          "assumptions": [
-            "Synthetic evidence, not executed validation"
-          ],
+          "assumptions": ["Synthetic evidence, not executed validation"],
           "command": "SYNTHETIC FIXTURE. No command executed.",
           "created_at": "2026-11-11T18:08:53.833111+00:00",
           "created_by": "0f0d204ef3734c97a1bc2702490e59a0",
@@ -741,9 +689,7 @@
             {
               "artifact_digest": "a09d01d6fedce10030df7a15a2d952a3c72ac4d7c5a38cb61c6bbaf33edd9714",
               "artifact_id": "263c3fbcc73745b0a948479e3837b567",
-              "assumptions": [
-                "Synthetic evidence, not executed validation"
-              ],
+              "assumptions": ["Synthetic evidence, not executed validation"],
               "command": "SYNTHETIC FIXTURE. No command executed.",
               "created_at": "2026-11-11T18:08:53.833111+00:00",
               "created_by": "0f0d204ef3734c97a1bc2702490e59a0",
@@ -761,9 +707,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_progress",
           "title": "Define contribution guide",
           "updated_at": "2026-11-11T18:08:53.833116+00:00"
@@ -808,9 +752,7 @@
             {
               "artifact_digest": "a09d01d6fedce10030df7a15a2d952a3c72ac4d7c5a38cb61c6bbaf33edd9714",
               "artifact_id": "263c3fbcc73745b0a948479e3837b567",
-              "assumptions": [
-                "Synthetic evidence, not executed validation"
-              ],
+              "assumptions": ["Synthetic evidence, not executed validation"],
               "command": "SYNTHETIC FIXTURE. No command executed.",
               "created_at": "2026-11-11T18:08:53.833111+00:00",
               "created_by": "0f0d204ef3734c97a1bc2702490e59a0",
@@ -828,9 +770,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_review",
           "title": "Define contribution guide",
           "updated_at": "2026-11-11T18:08:53.834033+00:00"
@@ -864,9 +804,7 @@
             {
               "artifact_digest": "a09d01d6fedce10030df7a15a2d952a3c72ac4d7c5a38cb61c6bbaf33edd9714",
               "artifact_id": "263c3fbcc73745b0a948479e3837b567",
-              "assumptions": [
-                "Synthetic evidence, not executed validation"
-              ],
+              "assumptions": ["Synthetic evidence, not executed validation"],
               "command": "SYNTHETIC FIXTURE. No command executed.",
               "created_at": "2026-11-11T18:08:53.833111+00:00",
               "created_by": "0f0d204ef3734c97a1bc2702490e59a0",
@@ -884,9 +822,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_review",
           "title": "Define contribution guide",
           "updated_at": "2026-11-11T18:08:53.834033+00:00"
@@ -942,9 +878,7 @@
             {
               "artifact_digest": "a09d01d6fedce10030df7a15a2d952a3c72ac4d7c5a38cb61c6bbaf33edd9714",
               "artifact_id": "263c3fbcc73745b0a948479e3837b567",
-              "assumptions": [
-                "Synthetic evidence, not executed validation"
-              ],
+              "assumptions": ["Synthetic evidence, not executed validation"],
               "command": "SYNTHETIC FIXTURE. No command executed.",
               "created_at": "2026-11-11T18:08:53.833111+00:00",
               "created_by": "0f0d204ef3734c97a1bc2702490e59a0",
@@ -973,9 +907,7 @@
               "task_id": "f4a70ebda6094b90a001d58ba14ee364"
             }
           ],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "accepted",
           "title": "Define contribution guide",
           "updated_at": "2026-11-11T18:08:53.835054+00:00"
@@ -993,13 +925,7 @@
       "id": "2999abbb8c2240a58db2e83bbc80a1e9",
       "payload": {
         "entity": {
-          "capabilities": [
-            "claim",
-            "work",
-            "artifact",
-            "evidence",
-            "submit"
-          ],
+          "capabilities": ["claim", "work", "artifact", "evidence", "submit"],
           "created_at": "2026-11-11T18:08:53.836028+00:00",
           "created_by": "49b4f343661945d49fc948b5b3366f71",
           "id": "9e8814fbd5b74e0fb033ca7ef1c20ada",
@@ -1036,9 +962,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "claimed",
           "title": "Build evidence intake",
           "updated_at": "2026-11-11T18:08:53.837096+00:00"
@@ -1060,9 +984,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "claimed",
           "title": "Build evidence intake",
           "updated_at": "2026-11-11T18:08:53.837096+00:00"
@@ -1095,9 +1017,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_progress",
           "title": "Build evidence intake",
           "updated_at": "2026-11-11T18:08:53.838557+00:00"
@@ -1119,9 +1039,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_progress",
           "title": "Build evidence intake",
           "updated_at": "2026-11-11T18:08:53.838557+00:00"
@@ -1180,9 +1098,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_progress",
           "title": "Build evidence intake",
           "updated_at": "2026-11-11T18:08:53.839998+00:00"
@@ -1202,9 +1118,7 @@
         "entity": {
           "artifact_digest": "27239a7a6d3d7753ea4aea7cd4153a99050146879cce04e52b4a110c276c829a",
           "artifact_id": "761bb0bc51684c239304097992c306cd",
-          "assumptions": [
-            "Synthetic evidence, not executed validation"
-          ],
+          "assumptions": ["Synthetic evidence, not executed validation"],
           "command": "SYNTHETIC FIXTURE. No command executed.",
           "created_at": "2026-11-11T18:08:53.841360+00:00",
           "created_by": "0f0d204ef3734c97a1bc2702490e59a0",
@@ -1246,9 +1160,7 @@
             {
               "artifact_digest": "27239a7a6d3d7753ea4aea7cd4153a99050146879cce04e52b4a110c276c829a",
               "artifact_id": "761bb0bc51684c239304097992c306cd",
-              "assumptions": [
-                "Synthetic evidence, not executed validation"
-              ],
+              "assumptions": ["Synthetic evidence, not executed validation"],
               "command": "SYNTHETIC FIXTURE. No command executed.",
               "created_at": "2026-11-11T18:08:53.841360+00:00",
               "created_by": "0f0d204ef3734c97a1bc2702490e59a0",
@@ -1266,9 +1178,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_progress",
           "title": "Build evidence intake",
           "updated_at": "2026-11-11T18:08:53.841369+00:00"
@@ -1313,9 +1223,7 @@
             {
               "artifact_digest": "27239a7a6d3d7753ea4aea7cd4153a99050146879cce04e52b4a110c276c829a",
               "artifact_id": "761bb0bc51684c239304097992c306cd",
-              "assumptions": [
-                "Synthetic evidence, not executed validation"
-              ],
+              "assumptions": ["Synthetic evidence, not executed validation"],
               "command": "SYNTHETIC FIXTURE. No command executed.",
               "created_at": "2026-11-11T18:08:53.841360+00:00",
               "created_by": "0f0d204ef3734c97a1bc2702490e59a0",
@@ -1333,9 +1241,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_review",
           "title": "Build evidence intake",
           "updated_at": "2026-11-11T18:08:53.842526+00:00"
@@ -1369,9 +1275,7 @@
             {
               "artifact_digest": "27239a7a6d3d7753ea4aea7cd4153a99050146879cce04e52b4a110c276c829a",
               "artifact_id": "761bb0bc51684c239304097992c306cd",
-              "assumptions": [
-                "Synthetic evidence, not executed validation"
-              ],
+              "assumptions": ["Synthetic evidence, not executed validation"],
               "command": "SYNTHETIC FIXTURE. No command executed.",
               "created_at": "2026-11-11T18:08:53.841360+00:00",
               "created_by": "0f0d204ef3734c97a1bc2702490e59a0",
@@ -1389,9 +1293,7 @@
           "priority": "normal",
           "project_id": "5630798bb34c4aa9ba33fc4a3ed3b636",
           "reviews": [],
-          "scope": [
-            "docs/"
-          ],
+          "scope": ["docs/"],
           "status": "in_review",
           "title": "Build evidence intake",
           "updated_at": "2026-11-11T18:08:53.842526+00:00"
