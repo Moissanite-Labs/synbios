@@ -21,8 +21,8 @@ function WalkthroughSteps({ demoMode }: { demoMode: boolean }) {
       {demoMode ? (
         <li>
           On the login screen, click <Ui>Use demo operator credential</Ui>. The
-          demo signs you in immediately—no separate <Ui>Open workspace</Ui>{" "}
-          step.
+          demo signs you in immediately. There is no separate{" "}
+          <Ui>Open workspace</Ui> step.
         </li>
       ) : (
         <>
@@ -129,7 +129,7 @@ export function Guide({ open, onClose, demoMode }: GuideProps) {
               <h3>This Pages build</h3>
               <p>
                 You are viewing the <strong>in-browser demo</strong>. Rules
-                match the real store, but nothing is saved to disk—refresh the
+                match the real store, but nothing is saved to disk. Refresh the
                 tab and the record resets. For a persistent forge on your
                 machine, run <code>python -m synbios init</code> or{" "}
                 <code>python -m synbios demo</code>, then{" "}
@@ -168,7 +168,7 @@ export function Guide({ open, onClose, demoMode }: GuideProps) {
             <dl className="guide-dl">
               <dt>The forge</dt>
               <dd>
-                Task board and stats—where active work, reviews, and accepted
+                Task board and stats: where active work, reviews, and accepted
                 outcomes are visible at a glance.
               </dd>
               <dt>Projects</dt>
@@ -178,7 +178,7 @@ export function Guide({ open, onClose, demoMode }: GuideProps) {
               </dd>
               <dt>Provenance</dt>
               <dd>
-                The hash-chained event log—who did what, when, with commits to
+                The hash-chained event log: who did what, when, with commits to
                 state integrity (<Ui>Record intact</Ui> in the header). Verify
                 exported bundles here without importing records (
                 <Ui>Verify a bundle</Ui>).
@@ -202,36 +202,36 @@ export function Guide({ open, onClose, demoMode }: GuideProps) {
             <h3>How this differs from GitHub</h3>
             <p>
               GitHub hosts repositories, pull requests, and CI. Synbios does not
-              replace that hosting—it records{" "}
+              replace that hosting. It records{" "}
               <strong>accountable task workflow</strong> on your machine:
             </p>
             <ul>
               <li>
-                <strong>Evidence binding</strong>—GitHub ties checks to commit
+                <strong>Evidence binding</strong>: GitHub ties checks to commit
                 SHAs on branches. Synbios ties reported test evidence to an
-                artifact revision digest; principals attest results—the forge
+                artifact revision digest; principals attest results. The forge
                 does not execute tests or merge code.
               </li>
               <li>
-                <strong>Human review on the candidate</strong>—GitHub blocks
+                <strong>Human review on the candidate</strong>: GitHub blocks
                 self-approval on pull requests too. Synbios requires an
                 independent human reviewer bound to the exact artifact under
                 review, with acceptance recorded in the same transaction as that
                 decision.
               </li>
               <li>
-                <strong>Claims vs. attachments</strong>—moving a task to{" "}
+                <strong>Claims vs. attachments</strong>: moving a task to{" "}
                 <Ui>in progress</Ui> or <Ui>in review</Ui> requires a claim (and
                 grants). On an open, unclaimed task, principals with grants may
                 still attach artifacts and evidence before anyone claims it.
               </li>
               <li>
-                <strong>Local audit chain</strong>—events hash together to
+                <strong>Local audit chain</strong>: events hash together to
                 detect tampering with stored history (not a signature or remote
                 witness).
               </li>
               <li>
-                <strong>Verifiable exports</strong>—bundles carry commitments
+                <strong>Verifiable exports</strong>: bundles carry commitments
                 you can check offline; they do not merge code or grant access by
                 themselves.
               </li>
@@ -240,7 +240,7 @@ export function Guide({ open, onClose, demoMode }: GuideProps) {
               Planned (not in 0.1): branch-aware diffs, file browsing in the UI,
               merge queues, authenticated multi-user sign-in, remote federation,
               signed identity, in-forge test execution, Git-host enforcement,
-              and sandboxing agent tools—the roadmap describes directions.
+              and sandboxing agent tools. The roadmap describes directions.
             </p>
           </section>
 
@@ -256,7 +256,8 @@ export function Guide({ open, onClose, demoMode }: GuideProps) {
                 Moissanite-Labs/synbios on GitHub
                 <ExternalLink size={15} />
               </a>
-              — README, trust model, API contract, and local setup instructions.
+              . Includes the README, trust model, API contract, and local setup
+              instructions.
             </p>
           </section>
         </div>

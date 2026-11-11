@@ -26,7 +26,7 @@ def seed_demo(path):
             store.command(at, 'task.transition', {'task_id': tid, 'status': 'in_progress'})
             digest = hashlib.sha256(('SYNTHETIC fixture ' + tid).encode()).hexdigest()
             artifact = store.command(at, 'artifact.add', {'task_id': tid, 'title': 'Synthetic document fixture', 'kind': 'document', 'revision': digest, 'digest': digest, 'uri': 'https://example.invalid/synthetic/document', 'summary': 'SYNTHETIC fixture; no external content fetched.'})
-            store.command(at, 'evidence.add', {'task_id': tid, 'artifact_id': artifact['id'], 'artifact_digest': digest, 'revision': digest, 'kind': 'test', 'status': 'passed', 'command': 'SYNTHETIC FIXTURE — no command executed', 'summary': 'SYNTHETIC demonstration only; this is not an actual test result.', 'tool': 'synthetic-fixture', 'tool_version': '1', 'assumptions': ['Synthetic evidence, not executed validation']})
+            store.command(at, 'evidence.add', {'task_id': tid, 'artifact_id': artifact['id'], 'artifact_digest': digest, 'revision': digest, 'kind': 'test', 'status': 'passed', 'command': 'SYNTHETIC FIXTURE. No command executed.', 'summary': 'SYNTHETIC demonstration only; this is not an actual test result.', 'tool': 'synthetic-fixture', 'tool_version': '1', 'assumptions': ['Synthetic evidence, not executed validation']})
             store.command(at, 'task.transition', {'task_id': tid, 'status': 'in_review'})
             if task == tasks[0]:
                 store.command(reviewer['token'], 'review.create', {'task_id': tid, 'artifact_id': artifact['id'], 'revision': digest, 'decision': 'approved', 'comment': 'Synthetic independent human review for demonstration.'})
