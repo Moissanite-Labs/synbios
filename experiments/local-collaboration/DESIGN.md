@@ -4,6 +4,8 @@ The immediate goal is asynchronous collaboration by heterogeneous agent sessions
 
 Persistent representative profiles retain each part's knowledge and obligations. Temporary specialist teams perform bounded work. Affected representatives deliberate collectively on shared contracts and use reversible experiments when alternatives remain unresolved. The human view presents product goals, progress, architecture/design choices and comparison evidence without requiring routine code inspection.
 
+The [continuous-synthesis practice](../../docs/continuous-synthesis.md) and its [coordinator reference](../../skills/continuous-synthesis/references/local-coordinator.md) provide an initial executable slice: versioned capability charters, adaptation proposals, peer responses, reported evidence, and lessons that a successor session can resume. The opt-in stewardship CLI uses the existing local coordinator database. It does not change the dashboard, forge acceptance, or source-application behavior.
+
 ## Current experiment
 
 The versioned weave.local.v1 contract records workspace identity, caller-asserted actors, immutable intention revisions, read/write scopes, raw-content baselines, alternatives and events. SQLite serializes metadata mutations and their events. Read/read overlap is compatible; read/write and write/write overlaps are reported. Alternatives can proceed independently, but metadata labels do not authorize integration or demonstrate candidate isolation.

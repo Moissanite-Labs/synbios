@@ -67,7 +67,8 @@ def main():
         exo_available = False
 
     suites = [
-        ("coordinator", ROOT / "prototype" / "test_coordinator.py", [sys.executable, "-m", "unittest", "discover", "-s", "prototype", "-v"]),
+        ("coordinator", ROOT / "prototype" / "test_coordinator.py", [sys.executable, "-m", "unittest", "discover", "-s", "prototype", "-p", "test_coordinator.py", "-v"]),
+        ("stewardship", ROOT / "prototype" / "test_stewardship.py", [sys.executable, "-m", "unittest", "discover", "-s", "prototype", "-p", "test_stewardship.py", "-v"]),
         ("demo", ROOT / "prototype" / "demo.py", [sys.executable, "prototype/demo.py"]),
         ("dashboard", ROOT / "dashboard", [sys.executable, "-m", "unittest", "discover", "-s", "dashboard", "-p", "test*.py", "-v"]),
         ("exo_integration_adapter", ROOT / "harness" / "test_exo_integration_adapter.py",
